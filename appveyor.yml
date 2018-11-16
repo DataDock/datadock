@@ -10,7 +10,7 @@ before_build:
 configuration: Release
 
 build_script:
-  - dotnet build -c Release src/DataDock.sln
+  - dotnet build -c %CONFIGURATION% src/DataDock.sln
 
 test_script:
   - ps: |
