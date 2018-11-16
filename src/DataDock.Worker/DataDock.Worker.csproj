@@ -8,17 +8,17 @@
   <ItemGroup>
     <ProjectReference Include="..\DataDock.Common\DataDock.Common.csproj" />
     <PackageReference Include="DataDock.CsvWeb" Version="0.1.0-pre0002" />
-    <PackageReference Include="DotLiquid" Version="2.0.262" />
+    <PackageReference Include="DotLiquid" Version="2.0.298" />
     <PackageReference Include="dotNetRDF" Version="2.1.0" />
-    <PackageReference Include="Elasticsearch.Net" Version="6.1.0" />
+    <PackageReference Include="Elasticsearch.Net" Version="6.4.0" />
     <PackageReference Include="MedallionShell" Version="1.5.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="Octokit" Version="0.29.0" />
-    <PackageReference Include="Polly" Version="6.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+    <PackageReference Include="Octokit" Version="0.32.0" />
+    <PackageReference Include="Polly" Version="6.1.1" />
     <PackageReference Include="Quince" Version="0.4.0" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="6.5.0" />
   </ItemGroup>
