@@ -18,7 +18,7 @@ test_script:
         Push-Location $test
         echo "build: Testing project in $test"
         $testlog = $test.Name + ".log"
-        dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $testlog
+        dotnet test -c %CONFIGURATION% -o $testlog
         Push-AppveyorArtifact $testlog
         if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
         Pop-Location
