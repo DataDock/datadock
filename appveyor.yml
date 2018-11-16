@@ -14,7 +14,7 @@ build_script:
 
 test_script:
   - ps: |
-      foreach ($test in ls test/*.Tests) {
+      foreach ($test in ls src/*.Tests) {
         Push-Location $test
         echo "build: Testing project in $test"
         dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $test.log
