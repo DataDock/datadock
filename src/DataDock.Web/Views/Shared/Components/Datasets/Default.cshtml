@@ -1,0 +1,45 @@
+﻿@using System.Globalization
+@model List<DataDock.Web.ViewModels.DatasetViewModel>
+
+@if (Model != null && Model.Count > 0)
+{
+  <div class="ui segments">
+    @foreach (var ds in Model)
+    {
+      <div class="ui fluid raised card">
+        <div class="content">
+          <div class="right floated">
+            <div class="ui vertical labeled icon buttons">
+              <a href="@ds.GetIri()" target="_blank" class="ui small basic primary button" title="Explore"><i class="external icon"></i>Explore</a>
+              <a href="@Url.RouteUrl("Dataset", new {ownerId=ds.OwnerId, repoId=ds.RepositoryId, datasetId=ds.Id})" class="ui small basic secondary button" title="Admin"><i class="edit icon"></i>Admin</a>
+            </div>
+          </div>
+          <div class="header">@ds.GetTitle()</div>
+          <div class="meta">Last Modified: @ds.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
+          <div class="description">
+            <p>@ds.GetDescription()</p>
+          </div>
+        </div>
+        <div class="extra content">
+          <div class="meta">@ds.GetIri()</div>
+        </div>
+        @if (ds.GetTags().Any())
+        {
+          <div class="extra content">
+            @foreach (var tag in ds.GetTags())
+            {
+              <a class="ui tag label" href="/search?tag=@tag">@tag</a>
+            }
+          </div>
+
+        }
+      </div>
+    }
+  </div>
+}
+else
+{
+  <div class="ui warning message">
+    None found.
+  </div>
+}

@@ -1,0 +1,10 @@
+﻿{
+  "ElasticsearchUrl": "http://some.elasticsearch:9200/",
+  "DatasetIndexName": "TestDatasets",
+  "JobsIndexName": "TestJobs",
+  "OwnerSettingsIndexName": "TestOwners",
+  "SchemaIndexName": "TestSchemas",
+  "RepoSettingsIndexName": "TestRepoSettings",
+  "UserIndexName": "TestUsers",
+  "FileStorePath":  "/path/to/file/store" 
+}

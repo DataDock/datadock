@@ -1,0 +1,5 @@
+﻿{% assign foo = triples | where:"predicate","http://example.org/p1" %}
+
+{% for f in foo %}
+	{{f.object}}
+{% endfor %}

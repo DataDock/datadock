@@ -1,0 +1,42 @@
+﻿/*
+CSS for public facing data portals produced by DataDock.io
+ */
+
+.search-buttons .card .header {
+    text-transform: capitalize;
+}
+
+.mr {
+    margin-right: 0.4em;
+}
+.dataset-content .segment {
+    overflow: hidden;
+}
+.dataset-content dl {
+    min-height: 30em;
+    position: relative;
+}
+.dataset-content dl dt {
+    font-weight: bold;
+    margin-bottom: 0.3em;
+}
+
+.dataset-content dl dt.hide {
+    display: none;
+}
+.dataset-content dl dd {
+    margin-left: 0;
+    margin-bottom: 1em;
+}
+.ds-tags .statistic {
+    margin-bottom: 0;
+}
+.ds-tags ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.ds-tags ul li {
+    display: inline;
+    padding: 0.2em;
+}

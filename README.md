@@ -1,2 +1,3 @@
 # datadock
-The source code for DataDock Community
+
+The open-source source-code that runs datadock.io

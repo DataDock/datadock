@@ -1,0 +1,27 @@
+﻿<html>
+  <h1>
+	{{subject}}
+  </h1>
+  <table>
+	{% for triple in triples %}
+	<tr>
+		<td>
+			{% if triple.predicate_is_uri %}
+				<a href="{{triple.predicate}}">{{triple.predicate|escape}}</a>
+			{% else %}
+				{{triple.predicate}}
+			{% endif %}
+		</td>
+		<td>
+			{% if triple.object_is_uri -%}
+				<a href="{{triple.object}}">{{triple.object|escape}}</a>
+			{% else %}
+				{{ triple.object }}
+				{% if triple.object_datatype %} ({{ triple.object_datatype }}) {% endif %} 
+				{% if triple.object_language %} ({{ triple.object_language}}) {% endif %}
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+  </table>
+</html>

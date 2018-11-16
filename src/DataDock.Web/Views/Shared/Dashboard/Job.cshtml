@@ -1,0 +1,10 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+  Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+  Model.Title = Model.Title + " Job Log";
+}
+
+
+<div class="ui container">
+  @await Component.InvokeAsync("JobLog", new { jobId = ViewData["JobId"] })
+</div>

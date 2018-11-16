@@ -1,0 +1,15 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+    Model.Title = Model.Title + " Add Data";
+}
+
+<div class="ui container">
+  <p>The list below shows all repositories for @Model.SelectedOwnerId</p>
+  <p class=""><i class="ui github icon"></i> Visit GitHub to <a href="https://github.com/" target="_blank" title="Visit your GitHub account">manage your repositories</a> or <a href="https://github.com/new" target="_blank" title="Create a new GitHub repository for your data">create a new repository</a>. To allow access to organisation's repositories you must check the permissions granted to DataDock in your <a href="https://github.com/settings/applications" target="_blank">application settings</a>.
+  </p>
+</div>
+
+<div class="ui text container">
+  @await Component.InvokeAsync("RepositorySelectorList", new { selectedOwnerId = Model.SelectedOwnerId, selectedSchemaId = Model.SelectedSchemaId, display = "link-list" })
+</div>

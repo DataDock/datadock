@@ -1,0 +1,31 @@
+/*******************************
+     User Global Variables
+*******************************/
+
+/* Fonts */
+
+@headerFont        : 'Open Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+@pageFont          : 'Fira Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+
+@fontSmoothing     : antialiased;
+
+@importGoogleFonts : true;
+@googleFontFamily  : 'Fira+Sans:400,700,400italic,700italic|Open+Sans:400italic,400|Lato:400,700,400italic,700italic';
+
+/*-------------------
+    Base Sizes
+--------------------*/
+
+@emSize      : 14px;
+@fontSize    : 14px;
+
+/* Colors */
+
+@primaryColor: #62b12f;
+@secondaryColor: #005680;
+
+
+/* Links */
+@linkColor: @secondaryColor;
+@linkHoverColor: #00234D;
+@linkHoverUnderline: underline;

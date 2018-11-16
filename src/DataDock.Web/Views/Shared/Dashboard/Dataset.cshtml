@@ -1,0 +1,18 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+    Model.Title = Model.Title + " Dataset";
+}
+
+<div class="ui grid">
+    <div class="sixteen wide column">
+        @await Component.InvokeAsync("Dataset", new { ownerId=Model.SelectedOwnerId, repoId=Model.SelectedRepoId, datasetId=@Model.SelectedDatasetId})
+    </div>
+</div>
+
+
+
+@section Scripts { 
+    <script type="text/javascript">
+    </script>
+}

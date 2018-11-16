@@ -1,0 +1,37 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+  Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+  Model.Title = Model.Title + " Datasets";
+}
+
+
+<div class="ui grid">
+    <div class="sixteen wide column">
+        <div class="data-loader"
+             data-endpoint="@Url.RouteUrl("DatasetsLoader", new {ownerId = @Model.SelectedOwnerId, repoId = @Model.SelectedRepoId})">
+            <div id="loadingJobs">
+                @await Html.PartialAsync("_SpinnerPartial")
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { 
+  <script type="text/javascript">
+      $(document).ready(function() { refresh() });
+
+      function refresh() {
+          $('.data-loader').each(function() {
+              var endpoint = $(this).data('endpoint');
+              var container = this;
+              $.ajax({
+                  type: "GET",
+                  url: endpoint
+              }).done(function(data) {
+                  $(container).html(data);
+              });
+          });
+          setTimeout(function() { refresh(); }, 5000);
+      }
+  </script>
+}

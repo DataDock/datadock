@@ -1,0 +1,19 @@
+﻿@model DataDock.Web.ViewModels.DashboardMenuViewModel
+
+<div class="ui pointing menu">
+  <!-- user / org drop down selector -->
+  <div class="item">
+    <div class="text">
+      <img class="ui avatar image" src="@Model.SelectedOwnerAvatarUrl">
+      @Model.SelectedOwnerId
+    </div>
+
+  </div><!-- end user / org menu item -->
+  <!-- repo list menu item-->
+  <!--<a class="item @Model.AreaIsActive("repos")" href="@Model.GetDashContext()/repositories" title="Repositories"><i class="cubes icon"></i> Repositories</a>-->
+  <!-- end repo list menu item-->
+  <!-- datasets list menu item-->
+  <a class="item @Model.AreaIsActive("datasets")" href="@Model.GetDashContext()/datasets" title="Datasets"><i class="cubes icon"></i> Datasets</a>
+  <!-- end datasets list menu item-->
+
+</div><!-- menu -->

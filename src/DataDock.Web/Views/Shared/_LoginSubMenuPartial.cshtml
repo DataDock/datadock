@@ -1,0 +1,22 @@
+﻿@{
+  var userId = User.Identity.Name;
+  var returnUrl = "";
+
+}
+@if (User.Identity.IsAuthenticated)
+{
+  <div class="item">
+    <div class="header">@userId</div>
+    <div class="menu">
+      <a class="item" href="@Url.RouteUrl("OwnerProfile", new {ownerId=@userId})"><i class="dashboard icon"></i> Dashboard</a>
+      <a class="item" href="@Url.RouteUrl("OwnerImport", new {ownerId=@userId})"><i class="upload icon"></i> Add Data</a>
+      <a asp-controller="Account" asp-action="Settings" class="item"><i class="user icon"></i> Account</a>
+    </div>
+  </div>
+  <a asp-action="LogOff" asp-controller="Account" class="item" id="logoffLink" asp-route-returnUrl="@returnUrl">Log Off</a>
+}
+else
+{
+
+  <a asp-action="Login" asp-controller="Account" class="item" id="loginLink" asp-route-returnUrl="@returnUrl">Log In</a>
+}

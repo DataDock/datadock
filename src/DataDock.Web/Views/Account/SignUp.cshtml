@@ -1,0 +1,128 @@
+﻿@model DataDock.Web.ViewModels.SignUpViewModel
+
+@{
+  ViewData["Title"] = "Confirm your DataDock account settings";
+}
+
+<div class="ui container">
+  <h2 class="ui header">@ViewBag.Title</h2>
+  <div class="ui hidden divider"></div>
+</div>
+
+<div class="ui container">
+  <p>
+    Thanks for confirming the permissions required for DataDock to interact with your GitHub account, just one final step and you're ready to go!
+  </p>
+
+  <p>
+    In order to use DataDock you must agree to our <a href="/terms" title="DataDock terms and conditions" target="_blank">terms and conditions</a>. If you do not wish to proceed, click the cancel button, which will take you to your GitHub account where you can remove any permissions for DataDock.
+  </p>
+
+  <div class="ui hidden divider"></div>
+</div>
+
+
+<div class="ui text container">
+
+  <div class="ui raised segment" style="height: 30em;overflow-y:auto;">
+    <h2>DataDock Terms & Conditions</h2>
+    <h3>Privacy</h3>
+    <p>
+      We will never sell your private data or information. We do not give out private information to organisations that may sell it. We do disclose a limited amount of user information
+      to providers that we use in order to run this service. Those third-party organisations include Google Mail for any communication with us and Microsoft Azure for hosting. In addition
+      you will be required to have an account with GitHub to use this service. Each of these third-party organisations have their own privacy policies.
+    </p>
+
+    <h3></h3>
+
+    <h3>GitHub</h3>
+    <p>
+      Our service accesses your GitHub account to determine which repositories you have access to and to retrieve your user name and email address. This information is stored within
+      our service only for the purpose of providing you with the service. Our service also has read/write access to your public GitHub repositories. It will only write to the
+      repository or repositories that you specify in your account settings on this service.
+    </p>
+    <p>
+      When you sign up for this service you are explicitly allowing the service to access your public repositories on Github.
+      Revoking this access is easy, just click the revoke button any time through your GitHub application settings page.
+      Revoking access to your GitHub account will stop the service from having access to your GitHub repositories and you will no longer
+      be able to use the service to create or update datasets.
+    </p>
+
+    <h3>Your Data</h3>
+    <p>
+      All of your data is stored in the GitHub repository or repositories you have specified in your user account settings. The contents of these repositories
+      are cloned to our servers when the service is required to create or update a dataset, but this clone is deleted once the update process is deleted.
+      Your content, including the RDF and HTML pages created by the service are served from your GitHub repository. We store a record of the metadata
+      associated with each of the datasets that you upload. This metadata is used to provide search functionality for all users of the site. When you
+      delete your account, all of this metadata is also deleted.
+    </p>
+    <p>
+      You remain responsible for any content that you upload to this service. We do not in anyway review or censor content that is uploaded to the service.
+      You should be aware that any content you upload may be made available publicly. It may be indexed by search engines and as a result it may remain
+      publicly availabe even after you delete it from this service and from your GitHub account.
+    </p>
+
+    <h3>Your Responsibilities</h3>
+    <p>You MUST NOT upload any personally identifiable data, nor will we tolerate the uploading of copyright-infringing content. User accounts that fail to respect this policy will be suspended. </p>
+
+    <h3>Cancelling</h3>
+    <p>
+      If you would like to delete your account, click the Delete link on your account settings page. Deleting your account will delete all account information we hold
+      about you and the metadata records for all of the datasets you have created using this service.
+    </p>
+
+    <h3>Feedback</h3>
+    <p>If you have any questions about or feedback on these terms please raise them on the <a href="https://github.com/DataDock/datadock/issues" title="DataDock on GitHub" target="_blank">DataDock issue list</a>.</p>
+
+    <h3>Disclaimer</h3>
+    <p>
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+      IN THE SOFTWARE.
+    </p>
+  </div>
+</div>
+
+<div class="ui container">
+
+  <form asp-action="SignUp">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+      <div class="checkbox">
+        <label>
+         
+        </label>
+      </div>
+    </div>
+    <div class="ui container">
+      <div class="ui hidden divider"></div>
+      <h3>Agree to Terms</h3>
+      <div class="ui hidden divider"></div>
+      @if (!string.IsNullOrEmpty(ViewBag.Success) && ViewBag.Success.Equals("failed"))
+      {
+        <div class="ui center aligned container">
+          <div class="ui red compact message"><i class="warning sign icon"></i> You must agree to the terms and conditions to use DataDock.</div>
+          <div class="ui hidden divider"></div>
+        </div>
+      }
+    </div>
+    <div class="ui center aligned container">
+      <div class="ui checkbox">
+        <input asp-for="AgreeTerms" /> @Html.LabelFor(model => model.AgreeTerms)
+      </div>
+      <div class="ui hidden divider"></div>
+    </div>
+    
+    <div class="ui center aligned container">
+      <div class="ui buttons">
+        <a asp-action="Cancel" asp-controller="Account" class="ui button">Cancel</a>
+        <div class="or"></div>
+        <input type="submit" class="ui primary button" value="Confirm and create my account"/>
+      </div>
+            
+    </div>
+  </form>
+
+</div>
+

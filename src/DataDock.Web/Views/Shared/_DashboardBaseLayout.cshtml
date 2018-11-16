@@ -1,0 +1,35 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  Model.Title = Model.SelectedOwnerId + " " + Model.SelectedRepoId;
+}
+
+
+  <div class="ui header">
+    @await Component.InvokeAsync("DashboardMenu", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId, area = Model.Area })
+  
+
+    <div class="ui dividing header">
+      <span>@Model.Heading</span>
+    </div>  
+
+  </div>
+@RenderBody()
+
+@section Scripts {
+
+  <script type="text/javascript">
+    /*
+    Dashboard javascript
+    */
+
+    // Repository selector to redirect to settings page
+    $("#repoSettings").click(function () {
+      var ownerId = $('#ownerId').val();
+      var repoId = $('#repoId').val();
+      window.location.href = '/dashboard/settings/' + ownerId + '/' + repoId;
+    });
+  </script>
+  
+  @RenderSection("Scripts", false)
+}

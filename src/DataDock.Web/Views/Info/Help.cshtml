@@ -1,0 +1,91 @@
+﻿@using DataDock.Web.Models
+
+@{
+    ViewBag.Title = "Before you publish... ";
+    
+}
+
+
+<div class="ui container">
+    <h2 class="ui header">@ViewBag.Title</h2>
+    <div class="ui hidden divider"></div>
+</div>
+
+
+<div class="ui grid container">
+    <div class="three column row">
+        <div class="center aligned column">
+            <i class="huge icons">
+                <i class="big red dont icon"></i>
+                <i class="small black users icon"></i>
+            </i>
+        </div>
+       
+        <div class="center aligned column">
+            <i class="huge icons">
+                <i class="big red dont icon"></i>
+                <i class="black copyright icon"></i>
+            </i>
+        </div>
+        
+        <div class="center aligned column">
+            <i class="massive icons">
+                <i class="creative commons icon"></i>
+            </i>
+        </div>
+    </div>
+    <div class="three column row">
+        <div class="center aligned column">
+            <h3>DO NOT upload personal info</h3>
+            <div class="content" style="text-align: left !important;">
+                <strong>DO NOT</strong> publish any data that could be used to personally identify or otherwise compromise the privacy of other individuals. 
+                
+            </div>
+        </div>
+        
+        <div class="center aligned column">
+            <h3 class="header">Don't infringe copyright</h3>
+            <p class="content" style="text-align: left !important;">
+                <strong>DO NOT</strong> publish any copyright-infringing material.
+            </p>
+        </div>
+        
+        <div class="center aligned column">
+            <h3 class="header">License Appropriately</h3>
+            <p class="content" style="text-align: left !important;">
+                <strong>DO</strong> ensure that the data you are publishing is either data that you own or data that has been published under a license that allows its republication, then choose a suitable license.
+            </p>
+        </div>
+    </div>
+    <div class="three column row">
+        <div class="column"></div>
+        <div class="column"></div>
+        <div class="column"></div>
+    </div>
+    <div class="one column row">
+        <div class="center aligned column">For more detail read our <a href="http://networkedplanet.com/datadock/getting-started/" title="DataDock Getting Started">Getting Started</a> guide</div>
+    </div>
+    <div class="one column row">
+        <div class="center aligned column">
+            <div class="ui raised segment">
+                <p>
+                    DataDock sits on a <strong>.io</strong> domain for a reason, IO stands for <strong>Input - Output</strong> - what you put in, you'll get out. <br />
+
+                    Do any checks before you upload your files for publishing.
+                </p>
+                <p>We'll be adding blog posts and videos to the <a href="http://networkedplanet.com/" title="Networked Planet">NetworkedPlanet blog</a> in the coming months, watch this space and thanks for taking a look at our Preview Release of DataDock</p>
+            </div>
+        </div>
+    </div>
+    <div class="one column row">
+        <div class="center aligned column">
+            <p>
+                <a href="@Url.Action("Index", "Import")" class="ui labeled icon big primary button">
+                    <i class="upload icon"></i>
+                    Add Data
+                </a>
+            </p>
+        </div>
+    </div>
+  
+</div>

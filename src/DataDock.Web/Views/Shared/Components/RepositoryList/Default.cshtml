@@ -1,0 +1,23 @@
+﻿@using DataDock.Web.ViewModels
+@model List<DataDock.Web.ViewModels.RepoSettingsViewModel>
+
+@if (Model != null & Model.Count > 0)
+{
+  <div class="dash-repo-list">
+
+    @foreach (RepoSettingsViewModel repo in Model)
+    {
+      <div class="ui fluid raised card">
+        <div class="content">
+          <div class="header"><a href="@Url.RouteUrl("RepoSummary", new {ownerId = repo.OwnerId, repoId = repo.RepoId})">@repo.RepoId</a></div>
+        </div>
+      </div>
+    }
+  </div>
+}
+else
+{
+  <div class="ui warning message">
+    No repositories found.
+  </div>
+}

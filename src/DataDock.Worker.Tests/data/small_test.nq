@@ -1,0 +1,25 @@
+﻿<http://example.org/s/s0> <http://example.org/p/p0> <http://example.org/s/s0> <http://example.org/g/g1>.
+<http://example.org/s/s0> <http://example.org/p/p1> "A simple string" <http://example.org/g/g1>.
+<http://example.org/s/s0> <http://example.org/p/p2> "A string with language"@en <http://example.org/g/g1>.
+<http://example.org/s/s0> <http://example.org/p/p3> "123"^^<http://www.w3.org/2001/XMLSchema#integer> <http://example.org/g/g1>.
+<http://example.org/s/s0> <http://example.org/p/p4> <http://example.org/s/s4> <http://example.org/g/g1>.
+<http://example.org/s/s1> <http://example.org/p/p0> <http://example.org/s/s0> <http://example.org/g/g2>.
+<http://example.org/s/s1> <http://example.org/p/p1> <http://example.org/s/s1> <http://example.org/g/g2>.
+<http://example.org/s/s1> <http://example.org/p/p2> <http://example.org/s/s2> <http://example.org/g/g2>.
+<http://example.org/s/s1> <http://example.org/p/p3> <http://example.org/s/s3> <http://example.org/g/g2>.
+<http://example.org/s/s1> <http://example.org/p/p4> <http://example.org/s/s4> <http://example.org/g/g2>.
+<http://example.org/s/s2> <http://example.org/p/p0> <http://example.org/s/s0> <http://example.org/g/g3>.
+<http://example.org/s/s2> <http://example.org/p/p1> <http://example.org/s/s1> <http://example.org/g/g3>.
+<http://example.org/s/s2> <http://example.org/p/p2> <http://example.org/s/s2> <http://example.org/g/g3>.
+<http://example.org/s/s2> <http://example.org/p/p3> <http://example.org/s/s3> <http://example.org/g/g3>.
+<http://example.org/s/s2> <http://example.org/p/p4> <http://example.org/s/s4> <http://example.org/g/g3>.
+<http://example.org/s/s3> <http://example.org/p/p0> <http://example.org/s/s0> <http://example.org/g/g4>.
+<http://example.org/s/s3> <http://example.org/p/p1> <http://example.org/s/s1> <http://example.org/g/g4>.
+<http://example.org/s/s3> <http://example.org/p/p2> <http://example.org/s/s2> <http://example.org/g/g4>.
+<http://example.org/s/s3> <http://example.org/p/p3> <http://example.org/s/s3> <http://example.org/g/g4>.
+<http://example.org/s/s3> <http://example.org/p/p4> <http://example.org/s/s4> <http://example.org/g/g4>.
+<http://example.org/s/s4> <http://example.org/p/p0> <http://example.org/s/s0> <http://example.org/g/g5>.
+<http://example.org/s/s4> <http://example.org/p/p1> <http://example.org/s/s1> <http://example.org/g/g5>.
+<http://example.org/s/s4> <http://example.org/p/p2> <http://example.org/s/s2> <http://example.org/g/g5>.
+<http://example.org/s/s4> <http://example.org/p/p3> <http://example.org/s/s3> <http://example.org/g/g5>.
+<http://example.org/s/s4> <http://example.org/p/p4> <http://example.org/s/s4> <http://example.org/g/g5>.

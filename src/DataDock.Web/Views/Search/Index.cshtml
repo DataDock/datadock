@@ -1,0 +1,59 @@
+﻿@model DataDock.Web.ViewModels.SearchResultViewModel
+
+@{
+  ViewBag.Title = "Search";
+}
+
+<div class="ui text container">
+  <form class="form">
+    <div class="ui fluid action input">
+      <input type="text" id="tag" name="tag" placeholder="Search by dataset keyword tag" value="@Model.SearchTag">
+      <button type="submit" class="ui search labeled icon button"><i class="search icon"></i>&nbsp;Search</button>
+    </div>
+  </form>
+</div>
+
+<div class="ui container">
+  @if (Model.Results != null)
+  {
+    if (Model.Results.Count == 1)
+    {
+      <p>Found 1 match</p>
+    }
+    else
+    {
+      <p>Found @Model.Results.Count matches</p>
+    }
+    <div class="ui relaxed divided list">
+      @foreach (var result in Model.Results)
+      {
+        <div class="item">
+          <div class="content">
+            <h4 class="header"><a href="@result.GetIri()">@result.GetTitle()</a></h4>
+            <p>
+              <a href="@result.GetIri()">@result.GetIri()</a>
+            </p>
+            <p class="description">@result.GetDescription()</p>
+          </div>
+          <div class="extra content">
+            @foreach (var tag in result.GetTags())
+            {
+              <a class="ui tag label" href="/search?tag=@tag">@tag</a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+  else
+  {
+    if (!string.IsNullOrEmpty(Model.SearchTag))
+    {
+      <div class="ui hidden divider"></div>
+      <div class="ui warning message">
+        None found.
+      </div>
+    }
+   
+  }
+</div>

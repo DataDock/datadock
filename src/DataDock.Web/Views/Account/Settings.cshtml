@@ -1,0 +1,87 @@
+﻿
+@model DataDock.Web.ViewModels.UserSettingsViewModel
+
+@{
+  ViewData["Title"] = "User Account Settings";
+}
+
+<div class="ui container">
+  <h2>@ViewData["Title"]</h2>
+  <div class="ui hidden divider"></div>
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
+{
+<div class="ui container">
+  <div class="ui info message"><i class="info icon"></i>@Html.Raw(@ViewBag.StatusMessage)</div>
+  <div class="ui hidden divider"></div>
+</div>
+}
+
+<div class="ui container">
+  <div class="ui message">
+    If you are interested in any of the features below, get involved with the <a href="https://github.com/DataDock/datadock">DataDock open source community</a> to let the developers know which are most popular.
+  </div>
+  <h4 class="ui dividing header">DataDock Future Feature Wish-List</h4>
+  <div class="ui list">
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Custom Domains</h3>
+        <p class="description">Publish your fully navigable data portal under your own custom domain.</p>
+      </div>
+    </div>
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Data Validation</h3>
+        <p class="description">Validate your data before it's published to ensure it's of the best quality.</p>
+      </div>
+    </div>
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Visualizations</h3>
+        <p class="description">Add charts, graphs and other data visualizations to your data portal pages and dashboard</p>
+      </div>
+    </div>
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Dashboards</h3>
+        <p class="description">Shareable dashboards of data views and charts to ease collaboration within teams and across organizations.</p>
+      </div>
+    </div>
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Visitor Analytics</h3>
+        <p class="description">View detailed information about who visited your data portal, where they're from and what technology they're using to access your data</p>
+      </div>
+    </div>
+    <div class="item">
+      <i class="diamond icon"></i>
+      <div class="content">
+        <h3 class="ui header">Webhooks</h3>
+        <p class="description">Hook your DataDock publishing processes into your custom ETL (Extract, Transform and Load) pipelines.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui container">
+  
+  <form asp-action="Settings">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+   
+    <input asp-for="UserId" type="hidden"/>
+    
+    
+    
+    <div class="ui right aligned container">
+      <a href="/account/delete">Delete Account</a>
+    </div>
+  </form>
+
+</div>
+

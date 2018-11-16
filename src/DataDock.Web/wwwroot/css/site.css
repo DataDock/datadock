@@ -1,0 +1,377 @@
+﻿
+.pusher {
+    display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+    display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
+    display: -ms-flexbox; /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Chrome */
+    display: flex; /* NEW, Spec - Opera 12.1, Firefox 20+ */
+    min-height: 100vh;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+}
+
+header,
+footer {
+    flex-shrink: 0;
+}
+
+section#content {
+    -ms-flex: 1 0 auto;
+    -webkit-flex: 1 0 auto;
+    flex: 1 0 auto;
+    padding: 6em 0;
+}
+
+@font-face {
+    font-family: 'Conv_Heavitas';
+    src: url('fonts/Heavitas.eot');
+    src: local('☺'), url('fonts/Heavitas.woff') format('woff'), url('fonts/Heavitas.ttf') format('truetype'), url('fonts/Heavitas.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+button a.cta {
+    color: #fff;
+}
+
+    button a.cta:hover {
+        text-decoration: none;
+        color: #fff;
+    }
+
+h1.ui.header {
+    font-family: 'Conv_Heavitas',Sans-Serif;
+}
+
+    h1.ui.header span.blue {
+        color: #005680;
+    }
+
+    h1.ui.header span.green {
+        color: #62b12f;
+    }
+
+
+.footer a {
+    color: #fff !important;
+    text-decoration: none;
+}
+
+    .footer a:hover {
+        color: #fff !important;
+        text-decoration: underline;
+    }
+
+.field-validation-error {
+    display: block;
+    color: #DB2828 !important;
+    margin-top: 0.5em;
+}
+
+ui.form .field.error {
+    margin-bottom: 0;
+}
+
+.container p {
+    padding: 0.5em 0;
+}
+
+.ui.info.message a {
+    text-decoration: underline;
+}
+
+.ui.message .content {
+    overflow: auto;
+}
+
+/*********************
+   CORNER FLAG
+*********************/
+.cr {
+    width: 200px;
+    padding: 16px;
+    position: absolute;
+    text-align: center;
+    color: #f0f0f0;
+    z-index: 999;
+}
+
+.cr-sticky {
+    position: fixed;
+}
+
+/* Positions */
+
+.cr-top {
+    top: 25px;
+}
+
+.cr-bottom {
+    bottom: 25px;
+}
+
+.cr-left {
+    left: -50px;
+}
+
+.cr-right {
+    right: -50px;
+}
+
+/* Rotations */
+
+.cr-top.cr-left,
+.cr-bottom.cr-right {
+    transform: rotate(-45deg);
+}
+
+.cr-top.cr-right,
+.cr-bottom.cr-left {
+    transform: rotate(45deg);
+}
+
+/* Colors */
+
+.cr-white {
+    background-color: #f0f0f0;
+    color: #444;
+}
+
+.cr-black {
+    background-color: #333;
+}
+
+.cr-grey {
+    background-color: #999;
+}
+
+.cr-blue {
+    background-color: #39d;
+}
+
+.cr-green {
+    background-color: #2c7;
+}
+
+.cr-turquoise {
+    background-color: #1b9;
+}
+
+.cr-purple {
+    background-color: #95b;
+}
+
+.cr-red {
+    background-color: #e43;
+}
+
+.cr-orange {
+    background-color: #e82;
+}
+
+.cr-yellow {
+    background-color: #ec0;
+}
+
+
+.hidden.menu {
+    display: none;
+}
+
+.masthead.segment {
+    min-height: 400px;
+    padding: 1em 0em;
+}
+
+.masthead .logo.item img {
+    margin-right: 1em;
+}
+
+.masthead .ui.menu .ui.button {
+    margin-left: 0.5em;
+}
+
+.masthead h1.ui.header {
+    margin-top: 0.2em;
+    margin-bottom: 0em;
+    font-size: 4em;
+    font-weight: normal;
+}
+
+.masthead h2 {
+    font-size: 1.7em;
+    font-weight: normal;
+}
+
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+
+    .ui.vertical.stripe h3 {
+        font-size: 2em;
+    }
+
+    .ui.vertical.stripe .button + h3,
+    .ui.vertical.stripe p + h3 {
+        margin-top: 3em;
+    }
+
+    .ui.vertical.stripe .floated.image {
+        clear: both;
+    }
+
+    .ui.vertical.stripe p {
+        font-size: 1.33em;
+    }
+
+    .ui.vertical.stripe .horizontal.divider {
+        margin: 3em 0em;
+    }
+
+.quote.stripe.segment {
+    padding: 0em;
+}
+
+    .quote.stripe.segment .grid .column {
+        padding-top: 5em;
+        padding-bottom: 5em;
+    }
+
+.footer.segment {
+    margin: 5em 0em 0em;
+    padding: 5em 0em;
+}
+
+
+.ui.fixed.menu .toc.item {
+    display: none;
+}
+
+/******
+    Narrow screens
+*******/
+@media only screen and (max-width: 700px) {
+    .ui.fixed.menu .item,
+    .ui.fixed.menu .menu {
+        display: none;
+    }
+
+    .ui.fixed.menu .toc.item {
+        display: block;
+    }
+
+    .masthead.segment {
+        min-height: 350px;
+    }
+
+    .masthead h1.ui.header {
+        font-size: 2em;
+        margin-top: 1.5em;
+    }
+
+    .masthead h2 {
+        margin-top: 0.5em;
+        font-size: 1.5em;
+    }
+
+    .cr {
+        width: 150px;
+        padding: 12px;
+        font-size: 0.6em;
+    }
+
+    /* Positions */
+
+    .cr-top {
+        top: 25px;
+    }
+
+    .cr-bottom {
+        bottom: 15px;
+    }
+
+    .cr-left {
+        left: -50px;
+    }
+
+    .cr-right {
+        right: -40px;
+    }
+}
+
+
+.add-data {
+    display: none;
+}
+
+.ui.action.input input[type="file"] {
+    display: none;
+}
+
+.dash-repo-list {
+    margin-bottom: 1em;
+}
+
+table#columnsMetadata {
+    width: 100%;
+    table-layout: fixed;
+}
+
+    table#columnsMetadata tr th:nth-child(1) {
+        width: 70%;
+    }
+
+    table#columnsMetadata td {
+        overflow-x: hidden;
+    }
+
+.data-preview {
+    clear: both;
+    overflow-x: scroll;
+}
+
+    .data-preview table td {
+        font-family: "Courier New", sans-serif;
+        font-size: 0.9em;
+    }
+
+.processing-messages {
+    font-family: monospace;
+    font-size: smaller;
+    padding-left: 1em;
+    background-color: #e3e3e3;
+    max-height: 150px;
+    transition: height 0.3s ease 0s;
+    overflow-y: auto;
+}
+
+
+img.ui.image.logo {
+    height: 2em;
+}
+
+a.no-underline:hover {
+    text-decoration: none;
+}
+
+/* Fix for tokenfield height in FF - BUGZID 8714 */
+#Keywords-tokenfield {
+    min-height: 2.3em;
+}
+
+.description {
+    white-space: pre-wrap
+}
+
+pre.rawJson {
+    padding: 1em 3em;
+    background: #f1f1f1;
+    font-size: 0.8em;
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+}

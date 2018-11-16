@@ -1,0 +1,19 @@
+﻿@using DataDock.Web.Models
+@model List<DataDock.Web.Models.RepositoryInfo>
+
+@if (Model != null & Model.Count > 0)
+{
+  <select class="ui dropdown" name="repoId" id="repoId">
+    @foreach (RepositoryInfo r in Model)
+    {
+      <option value="@r.RepoId">@r.RepoId</option>
+
+    }
+  </select>
+}
+else
+{
+  <div class="">
+    No repositories found.
+  </div>
+}

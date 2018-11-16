@@ -1,0 +1,401 @@
+﻿@using System.Globalization
+@model DataDock.Web.ViewModels.PortalViewModel
+@{
+  Layout = null;
+  ViewBag.Title = "DataDock Portal" + Model.OwnerId;
+}
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>DataDock: @Model.OwnerId</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css" integrity="sha256-/Z28yXtfBv/6/alw+yZuODgTbKZm86IKbPE/5kjO/xY=" crossorigin="anonymous" />
+
+  <!-- DataDock Theme Extensions -->
+  <link rel="stylesheet" href="https://datadock.io/css/portal.css" />
+  <link rel="stylesheet" href="https://datadock.io/Content/datadock-portal.css" />
+
+</head>
+
+<body prefix="dc: http://purl.org/dc/terms/ void: http://rdfs.org/ns/void# dcat: http://www.w3.org/ns/dcat#">
+
+  <!-- breadcrumb -->
+  <div class="ui hidden divider"></div>
+  <div class="ui grid container">
+    <header>
+      <div class="ui huge breadcrumb">
+        <div class="active section" title="@(Model.OwnerDisplayName) data portal homepage"><h1>@(Model.OwnerDisplayName)</h1></div>
+      </div>
+    </header>
+  </div>
+
+  <!-- user/organization details -->
+  <div class="ui hidden divider"></div>
+  <div class="ui grid container">
+    <div class="mobile only row">
+      @{
+        if (Model.ShowAvatar && !string.IsNullOrEmpty(Model.LogoUrl))
+        {
+          <div class="two wide column">
+            <img class="ui tiny rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture" />
+          </div>
+        }
+      }
+
+      <div class="seven wide column">
+        @if (Model.ShowDescription && !string.IsNullOrEmpty(Model.Description))
+        {
+          <span>@Model.Description</span>
+        }
+        <div class="ui list">
+
+          @if (Model.ShowDashboardLink)
+          {
+            <div class="item">
+              <i class="dashboard icon"></i>
+              <div class="content">
+                <a href="https://datadock.io/dashboard/@Model.OwnerId" title="Go to dashboard">DataDock Dashboard</a>
+              </div>
+            </div>
+          }
+
+          @if (Model.ShowLocation && !string.IsNullOrEmpty(Model.Location))
+          {
+            <div class="item">
+              <i class="marker icon"></i>
+              <div class="content">
+                @Model.Location
+              </div>
+            </div>
+          }
+
+          @if (Model.ShowWebsiteLink && !string.IsNullOrEmpty(Model.Website))
+          {
+            <div class="item">
+              <i class="linkify icon"></i>
+              <div class="content">
+                <a href="@Model.Website">@Model.Website</a>
+              </div>
+            </div>
+          }
+
+          @if (!string.IsNullOrEmpty(Model.Twitter))
+          {
+            <div class="item">
+              <i class="twitter icon"></i>
+              <div class="content">
+                <a href="https://twitter.com/@Model.Twitter">@Model.Twitter</a>
+              </div>
+            </div>
+          }
+
+        </div><!-- list -->
+      </div>
+
+      <div class="seven wide column">
+        @{
+          if (Model.Publisher != null && Model.Publisher.IsDisplayable())
+          {
+            <div class="ui list">
+              <div class="item">
+                <i class="user icon"></i>
+                <div class="content">
+                  <div class="header">Publisher</div>
+                  <div>
+
+                    <div class="list" property="dc:publisher">
+                      <div class="item">
+                        <div class="content">
+                          <span property="foaf:name">
+                            @(String.IsNullOrEmpty(Model.Publisher?.Label) ? "" : Model.Publisher.Label)
+                            </span>
+                        </div>
+                      </div>
+                      <div class="item">
+                        <div class="content">
+                          @if (!string.IsNullOrEmpty(Model.Publisher.Website))
+                          {
+                            <a property="foaf:homepage" href="@Model.Publisher.Website">@Model.Publisher.Website</a>
+                          }
+                          else
+                          {
+                            <span></span>
+                          }
+                        </div>
+                      </div>
+                      <div class="item">
+                        <div class="content">
+                          <span property="foaf:mbox"> @(String.IsNullOrEmpty(Model.Publisher?.Email) ? "" : Model.Publisher.Email)</span>
+                        </div>
+                      </div>
+                    </div><!-- list -->
+
+                  </div>
+                </div><!-- content -->
+              </div><!-- item -->
+            </div><!-- list -->
+
+            }
+          else
+          {
+            <div class="ui list">
+              <div class="item">
+                <i class="user icon"></i>
+                <div class="content">
+                  <div class="header">Publisher</div>
+                  <div>Not Specified</div>
+                </div>
+              </div>
+            </div>
+          }
+        }
+
+      </div><!-- column -->
+    </div> <!-- mobile row -->
+
+    <div class="row">
+      <div class="four wide computer only column">
+
+        @if (Model.ShowAvatar && !string.IsNullOrEmpty(Model.LogoUrl))
+        {
+          <div class="row">
+            <img class="ui medium rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture" />
+            <div class="ui hidden divider"></div>
+          </div>
+        }
+
+        @if (Model.ShowDescription && !string.IsNullOrEmpty(Model.Description))
+        {
+          <div class="row">
+            <span>@Model.Description</span>
+            <div class="ui hidden divider"></div>
+          </div>
+        }
+
+        <div class="row">
+          <div class="ui list">
+
+            @if (Model.ShowDashboardLink)
+            {
+              <div class="item">
+                <i class="dashboard icon"></i>
+                <div class="content">
+                  <a href="https://datadock.io/dashboard/@Model.OwnerId" title="Go to dashboard">DataDock Dashboard</a>
+                </div>
+              </div>
+            }
+          
+            @if (Model.ShowLocation && !string.IsNullOrEmpty(Model.Location))
+            {
+              <div class="item">
+                <i class="marker icon"></i>
+                <div class="content">
+                  @Model.Location
+                </div>
+              </div>
+            }
+
+            @if (Model.ShowWebsiteLink && !string.IsNullOrEmpty(Model.Website))
+            {
+              <div class="item">
+                <i class="linkify icon"></i>
+                <div class="content">
+                  <a href="@Model.Website">@Model.Website</a>
+                </div>
+              </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Twitter))
+            {
+              <div class="item">
+                <i class="twitter icon"></i>
+                <div class="content">
+                  <a href="https://twitter.com/@Model.Twitter">@Model.Twitter</a>
+                </div>
+              </div>
+            }
+
+            @{
+              if (Model.Publisher != null && Model.Publisher.IsDisplayable())
+              {
+                <div class="item">
+                  <i class="user icon"></i>
+                  <div class="content">
+                    <div class="header">Publisher</div>
+                    <div>
+
+                      <div class="list" property="dc:publisher">
+                        <div class="item">
+                          <div class="content">
+                            <span property="foaf:name">
+                              @(String.IsNullOrEmpty(Model.Publisher?.Label) ? "" : Model.Publisher.Label)
+                            </span>
+                          </div>
+                        </div>
+                        <div class="item">
+                          <div class="content">
+                            @if (!string.IsNullOrEmpty(Model.Publisher.Website))
+                            {
+                              <a property="foaf:homepage" href="@Model.Publisher.Website">@Model.Publisher.Website</a>
+                            }
+                            else
+                            {
+                              <span></span>
+                            }
+                          </div>
+                        </div>
+                        <div class="item">
+                          <div class="content">
+                            <span property="foaf:mbox"> @(String.IsNullOrEmpty(Model.Publisher?.Email) ? "" : Model.Publisher.Email)</span>
+                          </div>
+                        </div>
+                      </div><!-- list -->
+
+                    </div>
+                  </div><!-- content -->
+                </div><!-- item -->
+                }
+              else
+              {
+                  <div class="item">
+                    <i class="user icon"></i>
+                    <div class="content">
+                      <div class="header">Publisher</div>
+                      <div>Not Specified</div>
+                    </div>
+                  </div>
+              }
+            }
+
+          </div><!-- end list -->
+        </div><!-- end row -->
+      </div><!-- end four wide column -->
+      <!-- content -->
+      <div class="sixteen wide mobile twelve wide computer column owner-content">
+
+        @if (Model.OwnerSearchButtons != null && Model.OwnerSearchButtons.Count > 0)
+        {
+          <div class="ui center aligned container search-buttons" id="buttons">
+
+            <div class="ui link four cards">
+              @foreach (var button in Model.OwnerSearchButtons)
+              {
+                if (!string.IsNullOrEmpty(button.Tag))
+                {
+                  <div class="primary card" onclick="buttonSearch('@button.Tag.Trim()')" id="@button.Tag.Trim()">
+                    <div class="content">
+                      <div class="header">
+                        @if (!string.IsNullOrEmpty(button.Icon))
+                        {
+                          <i class="fa fa-@button.Icon mr"></i>
+                        }
+
+                        @if (!string.IsNullOrEmpty(button.Text))
+                        {
+                          <span>@button.Text</span>
+                        }
+                        else
+                        {
+                          <span>@button.Tag</span>
+                        }
+
+                      </div><!-- end header -->
+                    </div><!-- end content -->
+                  </div>
+                  <!-- end card -->
+                }
+              }
+            </div><!-- end cards -->
+          </div>
+          <!-- end #buttons -->
+        }
+        <div class="ui center aligned grid container">
+          <div class="two wide column"></div>
+          <div class="twelve wide column">
+            <div class="ui big action fluid input">
+              <input type="text" placeholder="search @(Model.OwnerDisplayName) datasets" id="tags" />
+              <button class="ui button" onclick="find();" id="search" tabindex="0">Search</button>
+            </div>
+          </div>
+          <div class="two wide column"></div>
+
+        </div>
+        <div class="ui divider"></div>
+
+        <div class="ui hidden divider"></div>
+
+        <div class="" id="results">
+          <div class="ui inverted dimmer" id="loader">
+            <div class="ui text loader">Loading</div>
+          </div>
+        </div>
+
+        <!-- end search -->
+
+        @if (Model.RepoIds != null && Model.RepoIds.Count > 0)
+        {
+          <div id="toc">
+            <div class="page-header">
+              <h2>Data Repositories</h2>
+              <div class="ui hidden divider"></div>
+            </div>
+            <div class="ui two cards">
+              @foreach (var r in Model.RepoIds)
+              {
+                <div class="card">
+                  <div class="content">
+                    <div class="header">
+                      <h3>
+                        <a href="https://datadock.io/@Model.OwnerId/@r/page/index.html">@r</a>
+                      </h3>
+                    </div>
+                  </div>
+
+                </div>
+              }
+            </div><!-- end cards -->
+          </div><!-- end toc -->
+        }
+
+        <div class="ui hidden divider"></div>
+
+
+        <div class="ui hidden divider"></div>
+
+      </div><!-- end content -->
+    </div><!-- end row -->
+
+  </div><!-- end ui grid container -->
+  <!-- footer -->
+  <div class="ui hidden divider"></div>
+  <div class="ui container">
+    <footer class="ui raised segment center aligned text-muted">
+      <img class="ui tiny left floated image" src="/images/DataDock_Colour_120.png" alt="DataDock logo: a hexagonal green and blue icon resembling two back-to-back letter Dees" />
+
+      This data portal was generated using <a href="https://datadock.io/">DataDock</a> by <b>@Model.OwnerId</b><br />
+      <i>Turn spreadsheets into 5* linked data</i>
+    </footer>
+  </div>
+
+  
+<!-- Jquery, Semantic-UI JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.js" integrity="sha256-Bhi6GMQ/72uYZcJXCJ2LToOIcN3+Cx47AZnq/Bw1f7A=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.js" integrity="sha256-2/3+Q1kMYR8MDaqFPNBgmLgiqWJjySkg1wqLx/iE5Zo=" crossorigin="anonymous"></script>
+<script>
+  $(document).ready(function(){
+    $('#tags').keypress(function(e){
+      if(e.keyCode==13)
+        $('#search').click();
+    });
+  });
+  var searchUri = 'https://datadock.io/api/search/jennet/community_1';
+</script>
+<script src="https://cdn.jsdelivr.net/gh/jennet/datadockjs@v0.1-alpha/datadock.portal.js" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

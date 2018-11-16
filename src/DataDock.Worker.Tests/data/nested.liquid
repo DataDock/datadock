@@ -1,0 +1,7 @@
+﻿{% for triple in triples -%}
+	{% if triple.object_is_uri -%}
+		{% for nested in triple.nested_triples %}
+			{{ nested.object }}
+		{% endfor %}
+	{% endif %}
+{% endfor %}

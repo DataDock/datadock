@@ -1,0 +1,15 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+    Model.Title = Model.Title + " Template Library";
+}
+
+<div class="ui container">
+  <p class="ui message">
+    <i class="ui book icon"></i> Templates can be created when you <a href="/@Model.SelectedOwnerId/import">add data</a>, simply select the option to save the metadata as a template and then visit the template library to use with new uploads.
+  </p>
+  <div class="ui hidden divider"></div>
+</div>
+<div class="ui container">
+  @await Component.InvokeAsync("Templates", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId })
+</div>

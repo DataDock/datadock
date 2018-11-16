@@ -1,0 +1,36 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+
+  Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+  Model.Title = Model.Title + " Repositories";
+}
+
+<div class="ui container">
+  <h3>Set up new repository</h3>
+  <p>Choose your GitHub repository from the list below to initialise it for DataDock publishing. This is an optional step for publisher who wish to setup repository level settings such as Publisher details. You can skip this step and publish to any of your GitHub repositories in the <a href="/@Model.SelectedOwnerId/import">Add Data</a> section.</p>
+
+  <form class="ui form">
+    <input type="hidden" name="ownerId" id="ownerId" value="@Model.SelectedOwnerId">
+
+    <div class="field">
+      <div class="two fields">
+        <div class="field">
+          @await Component.InvokeAsync("RepositorySelectorList", new { selectedOwnerId = Model.SelectedOwnerId, selectedSchemaId = "", display = "dropdown" })
+        </div>
+        <div class="field">
+          <button class="ui button" type="button" id="repoSettings">Go</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  
+  <p>Want to publish data to one of your GitHub organisation's repositories? Make sure that you have given authorisation to the <a href="https://github.com/settings/applications" target="_blank" title="GitHub authorization settings">DataDock app</a>, and then the organisation will appear as an option on the dashboard menu above.</p>
+</div>
+
+
+<div class="ui container">
+  <h3>Existing repositories</h3>
+  <p>The list below shows the repositories you have already set up in DataDock:</p>
+
+  @await Component.InvokeAsync("RepositoryList", new {selectedOwnerId = Model.SelectedOwnerId})
+</div>

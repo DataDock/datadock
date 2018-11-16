@@ -1,0 +1,4 @@
+﻿{
+  "ElasticsearchUrl": "http://some.elasticsearch:9200/",
+  "FileStorePath":  "/path/to/file/store" 
+}

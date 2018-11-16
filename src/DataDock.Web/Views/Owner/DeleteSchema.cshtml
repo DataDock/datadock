@@ -1,0 +1,66 @@
+﻿@model DataDock.Web.ViewModels.TemplateDeleteModel
+
+@{
+  Model.Title = Model.Title + " Delete Template";
+}
+
+<div class="ui container">
+  @if (!Model.HasErrored)
+  {
+    <form asp-action="DeleteSchema" asp-controller="Owner" class="ui form">
+    
+      @Html.HiddenFor(m => m.SelectedOwnerId)
+      @Html.HiddenFor(m => m.SchemaId)
+      @Html.HiddenFor(m => m.UserId)
+   
+      @if (Model.SchemaInfo != null)
+      {
+        <h3 class="text-danger">Confirmation Required</h3>
+        <p class="lead">
+          Please confirm deletion of the template <em>@Model.GetSchemaTitle()</em>.
+        </p>
+        <p>
+          This operation will permanently remove the template and cannot be undone. Any data imported using this template will remain in place and will not be affected.
+        </p>
+        <p>
+
+        </p>
+        <div class="ui center aligned container">
+          <div class="ui hidden divider"></div>
+          <div class="ui buttons">
+            <a href="@Url.RouteUrl("OwnerLibrary", new {ownerId = Model.SelectedOwnerId})" class="ui button large">Cancel Deletion</a>
+            <div class="or"></div>
+            <input type="submit" class="ui primary button large" value="Confirm Deletion" />
+          </div>
+          <div class="ui section divider"></div>
+        </div>
+      }
+      else
+      {
+        <h3 class="text-danger">Invalid Template ID</h3>
+        <p class="lead">We could not locate the metadata record for the template @Model.SchemaId. Please check the link you used to reach this page and try again.</p>
+        <p>
+          <a href="@Url.RouteUrl("OwnerLibrary", new {ownerId = Model.SelectedOwnerId})" title="View All Templates" class="ui button primary">View All Templates</a>
+        </p>
+      }
+
+    </form>
+  }
+  else
+  {
+    <h3 class="text-danger">Invalid Template ID</h3>
+    <p class="lead">We could not locate the metadata record for the template @Model.SchemaId. Please check the link you used to reach this page and try again.</p>
+    <p>
+      <a href="@Url.RouteUrl("OwnerLibrary", new {ownerId = Model.SelectedOwnerId})" title="View All Templates" class="ui button primary">View All Templates</a>
+    </p>
+
+    <div class="ui red message">
+      @foreach (var error in Model.Errors)
+      {
+        <p>@Html.Raw(error)</p>
+      }
+      <p>If the problem persists, please <a href="https://github.com/NetworkedPlanet/datadock/issues" target="_blank" title="DataDock support">raise an issue on our support page</a>.</p>
+    </div>
+
+  }
+</div>

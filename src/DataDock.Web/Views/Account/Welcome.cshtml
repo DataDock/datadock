@@ -1,0 +1,64 @@
+﻿
+@{
+  ViewData["Title"] = "Welcome";
+}
+
+
+
+<div class="ui container">
+  <h2 class="ui header">@ViewBag.Title</h2>
+  <div class="ui hidden divider"></div>
+</div>
+
+
+<div class="ui three column grid container">
+  <div class="row">
+    <div class="column">
+      <div class="ui icon header">
+        <i class="hdd outline icon"></i>
+        <div class="content">
+          <h3>Create a fresh repository</h3>
+          <div class="sub header">
+            Choose or create a fresh public repository which will be the target repository for the navigable data pages that DataDock produces.
+
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="column">
+          <div class="ui icon header">
+              <i class="upload icon"></i>
+              <div class="content">
+                  <h3>Publish Data!</h3>
+                  <div class="sub header">
+                      Publishing data is simple: select a spreadsheet, add a few details such as Title and License and publish it on the World Wide Web!
+
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="column">
+          <div class="ui icon header">
+              <i class="search icon"></i>
+              <div class="content">
+                  <h3>Search and Browse Datasets</h3>
+                  <div class="sub header">
+                      Every dataset published via DataDock is turned into a complete static Linked Data website serving up both human-readable HTML pages
+                      and machine-readable RDF data.
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="row">
+    <div class="center aligned column"><a href="https://help.github.com/articles/create-a-repo/" title="How to create a GitHub repo">Learn more about creating repos</a></div>
+    <div class="center aligned column"><a href="/info/about" title="About DataDock">Learn more about DataDock</a></div>
+      <div class="center aligned column"><a href="/search" title="Search DataDock">Search for datasets</a></div>
+  </div>
+  <div class="row">
+    <div class="column"></div>
+    <div class="column"></div>
+    <div class="column"></div>
+  </div>
+
+</div>

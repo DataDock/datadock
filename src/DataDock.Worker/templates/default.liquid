@@ -1,0 +1,387 @@
+﻿<html>
+	{% assign title = triples | where:"predicate", dcterms.title | first -%}
+  	{% assign name = triples | where:"predicate", foaf.name | first -%}
+	{% assign label = triples | where:"predicate", rdfs.label | first -%}
+
+	<head>
+		<meta  http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>
+			{% if title -%}
+				{{title.object}}
+			{% elsif name -%}
+				{{name.object}}
+			{% elsif label -%}
+				{{label.object}}
+			{% else -%}
+				{{subject}}
+			{% endif -%}
+		</title>
+
+		 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css" integrity="sha256-/Z28yXtfBv/6/alw+yZuODgTbKZm86IKbPE/5kjO/xY=" crossorigin="anonymous" />
+
+		<!-- DataDock Theme Extensions -->
+		<link rel="stylesheet" href="{{datadock-publish-url}}/css/portal.css" />
+		<link rel="stylesheet" href="{{datadock-publish-url}}/Content/datadock-portal.css" />
+
+		<link rel="alternate" type="application/n-quads" href="{{nquads}}"/>
+
+	</head>
+
+	<body>
+	  
+<!-- breadcrumb -->
+  <div class="ui hidden divider"></div>
+  <div class="ui grid container">
+    <header>
+      <div class="ui huge breadcrumb">
+        <a class="section" href="{{datadock-publish-url}}/{{portal-info.owner_id}}" title="{{portal-info.owner_display_name}} data portal homepage">{{portal-info.owner_display_name}}</a>
+        <i class="right chevron icon divider"></i>
+        <a class="section" href="{{datadock-publish-url}}/{{owner-id}}/{{repo-id}}" title="View {{repo-id}} datasets">{{repo-id}}</a>
+        <i class="right chevron icon divider"></i>
+			{% if parentDataset -%}
+				<a class="section" href="{{parentDataset}}" title="View parent dataset">Dataset</a>
+			{% else -%}
+				Dataset
+			{% endif -%}
+        <i class="right chevron icon divider"></i>
+        <div class="active section">
+          <h1>
+            {% if title -%}
+            {{title.object}}
+            {% elsif name -%}
+            {{name.object}}
+            {% elsif label -%}
+            {{label.object}}
+            {% else -%}
+            {{subject}}
+            {% endif -%}
+          </h1>
+        </div>
+      </div>
+    </header>
+  </div>
+  
+  <!-- user/organization details -->
+  <div class="ui hidden divider"></div>
+  <div class="ui grid container">
+    
+	 <div class="mobile only row">
+		{% if portal-info.logo_url -%}
+			<div class="two wide column">
+			  <img class="ui tiny rounded bordered image" src="{{portal-info.logo_url}}" alt="{{portal-info.owner_display_name}} GitHub avatar picture" />
+			</div>
+		{% endif -%}
+
+		<div class="seven wide column">
+			{% if portal-info.description -%}
+				{{portal-info.description}}
+			{% endif -%}
+
+			<div class="ui list">
+
+				{% if portal-info.show_dashboard_link -%}
+					<div class="item">
+					  <i class="dashboard icon"></i>
+					  <div class="content">
+						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+					  </div>
+					</div>
+				{% endif -%}
+
+				{% if portal-info.show_issues_link -%}
+					<div class="item">
+					  <i class="github icon"></i>
+					  <div class="content">
+						<a href="{{portal-info.git_hub_html_url}}/{{repo-id}}/issues" title="View this repository on DataDock">Start conversation about this data</a>
+					  </div>
+					</div>
+				{% endif -%}
+
+				{% if portal-info.location -%}
+					<div class="item">
+					  <i class="marker icon"></i>
+					  <div class="content">
+						{{portal-info.location}}
+					  </div>
+					</div>
+				{% endif -%}
+
+				{% if portal-info.website -%}
+					<div class="item">
+					  <i class="linkify icon"></i>
+					  <div class="content">
+						<a href="{{portal-info.website}}">{{portal-info.website}}</a>
+					  </div>
+					</div>
+				{% endif -%}
+
+				{% if portal-info.twitter -%}
+					<div class="item">
+					  <i class="twitter icon"></i>
+					  <div class="content">
+						<a href="https://twitter.com/{{portal-info.twitter}}">{{portal-info.twitter}}</a>
+					  </div>
+					</div>
+				{% endif -%}
+			</div>
+		</div>
+
+      <div class="seven wide column">
+	  	{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
+			{% if publisher -%}
+				<div class="ui list">
+					<div class="item">
+						<i class="user icon"></i>
+						<div class="content">
+						<div class="header">Publisher</div>
+							<div>
+						
+								{% assign publisher_triples = publisher.nested_triples -%}
+								{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+								<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
+									<div class="item">
+										<div class="content">
+											{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
+											  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+										</div>
+									</div>
+									<div class="item">
+										<div class="content">
+											  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+											  {% if web -%}
+											  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+											  {% else -%}
+											  Not specified.
+											  {% endif -%}
+										</div>
+									</div>
+									<div class="item">
+										<div class="content">
+										  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
+										  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+										</div>
+									</div>
+								</div><!-- list -->
+
+								</div>
+						</div><!-- content -->
+					</div><!-- item -->
+				</div><!-- list -->
+			{% endif -%}
+        
+      </div><!-- column -->
+    </div> <!-- mobile row -->
+
+    <div class="row">
+      <div class="four wide computer only column">
+	    {% if portal-info.logo_url -%}
+			<div class="row">
+			  <img class="ui medium rounded bordered image" src="{{portal-info.logo_url}}" alt="{{portal-info.owner_display_name}} GitHub avatar picture" />
+				<div class="ui hidden divider"></div>
+			</div>
+		{% endif -%}
+
+		{% if portal-info.description -%}
+			<div class="row">
+				{{portal-info.description}}
+				<div class="ui hidden divider"></div>
+			</div>
+		{% endif -%}
+
+        <div class="row">
+          <div class="ui list">
+
+			{% if portal-info.show_dashboard_link -%}
+					<div class="item">
+					  <i class="dashboard icon"></i>
+					  <div class="content">
+						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+					  </div>
+					</div>
+				{% endif -%}
+
+				{% if portal-info.show_issues_link -%}
+					<div class="item">
+					  <i class="github icon"></i>
+					  <div class="content">
+						<a href="{{portal-info.git_hub_html_url}}/{{repo-id}}/issues" title="View this repository on DataDock">Start conversation about this data</a>
+					  </div>
+					</div>
+				{% endif -%}
+
+			{% if portal-info.location -%}
+				<div class="item">
+				  <i class="marker icon"></i>
+				  <div class="content">
+					{{portal-info.location}}
+				  </div>
+				</div>
+			{% endif -%}
+
+			{% if portal-info.website -%}
+				<div class="item">
+				  <i class="linkify icon"></i>
+				  <div class="content">
+					<a href="{{portal-info.website}}">{{portal-info.website}}</a>
+				  </div>
+				</div>
+			{% endif -%}
+
+			{% if portal-info.twitter -%}
+				<div class="item">
+					<i class="twitter icon"></i>
+					<div class="content">
+					<a href="https://twitter.com/{{portal-info.twitter}}">{{portal-info.twitter}}</a>
+					</div>
+				</div>
+			{% endif -%}
+
+			{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
+			{% if publisher -%}
+				<div class="item">
+					<i class="user icon"></i>
+					<div class="content">
+					<div class="header">Publisher</div>
+						<div>
+						
+							{% assign publisher_triples = publisher.nested_triples -%}
+							{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+							<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
+								<div class="item">
+									<div class="content">
+										{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
+										  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+									</div>
+								</div>
+								<div class="item">
+									<div class="content">
+										  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+										  {% if web -%}
+										  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+										  {% else -%}
+										  Not specified.
+										  {% endif -%}
+									</div>
+								</div>
+								<div class="item">
+									<div class="content">
+									  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
+									  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+									</div>
+								</div>
+							</div><!-- list -->
+
+							</div>
+					</div><!-- content -->
+				</div>
+			{% endif -%}
+					
+           </div><!-- end list -->
+            </div><!-- end row -->
+        </div><!-- end four wide column -->
+
+
+	  <!-- content -->
+      <div class="sixteen wide mobile twelve wide computer column">
+		<div class="ui segment">
+			 <table class="ui very basic collapsing celled table" resource="{{subject}}">
+					{% for triple in triples %}
+						<tr>
+							<td>
+								{% if triple.predicate_is_uri %}
+									<a href="{{triple.predicate}}">{{triple.predicate|unescape_data_string|split:"/"|last|split:"#"|last|escape}}</a>
+								{% else %}
+									{{triple.predicate}}
+								{% endif %}
+							</td>
+							<td>
+								{% if triple.object_is_uri -%}
+									<a property="{{triple.predicate}}" href="{{triple.object}}">{{triple.object|escape}}</a>
+								{% else %}
+									<span property="{{triple.predicate}}" {% if triple.object_datatype %}datatype="{{triple.object_datatype}}"{% endif %}>
+									{{ triple.object | newline_to_br }}
+									</span>
+									{% if triple.object_language %} ({{ triple.object_language}}) {% endif %}
+								{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+				</table>
+
+					{% if incomingCount > 0 %}
+					<div class="ui divider"></div>
+				<header>
+					<h2>References to this entity</h2>
+				</header>
+				<table class="ui very basic collapsing celled table">
+					<thead>
+						<tr>
+							<td>Reference From</td>
+							<td>Property</td>
+						</tr>
+					</thead>
+					<tbody>
+					{% for triple in incoming %}
+						<tr>
+							<td>
+								{% if triple.subject_is_uri %}
+									<a href="{{triple.subject}}">{{triple.subject|unescape_data_string|split:"/"|last_n:2|join:"/"|escape}}</a>
+								{% else %}
+									{{triple.subject}}
+								{% endif %}
+							</td>
+							<td>
+								{% if triple.predicate_is_uri %}
+									<a href="{{triple.predicate}}">{{triple.predicate|unescape_data_string|split:"/"|last|split:"#"|last|escape}}</a>
+								{% else %}
+									{{triple.predicate}}
+								{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			{% endif %}
+
+		</div>
+
+        <div class="ui hidden divider"></div>
+
+			{% if nquads -%}
+				<div class="container">
+					<div class="row">
+						<p class="pull-right">Download the data in the table above page as RDF: <a href="{{nquads}}">NQuads</a></p>
+					</div>
+				</div>
+			{% endif -%}
+
+		
+          <div class="ui hidden divider"></div>
+
+      </div><!-- end 16 wide col (content) -->
+  </div><!-- end row -->
+
+  </div><!-- end grid container -->
+		
+     <!-- footer -->
+	  <div class="ui hidden divider"></div>
+	  <div class="ui container">
+	    <footer class="ui raised segment center aligned text-muted">
+          <img class="ui tiny left floated image" src="{{datadock-publish-url}}/images/DataDock_Colour_120.png" alt="DataDock logo: a hexagonal green and blue icon resembling two back-to-back letter Dees" />
+          Page generated by <a href="{{datadock-publish-url}}/">DataDock</a> for <strong>{{subject}}</strong>
+	    </footer>
+	  </div>
+	  		
+      <!-- Jquery, Semantic-UI JS -->
+      <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.js" integrity="sha256-Bhi6GMQ/72uYZcJXCJ2LToOIcN3+Cx47AZnq/Bw1f7A=" crossorigin="anonymous"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.js" integrity="sha256-2/3+Q1kMYR8MDaqFPNBgmLgiqWJjySkg1wqLx/iE5Zo=" crossorigin="anonymous"></script>
+      <script>
+        var searchUri = '';
+      </script>
+      <script src="https://cdn.jsdelivr.net/gh/jennet/datadockjs@v0.1-alpha/datadock.portal.js"></script>
+  </body>
+</html>

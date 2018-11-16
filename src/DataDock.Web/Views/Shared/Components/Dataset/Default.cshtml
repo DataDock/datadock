@@ -1,0 +1,54 @@
+﻿@using System.Globalization
+@model DataDock.Web.ViewModels.DatasetViewModel
+
+@if (Model != null)
+{
+  <div class="ui segments">
+      <div class="ui fluid raised card">
+        <div class="content">
+          <div class="right floated">
+            <div class="ui vertical labeled icon buttons">
+                <a href="@Model.GetIri()" target="_blank" class="ui small basic primary button" title="Explore"><i class="external icon"></i>Explore</a>
+                @if (Model.IsOwner)
+                {
+                    <a href="@Url.RouteUrl("DeleteDataset", new {ownerId=@Model.OwnerId, repoId=@Model.RepositoryId, datasetId=@Model.Id})" class="ui small basic negative button" title="Delete"><i class="delete icon"></i>Delete</a>
+                }
+            </div>
+          </div>
+            <div class="header">@Model.GetTitle()</div>
+            <div class="meta">Last Modified: @Model.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
+            <div class="meta">License: @if (!string.IsNullOrEmpty(Model.LicenseIcon))
+                                       {
+                                           <a href="@Model.LicenseUri"><img src="/images/license/@Model.LicenseIcon" alt="@Model.LicenseUri"/></a>
+                                       }
+                                       else
+                                       {
+                                           <a href="@Model.LicenseUri">@Model.LicenseUri</a>
+                                       }
+                </div>
+          <div class="description">
+            <p>@Model.GetDescription()</p>
+          </div>
+        </div>
+        <div class="extra content">
+          <div class="meta">@Model.GetIri()</div>
+        </div>
+        @if (Model.GetTags().Any())
+        {
+          <div class="extra content">
+            @foreach (var tag in Model.GetTags())
+            {
+              <a class="ui tag label" href="/search?tag=@tag">@tag</a>
+            }
+          </div>
+
+        }
+      </div>
+  </div>
+}
+else
+{
+  <div class="ui warning message">
+    None found.
+  </div>
+}

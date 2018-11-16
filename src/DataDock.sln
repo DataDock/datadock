@@ -1,0 +1,83 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web", "DataDock.Web\DataDock.Web.csproj", "{79D93F37-7DDF-4D98-BA25-1C50859483B5}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Worker", "DataDock.Worker\DataDock.Worker.csproj", "{D9C1FEEF-4EAB-4451-9174-F5B96A02E322}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Common", "DataDock.Common\DataDock.Common.csproj", "{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elasticsearch", "Elasticsearch", "{5AA83009-F0E4-4C30-9FD7-C673A86C3067}"
+	ProjectSection(SolutionItems) = preProject
+		Elasticsearch\Dockerfile = Elasticsearch\Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{E88F117F-AAC8-447E-B97D-0104D07E26DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Common.Tests", "DataDock.Common.Tests\DataDock.Common.Tests.csproj", "{203E241C-D2E7-4F58-8AFA-469F91F4EF04}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.IntegrationTests", "DataDock.IntegrationTests\DataDock.IntegrationTests.csproj", "{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Worker.Tests", "DataDock.Worker.Tests\DataDock.Worker.Tests.csproj", "{D16830CE-4C96-41C3-B5C9-FF12E4DDD0F7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web.Tests", "DataDock.Web.Tests\DataDock.Web.Tests.csproj", "{DED25EC1-781D-4C03-A80A-EBF54EBC802A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Import", "DataDock.Import\DataDock.Import.csproj", "{F7387540-90AA-42A2-89C5-171EC8E3AA0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{79D93F37-7DDF-4D98-BA25-1C50859483B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79D93F37-7DDF-4D98-BA25-1C50859483B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79D93F37-7DDF-4D98-BA25-1C50859483B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79D93F37-7DDF-4D98-BA25-1C50859483B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9C1FEEF-4EAB-4451-9174-F5B96A02E322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9C1FEEF-4EAB-4451-9174-F5B96A02E322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9C1FEEF-4EAB-4451-9174-F5B96A02E322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9C1FEEF-4EAB-4451-9174-F5B96A02E322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{203E241C-D2E7-4F58-8AFA-469F91F4EF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{203E241C-D2E7-4F58-8AFA-469F91F4EF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{203E241C-D2E7-4F58-8AFA-469F91F4EF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{203E241C-D2E7-4F58-8AFA-469F91F4EF04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D16830CE-4C96-41C3-B5C9-FF12E4DDD0F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D16830CE-4C96-41C3-B5C9-FF12E4DDD0F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D16830CE-4C96-41C3-B5C9-FF12E4DDD0F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D16830CE-4C96-41C3-B5C9-FF12E4DDD0F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DED25EC1-781D-4C03-A80A-EBF54EBC802A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DED25EC1-781D-4C03-A80A-EBF54EBC802A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DED25EC1-781D-4C03-A80A-EBF54EBC802A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DED25EC1-781D-4C03-A80A-EBF54EBC802A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4B837EE3-FA4A-4568-9EAA-A8207CD64CAF} = {E88F117F-AAC8-447E-B97D-0104D07E26DA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1CDF1AC3-CA0F-4A76-AD4F-1C8439E1DE4B}
+	EndGlobalSection
+EndGlobal

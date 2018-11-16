@@ -1,0 +1,60 @@
+﻿
+@model DataDock.Web.ViewModels.DeleteAccountViewModel
+@{
+  ViewData["Title"] = "Delete";
+}
+
+<div class="ui container">
+  <h2 class="ui header">@ViewBag.Title</h2>
+
+  <div class="ui red large message"><i class="warning sign icon"></i> Proceeding with this action will permanently delete your account and is not reversible.</div>
+
+  <p>
+    Permanently deleting your DataDock account will delete:</p>
+    <ul>
+      <li>your user, repository and dataset settings</li>
+      <li>your dataset records</li>
+      <li>your templates</li>
+      <li>all job history records</li>
+    </ul>
+  <p>
+    It will <strong>not</strong> delete the generated data and HTML pages on your github account. If you wish to delete the generated data files you can do this after this process has completed by logging in to your github account at <a href="http://github.com" target="_blank" title="GitHub">github.com</a>. You may also wish to remove DataDock from the list of <a href="https://github.com/settings/applications" target="_blank">authorized applications</a> within your github account.
+  </p>
+  
+  <h3>Organizations</h3>
+  <p>Deleting your account will not delete the settings, repositories or datasets for organizations that you have access to. These must be deleted manually at this time. This is to ensure that other users that have access to those organizations can still use DataDock to publish data.</p>
+  
+  <div class="ui divider"></div>
+  <p>This action is <b>not</b> reversible, but if you wish to sign up again in the future you can simply repeat the sign up process to start again with a fresh DataDock account.</p>
+  <p>If you're sure you want to proceed, check the confirmation box below and hit "Delete My Account"</p>
+
+  <div class="ui section divider"></div>
+</div>
+
+
+<div class="ui container">
+  @{
+    if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+      <div class="ui red message"><i class="warning sign icon"></i>@ViewBag.Message</div>
+    }
+  }
+      <form asp-action="Delete">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        
+        <div class="ui center aligned container">
+          <div class="ui slider checkbox">
+            @Html.CheckBoxFor(m => m.Confirm, new { @class = "" })
+            @Html.LabelFor(m => m.Confirm, new { @class = "" })
+            <br />
+          </div>        
+        </div>
+        <div class="ui center aligned container">
+          <div class="ui buttons">
+            <a href="/account/settings" class="ui button">Cancel</a>
+            <div class="or"></div>
+            <input type="submit" class="ui primary button" value="Delete My Account"/>
+          </div>
+        </div>
+      </form>
+</div>

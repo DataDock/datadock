@@ -1,0 +1,133 @@
+﻿@model DataDock.Web.ViewModels.OwnerSettingsViewModel
+
+
+
+<div class="ui container">
+
+  @Html.HiddenFor(m => m.OwnerIsOrg)
+  @Html.HiddenFor(m => m.OwnerId)
+  
+  <a href="/@Model.OwnerId" target="_blank" class="ui small basic right floated primary button" title="Explore"><i class="external icon"></i>View Portal</a>
+
+
+  <h4 class="ui dividing header">Portal Front End</h4>
+  
+  <div class="field">
+    <div class="ui checkbox">
+      @Html.CheckBoxFor(m => m.DisplayGitHubAvatar, new { @class = "" })
+      @Html.LabelFor(m => m.DisplayGitHubAvatar, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DisplayGitHubAvatar)
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="ui checkbox">
+      @Html.CheckBoxFor(m => m.DisplayGitHubDescription, new { @class = "" })
+      @Html.LabelFor(m => m.DisplayGitHubDescription, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DisplayGitHubDescription)
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="ui checkbox">
+      @Html.CheckBoxFor(m => m.DisplayGitHubLocation, new { @class = "" })
+      @Html.LabelFor(m => m.DisplayGitHubLocation, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DisplayGitHubLocation)
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="ui checkbox">
+      @Html.CheckBoxFor(m => m.DisplayGitHubBlogUrl, new { @class = "" })
+      @Html.LabelFor(m => m.DisplayGitHubBlogUrl, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DisplayGitHubBlogUrl)
+    </div>
+  </div>
+
+  <div class="field">
+    @Html.LabelFor(m => m.TwitterHandle, new { @class = "" })
+    <div class="">
+      @Html.TextBoxFor(m => m.TwitterHandle, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.TwitterHandle)
+    </div>
+  </div>
+
+
+  <div class="field">
+    <div class="ui checkbox">
+      @Html.CheckBoxFor(m => m.DisplayDataDockLink, new { @class = "" })
+      @Html.LabelFor(m => m.DisplayDataDockLink, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DisplayDataDockLink)
+    </div>
+  </div>
+
+  <h4 class="ui dividing header">Data Publisher Details</h4>
+  
+  <div class="field">
+    @Html.LabelFor(m => m.DefaultPublisherType, new {@class = ""})
+    <div class="">
+      @Html.DropDownListFor(m => m.DefaultPublisherType, Model.PublisherTypes, new {@class = ""})
+      @Html.ValidationMessageFor(m => m.DefaultPublisherType)
+    </div>
+  </div>
+
+  <div class="field">
+    @Html.LabelFor(m => m.DefaultPublisherName, new { @class = "" })
+    <div class="">
+      @Html.TextBoxFor(m => m.DefaultPublisherName, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DefaultPublisherName)
+    </div>
+  </div>
+
+  <div class="field">
+    @Html.LabelFor(m => m.DefaultPublisherEmail, new { @class = "" })
+    <div class="">
+      @Html.TextBoxFor(m => m.DefaultPublisherEmail, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DefaultPublisherEmail)
+    </div>
+  </div>
+
+  <div class="field">
+    @Html.LabelFor(m => m.DefaultPublisherWebsite, new { @class = "" })
+    <div class="">
+      @Html.TextBoxFor(m => m.DefaultPublisherWebsite, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.DefaultPublisherWebsite)
+    </div>
+  </div>
+
+  <div class="ui divider"></div>
+
+  <div class="field">
+
+    @Html.LabelFor(m => m.SearchButtons, new { @class = "" })
+    <div class="">
+      @Html.TextBoxFor(m => m.SearchButtons, new { @class = "" })
+      @Html.ValidationMessageFor(m => m.SearchButtons)
+    </div>
+    <p><i class="info icon"></i>To add search buttons to the data portal home page, add the tags as a comma separated list here. If you want the button text to be different from the tag then enter the tag as "tag;title". <br /><em>e.g. education,environment;Local Environment,housing,traffic will create four buttons on the home page that load the datasets that have matching tags.</em></p>
+  </div>
+
+
+  @if (!string.IsNullOrEmpty(Model.LastModifiedBy))
+  {
+    <div class="ui center aligned container">
+      <div class="ui hidden divider"></div>
+      <div class="ui compact message">
+
+        These settings were last updated
+
+        @if (Model.OwnerIsOrg)
+        {
+          <span> by @Model.LastModifiedBy</span>
+        }
+        on @Model.LastModified.ToString("F")
+      </div>
+      <div class="ui hidden divider"></div>
+    </div>
+  }
+
+
+
+
+
+</div>

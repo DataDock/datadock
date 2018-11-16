@@ -1,0 +1,26 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+    Model.Title = Model.Title + " Settings";
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
+{
+  <div class="ui container">
+    <div class="ui info message"><i class="info icon"></i>@Html.Raw(@ViewBag.StatusMessage)</div>
+  </div>
+}
+
+<div class="ui container">
+  <form asp-action="Settings" asp-controller="Owner" class="ui form">
+    @await Component.InvokeAsync("Settings", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId })
+
+    <div class="ui center aligned container">
+      <input type="submit" class="ui primary button large" value="Save" />
+      <div class="ui hidden divider"></div>
+
+    </div>
+
+  </form>
+
+</div>

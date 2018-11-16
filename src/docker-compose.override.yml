@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  datadock.worker:
+    environment:
+      - DD_ENVIRONMENT=Development
+
+  datadock.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5000:80"
+
+  elasticsearch:
+    ports:
+      - "9200:9200"

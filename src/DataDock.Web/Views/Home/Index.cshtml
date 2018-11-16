@@ -1,0 +1,53 @@
+@{
+  ViewBag.Title = "DataDock";
+}
+
+<div class="ui vertical masthead center aligned segment">
+  <div class="ui two column grid container">
+    <div class="row">
+      <div class="column">
+        <div class="ui medium image">
+          <img src="@Url.Content("~/images/datadock.png")" />
+        </div>
+      </div>
+      <div class="left aligned column">
+        <h1 class="ui header">
+          <span class="blue">Data</span><span class="green">Dock</span>
+        </h1>
+        <h2>Publish your data for free!</h2>
+        <div class="ui hidden divider"></div>
+        @Html.Partial("_HomeSignUpPartial")
+
+        <div class="ui hidden divider"></div>
+        <div class="ui compact menu">
+          <a class="item" href="@Url.Action("about", "info")">
+            <i class="info icon"></i>
+            About
+          </a>
+          <a class="item" href="@Url.Action("features", "info")">
+            <i class="star outline icon"></i>
+            Features
+          </a>
+          @{
+            var identity = User?.Identity;
+          }
+          @if(identity != null && identity.IsAuthenticated) 
+          {
+            <a class="item" href="@Url.RouteUrl("OwnerProfile", new {ownerId=User.Identity.Name})">
+              <i class="dashboard icon"></i>
+              Dashboard
+            </a>
+          }
+          else
+          {
+            <a class="item" href="@Url.Action("login", "Account")">
+              <i class="user plus icon"></i>
+              Sign up / Login
+            </a>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

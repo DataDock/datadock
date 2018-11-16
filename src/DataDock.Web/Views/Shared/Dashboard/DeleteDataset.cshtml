@@ -1,0 +1,24 @@
+﻿@model DataDock.Web.ViewModels.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
+    Model.Title = Model.Title + " Dataset";
+}
+
+<div class="ui grid">
+    <div class="sixteen wide column">
+
+        <div class="ui warning message">
+            <div class="header">Confirm deletion of dataset @Model.SelectedDatasetId</div>
+            This action currently only removes the metadata of the dataset from DataDock. <br>
+            The dataset will no longer appear in search results or in dashboard pages, but the
+            dataset content will still remain in your GitHub repository.
+        </div>
+        <div class="ui center aligned container">
+            <div class="ui buttons">
+                <a href="@Url.RouteUrl("Dataset", new {ownerId=Model.SelectedOwnerId, repoId=Model.SelectedRepoId, datasetId=Model.SelectedDatasetId})" class="ui button">Cancel</a>
+                <div class="or"></div>
+                <a href="@Url.RouteUrl("DeleteDataset", new {ownerId=Model.SelectedOwnerId, repoId=Model.SelectedRepoId, datasetId=Model.SelectedDatasetId, confirmed=true})" class="ui primary button">Delete Dataset</a>
+            </div>
+        </div>
+    </div>
+</div>

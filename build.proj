@@ -1,0 +1,24 @@
+<Project DefaultTargets="BuildImages">
+
+  <PropertyGroup>
+    <Tag Condition="'$(Tag)' == ''">latest</Tag>
+	<Environment>local</Environment>
+  </PropertyGroup>
+
+  <Target Name="BuildImages" DependsOnTargets="Build">
+	<Exec Command="docker build -t datadock.web -t datadock.web:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/web" />
+	<Exec Command="docker build -t datadock.worker -t datadock.worker:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/worker" />
+  </Target>
+
+  <Target Name="Up" DependsOnTargets="BuildImages">
+	<Exec Command="docker-compose -f docker-compose.yml -f docker-compose.$(Environment).yml -p $(Environment) up -d"
+	      WorkingDirectory="$(MSBuildProjectDirectory)/docker" />
+  </Target>
+  
+  <Target Name="Build">
+    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)/src/DataDock.Web" />
+	<Exec Command="node node_modules/gulp/bin/gulp.js min" WorkingDirectory="$(MSBuildProjectDirectory)/src/DataDock.Web" />
+	<Exec Command="dotnet publish -c Release src/DataDock.Web/DataDock.Web.csproj -o $(MSBuildProjectDirectory)/docker/web/app" />
+	<Exec Command="dotnet publish -c Release src/DataDock.Worker/DataDock.Worker.csproj -o $(MSBuildProjectDirectory)/docker/worker/app" />
+  </Target>
+</Project>

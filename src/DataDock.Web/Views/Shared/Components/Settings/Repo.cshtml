@@ -1,0 +1,77 @@
+﻿@model DataDock.Web.ViewModels.RepoSettingsViewModel
+  
+  <div class="ui container">
+
+    @Html.HiddenFor(m => m.OwnerId)
+    @Html.HiddenFor(m => m.RepoId)
+
+    <h4 class="ui dividing header">Data Publisher Details</h4>
+
+    <div class="field">
+      @Html.LabelFor(m => m.DefaultPublisherType, new {@class = ""})
+      <div class="">
+        @Html.DropDownListFor(m => m.DefaultPublisherType, Model.PublisherTypes, new {@class = ""})
+        @Html.ValidationMessageFor(m => m.DefaultPublisherType)
+      </div>
+    </div>
+
+    <div class="field">
+      @Html.LabelFor(m => m.DefaultPublisherName, new { @class = "" })
+      <div class="">
+        @Html.TextBoxFor(m => m.DefaultPublisherName, new { @class = "" })
+        @Html.ValidationMessageFor(m => m.DefaultPublisherName)
+      </div>
+    </div>
+
+    <div class="field">
+      @Html.LabelFor(m => m.DefaultPublisherEmail, new { @class = "" })
+      <div class="">
+        @Html.TextBoxFor(m => m.DefaultPublisherEmail, new { @class = "" })
+        @Html.ValidationMessageFor(m => m.DefaultPublisherEmail)
+      </div>
+    </div>
+
+    <div class="field">
+      @Html.LabelFor(m => m.DefaultPublisherWebsite, new { @class = "" })
+      <div class="">
+        @Html.TextBoxFor(m => m.DefaultPublisherWebsite, new { @class = "" })
+        @Html.ValidationMessageFor(m => m.DefaultPublisherWebsite)
+      </div>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <div class="field">
+
+      @Html.LabelFor(m => m.SearchButtons, new { @class = "" })
+      <div class="">
+        @Html.TextBoxFor(m => m.SearchButtons, new { @class = "" })
+        @Html.ValidationMessageFor(m => m.SearchButtons)
+      </div>
+      <p><i class="info icon"></i>To add search buttons to the data portal home page, add the tags as a comma separated list here. If you want the button text to be different from the tag then enter the tag as "tag;title". <br /><em>e.g. education,environment;Local Environment,housing,traffic will create four buttons on the home page that load the datasets that have matching tags.</em></p>
+    </div>
+
+
+    @if (!string.IsNullOrEmpty(Model.LastModifiedBy))
+  {
+    <div class="ui center aligned container">
+      <div class="ui hidden divider"></div>
+      <div class="ui compact message">
+
+        These settings were last updated
+
+        @if (Model.OwnerIsOrg)
+      {
+        <span> by @Model.LastModifiedBy</span>
+    }
+        on @Model.LastModified.ToString("F")
+      </div>
+      <div class="ui hidden divider"></div>
+    </div>
+}
+
+
+
+
+
+  </div>
