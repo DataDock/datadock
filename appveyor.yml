@@ -1,0 +1,28 @@
+image: Visual Studio 2017
+
+install:
+  - choco install gitversion.portable -pre -y
+
+before_build:
+  - dotnet restore src/DataDock.sln
+  - ps: gitversion /l console /output buildserver /updateassemblyinfo
+
+configuration: Release
+
+build_script:
+  - dotnet build -c Release src/DataDock.sln
+
+test_script:
+  - ps: |
+      foreach ($test in ls test/*.Tests) {
+        Push-Location $test
+        echo "build: Testing project in $test"
+        dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $test.log
+        Push-AppveyorArtifact $test.log
+        if($LASTEXITCODE -ne 0) { exit 3 }
+        Pop-Location
+      }
+
+artifacts:
+  - path: 'src\*.Tests\*.log'
+
