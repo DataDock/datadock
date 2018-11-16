@@ -17,8 +17,9 @@ test_script:
       foreach ($test in ls src/*.Tests) {
         Push-Location $test
         echo "build: Testing project in $test"
-        dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $test + ".log"
-        Push-AppveyorArtifact $test + ".log"
+        $testlog = $test + ".log"
+        dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $testlog
+        Push-AppveyorArtifact $testlog
         if($LASTEXITCODE -ne 0) { exit 3 }
         Pop-Location
       }
