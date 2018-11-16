@@ -17,12 +17,13 @@ test_script:
       foreach ($test in ls src/*.Tests) {
         Push-Location $test
         echo "build: Testing project in $test"
-        dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $test.log
-        Push-AppveyorArtifact $test.log
-        if($LASTEXITCODE -ne 0) { exit 3 }
+        $testlog = $test.Name + ".log"
+        dotnet test -c %CONFIGURATION% -l "trx;logfilename=$testlog" -r .
+        Push-AppveyorArtifact $testlog
+        if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
         Pop-Location
       }
 
 artifacts:
-  - path: 'src\*.Tests\*.log'
+  - path: 'src\*.Tests\*.trx'
 
