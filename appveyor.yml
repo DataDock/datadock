@@ -20,7 +20,7 @@ test_script:
         $testlog = $test.Name + ".log"
         dotnet xunit -configuration %CONFIGURATION% -notrait "Category=explicit" | Out-File $testlog
         Push-AppveyorArtifact $testlog
-        if($LASTEXITCODE -ne 0) { exit 3 }
+        if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
         Pop-Location
       }
 
