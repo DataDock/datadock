@@ -11,6 +11,7 @@ configuration: Release
 
 build_script:
   - dotnet build -c Release src/DataDock.sln
+  - msbuild /t:BuildImages /p:Tag=%GitVersion_SemVer% build.proj 
 
 test_script:
   - ps: |
@@ -23,10 +24,6 @@ test_script:
         if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
         Pop-Location
       }
-      
-after_test:
-  - docker build -t datadock/web -t datadock/web:%GitVersion_SemVer% docker/web
-  - docker build -t datadock/worker -t datadock/worker:%GitVersion_SemVer% docker/worker
       
 
 artifacts:
