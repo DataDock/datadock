@@ -1,11 +1,12 @@
-image: Visual Studio 2017
+image: ubuntu
 
 install:
-  - choco install gitversion.portable -pre -y
+  - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-coreclr-v4.0.0.zip
+  - unzip -d gitversion GitVersion-bin-coreclr-v4.0.0.zip
 
 before_build:
   - dotnet restore src/DataDock.sln
-  - ps: gitversion /l console /output buildserver /updateassemblyinfo
+  - sh: dotnet gitversion/GitVersionCore.dll /l console /output buildserver /updateassemblyinfo
 
 configuration: Release
 
@@ -27,5 +28,5 @@ test_script:
       
 
 artifacts:
-  - path: 'src\*.Tests\*.trx'
+  - path: 'src/*.Tests/*.trx'
 
