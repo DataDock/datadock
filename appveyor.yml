@@ -15,7 +15,7 @@ configuration: Release
 
 build_script:
   - dotnet build -c Release src/DataDock.sln
-  - msbuild /t:BuildImages /p:Tag=%GitVersion_SemVer% build.proj 
+  - msbuild /t:BuildImages /p:Tag=$GitVersion_SemVer build.proj 
 
 test_script:
   - ps: |
