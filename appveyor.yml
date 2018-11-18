@@ -1,8 +1,11 @@
 image: ubuntu
+environment:
+  nodejs_version: "8.12.0"
 
 install:
   - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-coreclr-v4.0.0.zip
   - unzip -d gitversion GitVersion-bin-coreclr-v4.0.0.zip
+  - sh: nvm install $nodejs_version
 
 before_build:
   - dotnet restore src/DataDock.sln
