@@ -6,7 +6,7 @@ install:
 
 before_build:
   - dotnet restore src/DataDock.sln
-  - sh: dotnet gitversion/GitVersionCore.dll /l console /output buildserver /updateassemblyinfo
+  - sh: dotnet gitversion/GitVersion.dll /l console /output buildserver /updateassemblyinfo
 
 configuration: Release
 
