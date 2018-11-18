@@ -14,6 +14,11 @@
 	<Exec Command="docker-compose -f docker-compose.yml -f docker-compose.$(Environment).yml -p $(Environment) up -d"
 	      WorkingDirectory="$(MSBuildProjectDirectory)/docker" />
   </Target>
+
+  <Target Name="Down" DependsOnTargets="BuildImages">
+	<Exec Command="docker-compose -f docker-compose.yml -f docker-compose.$(Environment).yml -p $(Environment) down"
+	      WorkingDirectory="$(MSBuildProjectDirectory)/docker" />
+  </Target>
   
   <Target Name="Build">
     <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)/src/DataDock.Web" />
