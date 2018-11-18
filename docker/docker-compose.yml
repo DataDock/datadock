@@ -15,8 +15,6 @@ services:
     image: datadock.web
     depends_on:
       - elasticsearch
-    volumes:
-      - dd-files:/datadock
     build:
       context: web
       dockerfile: Dockerfile
@@ -25,8 +23,6 @@ services:
     image: datadock.worker
     depends_on:
       - elasticsearch
-    volumes:
-      - dd-files:/datadock
     environment:
       GITHUB_HEADER: dev-datadock-io
     build:
@@ -41,7 +37,6 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200/
 
 volumes:
-  dd-files:
   es-data-1:
   es-logs-1:
   es-backup:
