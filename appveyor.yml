@@ -31,7 +31,7 @@ test_script:
         test=${dir%/}
         test=${test##*/}
         echo "build: Testing project $test in $dir"
-        $testlog = $test + ".trx"
+        testlog = $test + ".trx"
         dotnet test -c Release --logger:trx\;LogFileName=$testlog -r .
         if [ $? -ne 0 ]
         then
