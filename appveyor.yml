@@ -10,6 +10,7 @@ install:
 before_build:
   - dotnet restore src/DataDock.sln
   - dotnet gitversion/GitVersion.dll /l console /output buildserver /updateassemblyinfo
+  - GitVersion_SemVer=$(dotnet gitversion/GitVersion.dll /output json /showVariable SemVer)
   - echo $GitVersion_SemVer
 
 configuration: Release
