@@ -23,16 +23,24 @@ build_script:
   - msbuild /t:BuildImages /p:Tag=$GitVersion_SemVer build.proj 
 
 test_script:
-  - ps: |
-      foreach ($test in ls ./src/*.Tests) {
-        Push-Location $test
-        echo "build: Testing project in $test"
-        $testlog = $test.Name + ".log"
-        dotnet test -c %CONFIGURATION% -l "trx;logfilename=$testlog" -r .
+  - sh: |
+      exit_code = 0
+      for dir in ./src/*.Tests;
+      do
+        pushd $dir
+        test=${dir%/}
+        test=${test##*/}
+        echo "build: Testing project $test in $dir"
+        $testlog = $test + ".trx"
+        dotnet test -c Release -l "trx;logfilename=$testlog" -r .
+        if [ $? -neq 0]
+        then
+            $exit_code = $?
+        fi
         Push-AppveyorArtifact $testlog
-        if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
-        Pop-Location
-      }
+        popd
+      done
+      exit $exit_code
       
 
 artifacts:
