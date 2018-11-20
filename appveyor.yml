@@ -24,7 +24,7 @@ build_script:
 
 test_script:
   - ps: |
-      foreach ($test in ls src/*.Tests) {
+      foreach ($test in ls ./src/*.Tests) {
         Push-Location $test
         echo "build: Testing project in $test"
         $testlog = $test.Name + ".log"
