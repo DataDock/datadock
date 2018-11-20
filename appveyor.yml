@@ -32,7 +32,7 @@ test_script:
         test=${test##*/}
         echo "build: Testing project $test in $dir"
         $testlog = $test + ".trx"
-        dotnet test -c Release -l "trx;logfilename=$testlog" -r .
+        dotnet test -c Release --logger:trx\;LogFileName=$testlog -r .
         if [ $? -neq 0]
         then
             $exit_code = $?
