@@ -33,7 +33,7 @@ test_script:
         echo "build: Testing project $test in $dir"
         $testlog = $test + ".trx"
         dotnet test -c Release --logger:trx\;LogFileName=$testlog -r .
-        if [ $? -neq 0]
+        if [ $? -neq 0 ]
         then
             $exit_code = $?
         fi
