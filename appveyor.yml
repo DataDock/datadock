@@ -1,6 +1,8 @@
 image: ubuntu
 environment:
   nodejs_version: "8.12.0"
+services:
+  - docker
 
 install:
   - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-net40-v4.0.0.zip
