@@ -11,16 +11,16 @@ services:
       context: ../src/Elasticsearch
       dockerfile: Dockerfile
 
-  datadock.web:
-    image: datadock.web
+  datadock_web:
+    image: datadock/web
     depends_on:
       - elasticsearch
     build:
       context: web
       dockerfile: Dockerfile
 
-  datadock.worker:
-    image: datadock.worker
+  datadock_worker:
+    image: datadock/worker
     depends_on:
       - elasticsearch
     environment:

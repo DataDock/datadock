@@ -1,6 +1,12 @@
 image: ubuntu
+
 environment:
   nodejs_version: "8.12.0"
+  DOCKER_USER:
+    secure: 9LU4zEJHdpb+7UcFHNyvQQ==
+  DOCKER_PASS:
+    secure: SpDXXy2IWz1XFdorgWZcNWfmUze0KkAOeZQNnzWtZ7I=
+
 services:
   - docker
 
@@ -41,6 +47,11 @@ test_script:
       done
       exit $exit_code
       
+
+deploy_script:
+  - sh: docker login -u="$DOCKER_USER" -p="DOCKER_PASS"
+  - sh: docker push datadock/web:$GitVersion_SemVer
+  - sh: docker push datadock/worker:$GitVersion_SemVer
 
 artifacts:
   - path: 'src/*.Tests/*.trx'
