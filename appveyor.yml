@@ -29,24 +29,9 @@ build_script:
   - msbuild /t:BuildImages /p:Tag=$GitVersion_SemVer build.proj 
 
 test_script:
-  - sh: |
-      exit_code = 0
-      for dir in ./src/*.Tests;
-      do
-        pushd $dir
-        test=${dir%/}
-        test=${test##*/}
-        echo "build: Testing project $test in $dir"
-        testlog=$test.trx
-        dotnet test -c Release --logger:trx\;LogFileName=$testlog -r .
-        if [ $? -ne 0 ]
-        then
-            exit_code=$?
-        fi
-        popd
-      done
-      exit $exit_code
-      
+  - sh: dotnet test -c Release src/DataDock.Common.Tests
+  - sh: dotnet test -c Release src/DataDock.Web.Tests
+  - sh: dotnet test -c Release src/DataDock.Worker.Tests     
 
 deploy_script:
   - sh: docker login -u="$DOCKER_USER" -p="DOCKER_PASS"
