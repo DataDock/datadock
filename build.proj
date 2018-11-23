@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <Target Name="BuildImages" DependsOnTargets="Build">
-	<Exec Command="docker build -t datadock.web -t datadock.web:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/web" />
-	<Exec Command="docker build -t datadock.worker -t datadock.worker:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/worker" />
+	<Exec Command="docker build -t datadock/web -t datadock/web:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/web" />
+	<Exec Command="docker build -t datadock/worker -t datadock/worker:$(Tag) ." WorkingDirectory="$(MSBuildProjectDirectory)/docker/worker" />
   </Target>
 
   <Target Name="Up" DependsOnTargets="BuildImages">
