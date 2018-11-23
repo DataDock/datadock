@@ -34,6 +34,10 @@ test_script:
   - sh: dotnet test -c Release src/DataDock.Worker.Tests     
 
 deploy_script:
-  - docker login -u=$DOCKER_USER -p=$DOCKER_PASS
-  - docker push datadock/web:$GitVersion_SemVer
-  - docker push datadock/worker:$GitVersion_SemVer
+  - sh: |
+      if [$APPVEYOR_REPO_BRANCH="master" ] && [$APPVEYOR_REPO_TAG="true"]
+      then
+        docker login -u=$DOCKER_USER -p=$DOCKER_PASS
+        docker push datadock/web:$GitVersion_SemVer
+        docker push datadock/worker:$GitVersion_SemVer
+      fi
