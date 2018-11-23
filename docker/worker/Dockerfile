@@ -5,6 +5,5 @@ RUN apt-get update && apt-get install -y git-core
 ENV GIT_PATH=/usr/bin/git
 FROM base AS final
 COPY app/ /app/
-COPY appsettings.* /app/
 WORKDIR /app
 ENTRYPOINT ["dotnet", "DataDock.Worker.dll"]

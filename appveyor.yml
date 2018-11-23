@@ -1,29 +1,43 @@
-image: Visual Studio 2017
+image: ubuntu
+
+environment:
+  nodejs_version: "8.12.0"
+  DOCKER_USER:
+    secure: 9LU4zEJHdpb+7UcFHNyvQQ==
+  DOCKER_PASS:
+    secure: SpDXXy2IWz1XFdorgWZcNWfmUze0KkAOeZQNnzWtZ7I=
+
+services:
+  - docker
 
 install:
-  - choco install gitversion.portable -pre -y
+  - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-net40-v4.0.0.zip
+  - unzip -d gitversion GitVersion-bin-net40-v4.0.0.zip
+  - sh: nvm install $nodejs_version
 
 before_build:
-  - dotnet restore src/DataDock.sln
-  - ps: gitversion /l console /output buildserver /updateassemblyinfo
+  - sh: |
+      dotnet restore src/DataDock.sln
+      mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
+      GitVersion_SemVer=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
+      echo $GitVersion_SemVer
 
 configuration: Release
 
 build_script:
   - dotnet build -c Release src/DataDock.sln
+  - msbuild /t:BuildImages /p:Tag=$GitVersion_SemVer build.proj 
 
 test_script:
-  - ps: |
-      foreach ($test in ls src/*.Tests) {
-        Push-Location $test
-        echo "build: Testing project in $test"
-        $testlog = $test.Name + ".log"
-        dotnet test -c %CONFIGURATION% -l "trx;logfilename=$testlog" -r .
-        Push-AppveyorArtifact $testlog
-        if($LASTEXITCODE -ne 0) { $host.SetShouldExit($LastExitCode) }
-        Pop-Location
-      }
+  - sh: dotnet test -c Release src/DataDock.Common.Tests
+  - sh: dotnet test -c Release src/DataDock.Web.Tests
+  - sh: dotnet test -c Release src/DataDock.Worker.Tests     
 
-artifacts:
-  - path: 'src\*.Tests\*.trx'
-
+deploy_script:
+  - sh: |
+      if [$APPVEYOR_REPO_BRANCH="master" ] && [$APPVEYOR_REPO_TAG="true"]
+      then
+        docker login -u=$DOCKER_USER -p=$DOCKER_PASS
+        docker push datadock/web:$GitVersion_SemVer
+        docker push datadock/worker:$GitVersion_SemVer
+      fi
