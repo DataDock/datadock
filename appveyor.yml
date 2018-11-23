@@ -34,6 +34,6 @@ test_script:
   - sh: dotnet test -c Release src/DataDock.Worker.Tests     
 
 deploy_script:
-  - sh: docker login -u="$DOCKER_USER" -p="DOCKER_PASS"
+  - docker login -u="$env:DOCKER_USER" -p="$env:DOCKER_PASS"
   - sh: docker push datadock/web:$GitVersion_SemVer
   - sh: docker push datadock/worker:$GitVersion_SemVer
