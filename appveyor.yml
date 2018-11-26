@@ -40,5 +40,7 @@ deploy_script:
       then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
         docker push datadock/web:$GitVersion_SemVer
+        docker push datadock/web:latest
         docker push datadock/worker:$GitVersion_SemVer
+        docker push datadock/worker:latest
       fi
