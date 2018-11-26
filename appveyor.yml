@@ -37,7 +37,7 @@ deploy_script:
   - sh: |
       echo $APPVEYOR_REPO_BRANCH - $APPVEYOR_REPO_TAG
       echo $GitVersion_SemVer
-      if [ "$APPVEYOR_REPO_BRANCH" == "feature/fix-script" ] && [ "$APPVEYOR_REPO_TAG" == "false" ]; then
+      if [ "$APPVEYOR_REPO_BRANCH" == "feature/fix-script" ] && [ "$APPVEYOR_REPO_TAG" == "true" ]; then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
         docker push datadock/web:$GitVersion_SemVer
         docker push datadock/web:latest
