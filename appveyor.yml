@@ -36,7 +36,7 @@ test_script:
 deploy_script:
   - sh: |
       echo $APPVEYOR_REPO_BRANCH - $APPVEYOR_REPO_TAG
-      if [ $APPVEYOR_REPO_BRANCH == "master" ] && [ $APPVEYOR_REPO_TAG == "true" ]
+      if [ "$APPVEYOR_REPO_BRANCH" == "master" ] && [ "$APPVEYOR_REPO_TAG" == "true" ]
       then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
         docker push datadock/web:$GitVersion_SemVer
