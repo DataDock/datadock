@@ -19,7 +19,7 @@ before_build:
   - sh: |
       dotnet restore src/DataDock.sln
       mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
-      GitVersion_SemVer=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
+      export GitVersion_SemVer=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
       echo $GitVersion_SemVer
 
 configuration: Release
