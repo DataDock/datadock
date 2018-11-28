@@ -233,7 +233,7 @@ namespace DataDock.Web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/error");
             }
 
             app.UseStaticFiles();
@@ -244,6 +244,11 @@ namespace DataDock.Web
             
             app.UseMvc(routes =>
             {
+                routes.MapRoute(
+                    name: "Error",
+                    template: "error",
+                    defaults: new {controller = "Home", action = "Error"}
+                );
                 // {ownerId}
                 routes.MapRoute(
                 name: "OwnerProfile",
