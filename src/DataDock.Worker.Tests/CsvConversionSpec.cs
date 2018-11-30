@@ -10,12 +10,12 @@ using Xunit;
 
 namespace DataDock.Worker.Tests
 {
-    public class CsvConverionSpec : IDisposable
+    public class CsvConversionSpec : IDisposable
     {
         private readonly string _tmpDir;
         private readonly IDataDockUriService _uriService;
 
-        public CsvConverionSpec()
+        public CsvConversionSpec()
         {
             _tmpDir = Path.GetFullPath(DateTime.UtcNow.Ticks.ToString());
             _uriService = new DataDockUriService("http://datadock.io/");
@@ -34,7 +34,7 @@ namespace DataDock.Worker.Tests
             var repo = new DynamicFileStore(repoDir, 100);
             var defaultGraph = new Graph();
             var parser = new NQuadsParser();
-            using (var reader = File.OpenText("data\\test1.nq"))
+            using (var reader = File.OpenText(Path.Join("data", "test1.nq")))
             {
                 parser.Parse(reader, t => repo.Assert(t.Subject, t.Predicate, t.Object, t.GraphUri), defaultGraph);
             }

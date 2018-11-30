@@ -6,7 +6,6 @@ RUN apt-get -qq update && apt-get -qqy --no-install-recommends install wget gnup
 RUN curl -sL https://deb.nodesource.com/setup_6.x |  bash -
 RUN apt-get install -y nodejs
 COPY app/ /app/
-COPY appsettings.* /app/
 WORKDIR /app
 EXPOSE 80
 ENTRYPOINT ["dotnet", "DataDock.Web.dll"]

@@ -2,31 +2,35 @@ version: '3.4'
 
 services:
   elasticsearch:
-    image: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.1
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
-      - es-data-1:/home/elastic/data
-      - es-logs-1:/home/elastic/logs
-      - es-backup:/home/elastic/backup
-    build:
-      context: ../src/Elasticsearch
-      dockerfile: Dockerfile
+      - es-data-1:/usr/share/elasticsearch/data
+      - es-logs-1:/usr/share/elasticsearch/logs
+      - es-backup:/usr/share/elasticsearch/backup
+    ports:
+      - 9200:9200
 
-  datadock.web:
-    image: datadock.web
+  datadock_web:
+    image: datadock/web
     depends_on:
       - elasticsearch
-    volumes:
-      - dd-files:/datadock
     build:
       context: web
       dockerfile: Dockerfile
 
-  datadock.worker:
-    image: datadock.worker
+  datadock_worker:
+    image: datadock/worker
     depends_on:
       - elasticsearch
-    volumes:
-      - dd-files:/datadock
     environment:
       GITHUB_HEADER: dev-datadock-io
     build:
@@ -34,14 +38,13 @@ services:
       dockerfile: Dockerfile
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:6.2.2
+    image: docker.elastic.co/kibana/kibana-oss:6.5.1
     depends_on:
       - elasticsearch
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200/
 
 volumes:
-  dd-files:
   es-data-1:
   es-logs-1:
   es-backup:

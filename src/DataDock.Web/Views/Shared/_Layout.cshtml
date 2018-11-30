@@ -15,11 +15,8 @@
   }
   <title>@title</title>
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
   <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#62b12f">
   <meta name="theme-color" content="#ffffff">
   <meta name="format-detection" content="telephone=no">
 
@@ -30,7 +27,7 @@
 
   </environment>
   <environment include="Staging, Production">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css"
           asp-fallback-href="~/semantic-ui/dist/semantic.min.css"
           asp-fallback-test-class="transition" asp-fallback-test-property="animation-iteration-count" asp-fallback-test-value="1" />
     <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
@@ -131,11 +128,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" type="text/javascript"></script>
   </environment>
   <environment names="Staging,Production">
-    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.2.1.min.js"
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
             asp-fallback-src="~/vendor/jquery/jquery.min.js"
             asp-fallback-test="window.jQuery">
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/3.2.1/semantic.min.js"
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js"
             asp-fallback-src="~/semantic/dist/semantic.min.js"
             asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.site">
 
@@ -160,7 +157,7 @@
 
 
   <environment names="Staging,Production">
-    <script type="text/javascript" src="~/vendor/cookiebar/cookiebar-latest.min.js?noGeoIp=1&remember=365&theme=altblack&top=1&privacyPage=%2Fprivacy"></script>
+    <script type="text/javascript" src="~/lib/cookiebar/cookiebar-latest.min.js?noGeoIp=1&remember=365&theme=altblack&top=1&privacyPage=%2Finfo%2fprivacy"></script>
 
     <script>
       var cookie = document.cookie.match(/(;)?cookiebar=([^;]*);?/);
