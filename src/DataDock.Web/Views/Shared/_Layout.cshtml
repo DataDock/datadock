@@ -38,15 +38,15 @@
 </head>
 <body>
 
-  <div class="cr cr-bottom cr-right cr-sticky cr-orange" title="DataDock is in Preview Release stage - please report any bugs to us">PREVIEW RELEASE</div>
+  <div class="cr cr-bottom cr-right cr-sticky cr-orange" title="DataDock is in Beta Release stage">BETA RELEASE</div>
 
 
   <!-- slide out mobile menu -->
   <div class="ui vertical inverted sidebar menu">
     <a class="active item" href="/" title="DataDock homepage">Home</a>
-    <a class="item" href="/info/about" title="About DataDock">About</a>
-    <a class="item" href="/info/features" title="DataDock Features">Features</a>
-    <a href="http://datadock.github.io" class="item">Help</a>
+    <a class="item" href="@Url.RouteUrl("Info", new{action="about"})" title="About DataDock">About</a>
+    <a class="item" href="@Url.RouteUrl("Info", new{action="features"})" title="DataDock Features">Features</a>
+    <a href="https://github.com/DataDock/datadock/wiki" class="item">Help</a>
     <a class="item" href="/search" title="Search Data Dock">Search</a>
     @Html.Partial("_LoginSubMenuPartial")
   </div>
@@ -85,19 +85,19 @@
           <div class="three wide column">
             <h4 class="ui inverted header">Info</h4>
             <ul class="ui inverted">
-              <li><a class="item" href="/info/about" title="About DataDock">About DataDock</a></li>
-              <li><a class="item" href="/info/features" title="DataDock Features">Features</a></li>
-              <li><a class="item" href="/info/terms" title="DataDock Terms & Conditions">Terms</a></li>
-              <li><a class="item" href="/info/privacy" title="DataDock Privacy Statement">Privacy</a></li>
+              <li><a class="item" href="@Url.RouteUrl("Info", new{action="about"})" title="About DataDock">About DataDock</a></li>
+              <li><a class="item" href="@Url.RouteUrl("Info", new{action="features"})" title="DataDock Features">Features</a></li>
+              <li><a class="item" href="@Url.RouteUrl("Info", new{action="terms"})" title="DataDock Terms & Conditions">Terms</a></li>
+              <li><a class="item" href="@Url.RouteUrl("Info", new{action="privacy"})" title="DataDock Privacy Statement">Privacy</a></li>
             </ul>
           </div>
           <div class="three wide column">
             <h4 class="ui inverted header">Help</h4>
             <ul class="ui inverted">
-              <li><a href="http://datadock.github.io/getting-started/" class="item">Getting Started</a></li>
-              <li><a href="http://datadock.github.io/user-guide/" class="item">User Guide</a></li>
+              <li><a href="https://github.com/DataDock/datadock/wiki/getting-started" class="item">Getting Started</a></li>
+              <li><a href="https://github.com/DataDock/datadock/wiki" class="item">Documentation</a></li>
               <li><a href="https://github.com/DataDock/datadock/issues" class="item">Ask a question</a></li>
-              <li><a href="https://github.com/DataDock/datadock/issues" class="item">Report a bug</a></li>
+              <li><a href="https://github.com/DataDock/datadock/issues/new" class="item">Raise an issue</a></li>
             </ul>
           </div>
           <div class="ten wide column">
