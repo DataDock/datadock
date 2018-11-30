@@ -109,21 +109,20 @@
 
 
 @section scripts {
-  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js" type="text/javascript"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/additional-methods.min.js" type="text/javascript"></script>
-  <script src="/js/inputosaurus.js" type="text/javascript"></script>
-  <script src="/js/jquery.dform-1.1.0.js" type="text/javascript"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.5.0/papaparse.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/additional-methods.min.js" type="text/javascript"></script>
+    <script src="/js/inputosaurus.js" type="text/javascript"></script>
+    <script src="/js/jquery.dform-1.1.0.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.5.0/papaparse.min.js" type="text/javascript"></script>
 
-  <script>
-    var baseUrl = "@Html.Raw(ViewData["BaseUrl"])";
-    var publishUrl = "@Html.Raw(ViewData["PublishUrl"])";
-    var ownerId = "@Html.Raw(ViewData["OwnerId"])";
-    var repoId = "@Html.Raw(ViewData["RepoId"])";
-    var schemaId = "@Html.Raw(ViewData["SchemaId"])";
-    var apiUrl = baseUrl + "/api/data";
-  </script>
+    <script>
+        var baseUrl = "@Html.Raw(ViewData["BaseUrl"])";
+        var publishUrl = "@Html.Raw(ViewData["PublishUrl"])";
+        var ownerId = "@Html.Raw(ViewData["OwnerId"])";
+        var repoId = "@Html.Raw(ViewData["RepoId"])";
+        var schemaId = "@Html.Raw(ViewData["SchemaId"])";
+        var apiUrl = baseUrl + "/api/data";
+        metadataEditor();
+    </script>
 
-  <script src="/js/datadock.metadataeditor.js" type="text/javascript"></script>
-  <script src="/js/datadock.schemahelper.js" type="text/javascript"></script>
 }

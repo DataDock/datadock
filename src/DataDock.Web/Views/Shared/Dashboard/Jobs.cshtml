@@ -12,15 +12,17 @@
 @section Scripts {
 
   <environment names="Development">
-    <script src="~/vendor/aspnet/signalr.js"></script>
+    <script src="~/lib/signalr/signalr.js"></script>
   </environment>
   <environment names="Staging,Production">
-    <script src="~/vendor/aspnet/signalr.min.js"></script>
+    <script src="~/lib/signalr/signalr.min.js"></script>
   </environment>
   <script>
     $(function () {
 
-      var connection = new signalR.HubConnection('/progress');
+      //var connection = new signalR.HubConnection('/progress');
+        var connection = new signalR.HubConnectionBuilder().withUrl('/progress')
+            .configureLogging(signalR.LogLevel.Information).build();
 
       // Create a function that the hub can call to broadcast messages.
       connection.on('sendMessage', function (userId, message) {
