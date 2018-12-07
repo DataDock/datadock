@@ -34,7 +34,7 @@ namespace DataDock.Worker
         {
             if (_hubConnection != null) return _hubConnection;
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://datadock.web/progress", HttpTransportType.WebSockets)
+                .WithUrl("http://web/progress", HttpTransportType.WebSockets)
                 .Build();
             _hubConnection.Closed += OnHubConnectionLost;
             var connectionStarted = false;
