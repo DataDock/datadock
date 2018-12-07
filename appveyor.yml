@@ -19,14 +19,14 @@ before_build:
   - sh: |
       dotnet restore src/DataDock.sln
       mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
-      export GitVersion_SemVer=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
-      echo $GitVersion_SemVer
+      export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable FullSemVer)
+      echo $DockerImageVersion
 
 configuration: Release
 
 build_script:
   - dotnet build -c Release src/DataDock.sln
-  - msbuild /t:BuildImages /p:Tag=$GitVersion_SemVer build.proj 
+  - msbuild /t:BuildImages /p:Tag=$DockerImageVersion build.proj 
 
 test_script:
   - sh: dotnet test -c Release src/DataDock.Common.Tests
@@ -37,14 +37,14 @@ deploy_script:
   - sh: |
       if [ "$APPVEYOR_REPO_TAG" == "true" ]; then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
-        docker push datadock/web:$GitVersion_SemVer
+        docker push datadock/web:$DockerImageVersion
         docker push datadock/web:latest
-        docker push datadock/worker:$GitVersion_SemVer
+        docker push datadock/worker:$DockerImageVersion
         docker push datadock/worker:latest
       elif [ "$APPVEYOR_REPO_BRANCH" == "master" ]; then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
-        docker push datadock/web:$GitVersion_SemVer
-        docker push datadock/worker:$GitVersion_SemVer
+        docker push datadock/web:$DockerImageVersion
+        docker push datadock/worker:$DockerImageVersion
       else
         echo "Deployment will only run on a tag or commit to master"
       fi
