@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  datadock.web:
+  web:
     image: datadock.web
     volumes:
       - dd-files:/datadock
@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: DataDock.Web/Dockerfile
 
-  datadock.worker:
+  worker:
     image: datadock.worker
     volumes:
       - dd-files:/datadock
@@ -20,14 +20,21 @@ services:
       dockerfile: DataDock.Worker/Dockerfile
 
   elasticsearch:
-    image: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.1
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - path.repo=/usr/share/elasticsearch/backup
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
-      - es-data-1:/home/elastic/data
-      - es-logs-1:/home/elastic/logs
-      - es-backup:/home/elastic/backup
-    build:
-      context: Elasticsearch
-      dockerfile: Dockerfile
+      - es-data-1:/usr/share/elasticsearch/data
+      - es-logs-1:/usr/share/elasticsearch/logs
+      - es-backup:/usr/share/elasticsearch/backup
 
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:6.2.2

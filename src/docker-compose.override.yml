@@ -1,11 +1,11 @@
 version: '3.4'
 
 services:
-  datadock.worker:
+  worker:
     environment:
       - DD_ENVIRONMENT=Development
 
-  datadock.web:
+  web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     ports:

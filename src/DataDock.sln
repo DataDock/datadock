@@ -11,11 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Worker", "DataDock
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Common", "DataDock.Common\DataDock.Common.csproj", "{3B7619F9-2AEA-4E2D-9B48-93C1F2B5CCCB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elasticsearch", "Elasticsearch", "{5AA83009-F0E4-4C30-9FD7-C673A86C3067}"
-	ProjectSection(SolutionItems) = preProject
-		Elasticsearch\Dockerfile = Elasticsearch\Dockerfile
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{E88F117F-AAC8-447E-B97D-0104D07E26DA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Common.Tests", "DataDock.Common.Tests\DataDock.Common.Tests.csproj", "{203E241C-D2E7-4F58-8AFA-469F91F4EF04}"

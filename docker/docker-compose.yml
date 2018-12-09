@@ -7,6 +7,7 @@ services:
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
+      - path.repo=/usr/share/elasticsearch/backup
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -16,10 +17,8 @@ services:
       - es-data-1:/usr/share/elasticsearch/data
       - es-logs-1:/usr/share/elasticsearch/logs
       - es-backup:/usr/share/elasticsearch/backup
-    ports:
-      - 9200:9200
 
-  datadock_web:
+  web:
     image: datadock/web
     depends_on:
       - elasticsearch
@@ -27,7 +26,7 @@ services:
       context: web
       dockerfile: Dockerfile
 
-  datadock_worker:
+  worker:
     image: datadock/worker
     depends_on:
       - elasticsearch
