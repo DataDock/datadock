@@ -19,7 +19,7 @@ before_build:
   - sh: |
       dotnet restore src/DataDock.sln
       mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
-      export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable FullSemVer)
+      export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
       echo $DockerImageVersion
 
 configuration: Release

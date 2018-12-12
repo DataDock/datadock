@@ -30,21 +30,21 @@ cluster.name: datadock
 #
 # Path to directory where to store the data (separate multiple locations by comma):
 #
-path.data: /home/elastic/data
+path.data: /usr/share/elasticsearch/data
 #
 # Path to log files:
 #
-path.logs: /home/elastic/logs
+path.logs: /usr/share/elasticsearch/logs
 
 # Path to backup volume
-path.repo: ["/home/elastic/backup"]
+path.repo: ["/tmp", "/usr/share/elasticsearch/backup"]
 
 #
 # ----------------------------------- Memory -----------------------------------
 #
 # Lock the memory on startup:
 #
-#bootstrap.memory_lock: true
+# bootstrap.memory_lock: true
 #
 # Make sure that the heap size is set to about half the memory available
 # on the system and that the owner of the process is allowed to use this
@@ -56,7 +56,7 @@ path.repo: ["/home/elastic/backup"]
 #
 # Set the bind address to a specific IP (IPv4 or IPv6):
 #
-#network.host: 192.168.0.1
+network.host: 0.0.0.0
 #
 # Set a custom port for HTTP:
 #
