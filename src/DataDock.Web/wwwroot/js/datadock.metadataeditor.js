@@ -674,7 +674,7 @@ var templateMetadata;
                             "html": {
                                 "type": "td",
                                 "html":
-                                    "The identifier for the dataset is constructed from the chosen title, the GitHub repository, and the GitHub user or organisation you're uploading the data to."
+                                    "The identifier for the dataset is constructed from the chosen title, the GitHub repository, and the GitHub user or organization you're uploading the data to."
                             }
                         }
                     ]
@@ -739,7 +739,7 @@ var templateMetadata;
                             {
                                 "type": "td",
                                 "html":
-                                    "You must be sure that there are no empty values in the data to use it as the basis for a record's identifier. We suggest using an ID field if you have one. If in doubt, use the default (the row number). <br />Identifiers can be crucial when it comes to linking between records of different datasets; <a href=\"http://datadock.io/docs/user-guide/selecting-an-identifier.html\" title=\"DataDock Documentation: Identifiers\" target=\"_blank\">You can read more about identifiers here (opens in new window)</a>. (TODO: Need documentation link)"
+                                    "You must be sure that there are no empty values in the data to use it as the basis for a record's identifier. We suggest using an ID field if you have one. If in doubt, use the default (the row number). <br />Identifiers can be crucial when it comes to linking between records of different datasets; <a href=\"https://github.com/DataDock/datadock/wiki/selecting-an-identifier\" title=\"DataDock Documentation: Identifiers\" target=\"_blank\">You can read more about identifiers here (opens in new window)</a>."
                             }
                         ]
                     }
