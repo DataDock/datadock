@@ -399,6 +399,12 @@ namespace DataDock.Web
                     template: "account/signup",
                     defaults: new { controller = "Account", action = "SignUp" });
 
+                // Search
+                routes.MapRoute(
+                    "Search",
+                    "search",
+                    new {controller = "Search", action = "Index"});
+
                 // Info
                 routes.MapRoute(
                     name: "Info",
