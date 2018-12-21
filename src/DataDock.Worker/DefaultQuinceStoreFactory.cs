@@ -11,7 +11,7 @@ namespace DataDock.Worker
         private readonly string _quinceSubDir;
         private readonly int _cacheThreshold;
 
-        public DefaultQuinceStoreFactory(string quinceSubDir = "quince", int cacheThreshold = 10)
+        public DefaultQuinceStoreFactory(string quinceSubDir = "quince", int cacheThreshold = 1000)
         {
             _quinceSubDir = quinceSubDir;
             _cacheThreshold = cacheThreshold;
