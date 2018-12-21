@@ -37,6 +37,12 @@ namespace DataDock.Worker.Tests
             Retracted.Add(new Tuple<INode, INode, INode, Uri>(subject, predicate, obj, graph));
         }
 
+        public void Assert(IGraph graph)
+        {
+            foreach (var t in graph.Triples)
+                Asserted.Add(new Tuple<INode, INode, INode, Uri>(t.Subject, t.Predicate, t.Object, graph.BaseUri));
+        }
+
         public void DropGraph(Uri graph)
         {
             DroppedGraphs.Add(graph);
