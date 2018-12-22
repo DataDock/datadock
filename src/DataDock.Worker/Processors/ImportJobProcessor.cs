@@ -12,9 +12,11 @@ using DataDock.CsvWeb.Parsing;
 using DataDock.CsvWeb.Rdf;
 using DataDock.Worker.Liquid;
 using Newtonsoft.Json.Linq;
+using Octokit;
 using Serilog;
 using VDS.RDF;
 using VDS.RDF.Parsing.Handlers;
+using FileMode = System.IO.FileMode;
 
 namespace DataDock.Worker.Processors
 {
@@ -159,6 +161,7 @@ namespace DataDock.Worker.Processors
             // Update the dataset repository
             try
             {
+                var voidMetadataJson = ExtractVoidMetadata(metadataGraph);
                 await _datasetStore.CreateOrUpdateDatasetRecordAsync(new DatasetInfo
                 {
                     OwnerId = job.OwnerId,
@@ -166,6 +169,7 @@ namespace DataDock.Worker.Processors
                     DatasetId = job.DatasetId,
                     LastModified = DateTime.UtcNow,
                     CsvwMetadata = metadataJson,
+                    VoidMetadata = voidMetadataJson,
                     ShowOnHomePage = job.IsPublic,
                     Tags = metadataJson["dcat:keyword"]?.ToObject<List<string>>()
                 });
@@ -399,6 +403,34 @@ namespace DataDock.Worker.Processors
                 metadataGraph.Assert(dsNode, exampleResource, distinctSubject);
             }
             return metadataGraph;
+        }
+
+        private JObject ExtractVoidMetadata(IGraph metadataGraph)
+        {
+            var metadata = new JObject();
+            var dataDump = metadataGraph.CreateUriNode(new Uri("http://rdfs.org/ns/void#dataDump"));
+            var tripleCount = metadataGraph.CreateUriNode(new Uri("http://rdfs.org/ns/void#triples"));
+            var dataDumps = metadataGraph.GetTriplesWithPredicate(dataDump).Select(t => t.Object.ToString()).ToArray();
+            var tripleCountValue = metadataGraph.GetTriplesWithPredicate(tripleCount).Select(t => t.Object)
+                .OfType<ILiteralNode>().Select(lit => long.Parse(lit.Value)).FirstOrDefault();
+            if (dataDumps.Length > 0)
+            {
+                if (dataDumps.Length == 1)
+                {
+                    metadata["void:dataDump"] = dataDumps[0];
+                }
+                else
+                {
+                    metadata["void:dataDump"] = new JArray(dataDumps);
+                }
+            }
+
+            if (tripleCountValue > 0)
+            {
+                metadata["void:triples"] = tripleCountValue;
+            }
+
+            return metadata;
         }
 
         private Graph GenerateDefinitionsGraph(JObject metadataJson)
