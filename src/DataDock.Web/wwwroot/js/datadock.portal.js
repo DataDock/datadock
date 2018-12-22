@@ -1,19 +1,4 @@
-﻿/*
-$(document).ready(function () {
-    if (searchUri) {
-        $.getJSON(searchUri)
-            .done(function (data) {
-                // On success, 'data' contains a list of datasets.
-                $.each(data, function (key, item) {
-                    // Add a list item for the dataset.
-                    $('<div>', { text: formatItem(item) }).appendTo($('#datasets'));
-                });
-            });
-    }
-
-});
-*/
-
+﻿
 function formatResults(results, searchInput) {
     console.log(results);
     console.log(searchInput);
@@ -21,7 +6,7 @@ function formatResults(results, searchInput) {
     var $resultsHtml = $("<div id='results-inner'></div>");
     var $hiddenDivider = $("<div/>", { 'class': "ui hidden divider" });
 
-    var $heading = $("<h2/>", { text: "Results: " + searchInput }).appendTo($resultsHtml);
+    $("<h2/>", { text: "Results: " + searchInput }).appendTo($resultsHtml);
     $resultsHtml.append($hiddenDivider);
 
     if (results && Array.isArray(results) && results.length > 0) {
@@ -29,14 +14,14 @@ function formatResults(results, searchInput) {
 
         $.each(results,
             function(key, ds) {
-                var dsUrl = getMetadataValue(ds.metadata, "url", "");
-                var lastMod = moment(ds.LastModified);
-                var dsDesc = getMetadataValue(ds.metadata, "dc:description", "");
-                var dsLicense = getMetadataValue(ds.metadata, "dc:license", "");
+                var dsUrl = getMetadataValue(ds.csvwMetadata, "url", "");
+                var lastMod = moment(ds.lastModified);
+                var dsDesc = getMetadataValue(ds.csvwMetadata, "dc:description", "");
+                var dsLicense = getMetadataValue(ds.csvwMetadata, "dc:license", "");
                 console.log(ds);
 
 
-                if (dsDesc !== "") {
+                if (dsDesc) {
                     dsDesc = dsDesc.replace(/^(.{20}[^\s]*).*/, "$1") + "...\n";
                 }
 
@@ -58,7 +43,7 @@ function formatResults(results, searchInput) {
                         }).append($("<a />",
                             {
                                 href: dsUrl,
-                                text: getMetadataValue(ds.metadata, "dc:title", ds.datasetId)
+                                text: getMetadataValue(ds.csvwMetadata, "dc:title", ds.datasetId)
                             })
                     ));
                 $header.appendTo($cardContent);
@@ -127,7 +112,7 @@ function formatResults(results, searchInput) {
             });
     } else {
         //0 results
-        var $none = $("<p/>", { 'class': "ui big", text: 'No datasets found.'}).appendTo($resultsHtml);
+        $("<p/>", { 'class': "ui big", text: 'No datasets found.'}).appendTo($resultsHtml);
     }
     $("#results").empty().append($resultsHtml);
    

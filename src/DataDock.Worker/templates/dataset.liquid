@@ -17,8 +17,7 @@
 		  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css" integrity="sha256-/Z28yXtfBv/6/alw+yZuODgTbKZm86IKbPE/5kjO/xY=" crossorigin="anonymous" />
 
 		  <!-- DataDock Theme Extensions -->
-		  <link rel="stylesheet" href="{{datadock-publish-url}}/css/portal.css" />
-		  <link rel="stylesheet" href="{{datadock-publish-url}}/Content/datadock-portal.css" />
+		  <link rel="stylesheet" href="/css/portal.css" />
 
 		<link rel="alternate" type="application/n-quads" href="{{nquads}}"/>
 
@@ -73,7 +72,7 @@
 					<div class="item">
 					  <i class="dashboard icon"></i>
 					  <div class="content">
-						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+						<a href="http://datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
 					  </div>
 					</div>
 				{% endif -%}
@@ -185,7 +184,7 @@
 					<div class="item">
 					  <i class="dashboard icon"></i>
 					  <div class="content">
-						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+						<a href="http://datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
 					  </div>
 					</div>
 				{% endif -%}
@@ -486,6 +485,6 @@
 				})
 			;
 	  </script>
-	 <script src="https://cdn.jsdelivr.net/gh/jennet/datadockjs@v0.1-alpha/datadock.portal.js" crossorigin="anonymous"></script>
+	 <script src="/js/datadock.portal.js" crossorigin="anonymous"></script>
 	</body>
 </html>
