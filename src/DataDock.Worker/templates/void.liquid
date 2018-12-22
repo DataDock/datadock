@@ -22,7 +22,6 @@
 
 		<!-- DataDock Theme Extensions -->
 		<link rel="stylesheet" href="{{datadock-publish-url}}/css/portal.css" />
-		<link rel="stylesheet" href="{{datadock-publish-url}}/Content/datadock-portal.css" />
 
 		<link rel="alternate" type="application/n-quads" href="{{nquads}}"/>
 
@@ -78,7 +77,7 @@
 					<div class="item">
 					  <i class="dashboard icon"></i>
 					  <div class="content">
-						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+						<a href="http://datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
 					  </div>
 					</div>
 				{% endif -%}
@@ -191,7 +190,7 @@
 					<div class="item">
 					  <i class="dashboard icon"></i>
 					  <div class="content">
-						<a href="http://manage.datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
+						<a href="http://datadock.io/{{owner-id}}/{{repo-id}}" title="View this repository on DataDock">DataDock Dashboard</a>
 					  </div>
 					</div>
 				{% endif -%}
@@ -471,7 +470,7 @@
     });
     var searchUri = '{{datadock-publish-url}}/api/search/{{owner-id}}/{{repo-id}}';
   </script>
-  <script src="https://cdn.jsdelivr.net/gh/jennet/datadockjs@v0.1-alpha/datadock.portal.js" crossorigin="anonymous"></script>
+  <script src="/js/datadock.portal.js" crossorigin="anonymous"></script>
 
 </body>
 </html>
