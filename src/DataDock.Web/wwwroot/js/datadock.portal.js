@@ -15,8 +15,7 @@ function formatResults(results, searchInput) {
         $.each(results,
             function(key, ds) {
                 var dsUrl = getMetadataValue(ds.csvwMetadata, "url", "");
-                //var lastMod = moment(ds.LastModified);
-                lastMod = ds.lastModified;
+                var lastMod = moment(ds.lastModified);
                 var dsDesc = getMetadataValue(ds.csvwMetadata, "dc:description", "");
                 var dsLicense = getMetadataValue(ds.csvwMetadata, "dc:license", "");
                 console.log(ds);
