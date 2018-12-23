@@ -153,8 +153,7 @@ var templateMetadata;
 
         csvw["dc:license"] = $("#datasetLicense").val();
 
-        var suffix = $("#aboutUrlSuffix").val();
-        var aboutUrl = datasetId.replace("/dataset/", "/resource/") + "/" + suffix;
+        var aboutUrl = $('#aboutUrlSuffix').val();
         csvw["aboutUrl"] = aboutUrl;
 
         csvw["tableSchema"] = constructCsvwtableSchema();
@@ -631,7 +630,8 @@ var templateMetadata;
 
     function constructIdentifiersTabContent() {
         var prefix = getPrefix();
-        var idFromFilename = prefix + "/id/dataset/" + slugify(filename, "", "", "camelCase");
+        var datasetId = slugify(filename, "", "", "camelCase");
+        var idFromFilename = prefix + "/id/dataset/" + datasetId;
         var defaultValue = getMetadataDatasetId(idFromFilename);
 
         var dsIdTable = {
@@ -701,14 +701,15 @@ var templateMetadata;
                 ]
             }
         );
-        var rowIdentifier = "row_{_row}";
+
+        var rowIdentifier = getIdentifierPrefix() + "/" + datasetId + "/row_{_row}";
         var identifierOptions = {};
         identifierOptions[rowIdentifier] = "Row Number";
 
         for (var colIdx = 0; colIdx < columnCount; colIdx++) {
             var colTitle = header[colIdx];
             var colName = slugify(colTitle, "_", "_", "lowercase");
-            var colIdentifier = colName + "/{" + colName + "}";
+            var colIdentifier = getIdentifierPrefix() + "/" + colName + "/{" + colName + "}";
             identifierOptions[colIdentifier] = colTitle;
         }
         identifierTableElements.push(
@@ -1079,6 +1080,10 @@ var templateMetadata;
 //helper functions
     function getPrefix() {
         return publishUrl + "/" + ownerId + "/" + repoId;
+    }
+
+    function getIdentifierPrefix() {
+        return getPrefix() + "/id/resource";
     }
 
     function slugify(original, whitespaceReplacement, specCharReplacement, casing) {
