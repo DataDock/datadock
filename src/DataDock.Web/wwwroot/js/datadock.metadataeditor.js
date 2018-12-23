@@ -1105,7 +1105,7 @@ var templateMetadata;
     }
 
     function camelize(str) {
-        var camelised = str.split(" ").map(function(word, index) {
+        var camelised = str.split(/[\s_\-]/).map(function(word, index) {
             if (index === 0) {
                 return word.toLowerCase();
             }
