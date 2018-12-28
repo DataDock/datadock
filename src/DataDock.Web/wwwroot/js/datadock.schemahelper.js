@@ -22,26 +22,6 @@ function getMetadataIdentifier(aboutUrlPrefix, ifNotFound) {
     return ifNotFound;
 }
 
-function getMetadataIdentifierColumnName() {
-    if (templateMetadata) {
-        var templateIdentifier = templateMetadata["aboutUrl"];
-        if (templateIdentifier) {
-            try {
-                // get chars between { and }
-                var col = templateIdentifier.substring(templateIdentifier.lastIndexOf("{") + 1, templateIdentifier.lastIndexOf("}"));
-                if (col !== "_row") {
-                    // ignore _row as that is not a col
-                    return col;
-                }
-            } catch (error) {
-                return "";
-            }
-        }
-    }
-    // return blank for errors or _row, as it will fall back to _row
-    return "";
-}
-
 function getMetadataTitle(ifNotFound) {
     if (templateMetadata) {
         var title = templateMetadata["dc:title"];

@@ -1,24 +1,24 @@
 
-var chunks = 0, rows = 0, columnCount = 0;
-var start, end;
-var parser;
-var pauseChecked = false;
-var printStepChecked = false;
-
-var filename = "";
-var csvFile;
-var csvData;
-var header;
-var columnSet;
-
-var schemaTitle;
-var templateMetadata;
-
 (function($) {
 
     metadataEditor = function(opts) {
 
         this.opts = opts;
+        this.chunks = 0;
+        this.stepped = 0;
+        this.rows = 0;
+        this.columnCount = 0;
+        this.pauseChecked = false;
+        this.printStepChecked = false;
+        this.filename = "";
+        this.csvFile = null;
+        this.csvData = null;
+        this.header = [];
+        this.columnSet = [];
+        this.schemaTitle = null;
+        this.templateMetadata = null;
+
+        var self = this;
         // event subscriptions
 
         $("#fileSelectTextBox").click(function(e) {
@@ -62,16 +62,16 @@ var templateMetadata;
         $("#fileSelect").on("change",
             function() {
                 clearErrors();
-                stepped = 0;
-                chunks = 0;
-                rows = 0;
+                self.stepped = 0;
+                self.chunks = 0;
+                self.rows = 0;
 
                 // todo check that the file input can only select CSV
                 var files = $("#fileSelect")[0].files;
                 var config = buildConfig();
 
-                pauseChecked = $("#step-pause").prop("checked");
-                printStepChecked = $("#print-steps").prop("checked");
+                // pauseChecked = $("#step-pause").prop("checked");
+                // printStepChecked = $("#print-steps").prop("checked");
 
 
                 if (files.length > 0) {
@@ -81,7 +81,6 @@ var templateMetadata;
                         return false;
                     }
 
-                    start = performance.now();
                     Papa.parse(file, config);
                 } else {
                     displaySingleError("No file found. Please try again.");
@@ -123,8 +122,8 @@ var templateMetadata;
     }
 
     this.displayFileSelector = function() {
-        if (schemaTitle) {
-            $("#templateTitle").html(schemaTitle);
+        if (this.schemaTitle) {
+            $("#templateTitle").html(this.schemaTitle);
             $("#metadataEditorForm").addClass("info");
             $("#templateInfoMessage").show();
         }
@@ -170,9 +169,9 @@ var templateMetadata;
         var columns = [];
 
         console.log(columnSet);
-        if (columnSet) {
-            for (var i = 0; i < columnSet.length; i++) {
-                var colName = columnSet[i];
+        if (this.columnSet) {
+            for (var i = 0; i < this.columnSet.length; i++) {
+                var colName = this.columnSet[i];
                 var colId = "#" + colName;
                 var skip = $(colId + "_suppress").prop("checked");
                 var col = constructCsvwColumn(colName, skip);
@@ -216,8 +215,8 @@ var templateMetadata;
         var formData = new FormData();
         formData.append("ownerId", this.opts.ownerId); // global variable set on Import.cshtml
         formData.append("repoId", this.opts.repoId); // global variable set on Import.cshtml
-        formData.append("file", csvFile, filename);
-        formData.append("filename", filename);
+        formData.append("file", this.csvFile, this.filename);
+        formData.append("filename", this.filename);
         formData.append("metadata", JSON.stringify(constructCsvwMetadata()));
         formData.append("showOnHomePage", JSON.stringify($("#showOnHomepage").prop("checked")));
         formData.append("saveAsSchema", JSON.stringify($("#saveAsTemplate").prop("checked")));
@@ -291,7 +290,9 @@ var templateMetadata;
             encoding: $("#encoding").val(),
             worker: false,
             step: undefined,
-            complete: completeFn,
+            complete: function(results, parser) {
+                self.completeFn(results, parser);
+            },
             error: errorFn,
             download: false,
             skipEmptyLines: true,
@@ -316,61 +317,55 @@ var templateMetadata;
     }
 
     this.stepFn = function(results, parserHandle) {
-        stepped++;
-        rows += results.data.length;
+        this.stepped++;
+        this.rows += results.data.length;
+        this.parser = parserHandle;
 
-        parser = parserHandle;
-
-        if (pauseChecked) {
+        if (this.pauseChecked) {
             //console.log(results, results.data[0]);
             parserHandle.pause();
             return;
         }
 
-        if (printStepChecked) {
+        if (this.printStepChecked) {
             //console.log(results, results.data[0]);
         }
 
     }
 
     this.chunkFn = function(results, streamer, file) {
-        if (!results)
-            return;
-        chunks++;
-        rows += results.data.length;
+        if (!results) return;
 
-        parser = streamer;
+        this.chunks++;
+        this.rows += results.data.length;
+        this.parser = streamer;
 
-        if (printStepChecked)
+        if (this.printStepChecked)
             console.log("Chunk data:", results.data.length, results);
 
-        if (pauseChecked) {
+        if (this.pauseChecked) {
             console.log("Pausing; " + results.data.length + " rows in chunk; file:", file);
             streamer.pause();
             return;
         }
     }
 
-    this.errorFn = function(error, file) {
+    this.errorFn = function (error, file) {
+        // TODO: Surface parsing errors to the end user
         console.log("ERROR:", error, file);
     }
 
-    this.completeFn = function() {
-        end = performance.now();
-        if (!$("#stream").prop("checked") && !$("#chunk").prop("checked") && arguments[0] && arguments[0].data)
-            rows = arguments[0].data.length;
-
-        csvData = arguments[0].data;
-        // arguments[0] .data [][] | .errors [] | meta (aborted, cursor, delimiter, linebreak, truncated)
-        var file = arguments[1];
-        filename = file.name; // save in global variable
-        csvFile = file;
-        if (csvData) {
-            header = csvData[0];
-            columnCount = header.length;
+    this.completeFn = function(results, file) {
+        if (!$("#stream").prop("checked") && !$("#chunk").prop("checked") && arguments[0] && arguments[0].data) {
+            self.rows = results.data.length;
         }
-        // console.log("Finished input (async). Time:", end-start, arguments);
-        // console.log("Rows:", rows, "Stepped:", stepped, "Chunks:", chunks);
+        self.csvData = results.data;
+        self.filename = file.name;
+        self.csvFile = file;
+        if (self.csvData) {
+            self.header = self.csvData[0];
+            self.columnCount = self.header.length;
+        }
         loadEditor();
     }
 //end papaparse
@@ -378,7 +373,7 @@ var templateMetadata;
 //jquery.dform
     this.loadEditor = function() {
 
-        columnSet = [];
+        this.columnSet = [];
 
         var datasetInfoTabContent = constructBasicTabContent();
         var identifiersTabContent = constructIdentifiersTabContent();
@@ -510,7 +505,7 @@ var templateMetadata;
         $("#metadataEditorForm").dform(formTemplate);
 
         // set selected license from template
-        if (templateMetadata) {
+        if (this.templateMetadata) {
             var licenseFromTemplate = getMetadataLicenseUri();
             if (licenseFromTemplate) {
                 $("#datasetLicense").val(licenseFromTemplate);
@@ -519,13 +514,8 @@ var templateMetadata;
         // set the column datatypes from the template
         setDatatypesFromTemplate();
         // set the aboutUrl from the template
-        if (templateMetadata) {
-            var colToUse = getMetadataIdentifierColumnName();
-            var valToUse = "row_{_row}";
-            if (colToUse !== "") {
-                valToUse = colToUse + "/{" + colToUse + "}";
-            }
-            $("#aboutUrlSuffix").val(valToUse);
+        if (this.templateMetadata) {
+            $("#aboutUrlSuffix").val(templateMetadata["aboutUrl"]);
         }
 
         showStep2();
@@ -566,7 +556,7 @@ var templateMetadata;
                     "caption": "Title",
                     "type": "text",
                     "updateDatasetId": "this",
-                    "value": getMetadataTitle(filename) || filename,
+                    "value": getMetadataTitle(this.filename) || this.filename,
                     "validate": {
                         "required": true,
                         "minlength": 2,
@@ -632,7 +622,7 @@ var templateMetadata;
 
     this.constructIdentifiersTabContent = function() {
         var prefix = getPrefix();
-        var datasetId = slugify(filename, "", "", "camelCase");
+        var datasetId = slugify(this.filename, "", "", "camelCase");
         var idFromFilename = prefix + "/id/dataset/" + datasetId;
         var defaultValue = getMetadataDatasetId(idFromFilename);
 
@@ -708,8 +698,8 @@ var templateMetadata;
         var identifierOptions = {};
         identifierOptions[rowIdentifier] = "Row Number";
 
-        for (var colIdx = 0; colIdx < columnCount; colIdx++) {
-            var colTitle = header[colIdx];
+        for (var colIdx = 0; colIdx < this.columnCount; colIdx++) {
+            var colTitle = this.header[colIdx];
             var colName = slugify(colTitle, "_", "_", "lowercase");
             var colIdentifier = getIdentifierPrefix() + "/" + colName + "/{" + colName + "}";
             identifierOptions[colIdentifier] = colTitle;
@@ -789,13 +779,13 @@ var templateMetadata;
                 ]
             }
         );
-        for (var colIdx = 0; colIdx < columnCount; colIdx++) {
+        for (var colIdx = 0; colIdx < this.columnCount; colIdx++) {
 
             var trElements = [];
-            var colTitle = header[colIdx];
+            var colTitle = this.header[colIdx];
             var colName = slugify(colTitle, "_", "_", "lowercase");
 
-            columnSet.push(colName);
+            this.columnSet.push(colName);
 
             var colTemplate = getMetadataColumnTemplate(colName);
             var defaultTitleValue = getColumnTitle(colTemplate, colTitle);
@@ -880,7 +870,7 @@ var templateMetadata;
         for (var colIdx = 0; colIdx < columnCount; colIdx++) {
 
             var trElements = [];
-            var colTitle = header[colIdx];
+            var colTitle = this.header[colIdx];
             var colName = slugify(colTitle, "_", "_", "lowercase");
 
             var titleDiv = {
@@ -934,10 +924,10 @@ var templateMetadata;
     this.constructPreviewTabContent = function() {
 
         var ths = [];
-        for (var i = 0; i < header.length; i++) {
+        for (var i = 0; i < this.header.length; i++) {
             var th = {
                 "type": "th",
-                "html": header[i]
+                "html": this.header[i]
             };
             ths.push(th);
         }
@@ -950,7 +940,7 @@ var templateMetadata;
         };
         var rows = [];
         var displayRowCount = 50;
-        var originalRowCount = csvData.length - 1; // row 0 is header
+        var originalRowCount = this.csvData.length - 1; // row 0 is header
         var originPlural = "s";
         if (originalRowCount === 1) {
             originPlural = "";
@@ -965,7 +955,7 @@ var templateMetadata;
         }
 
         for (var i = 1; i < displayRowCount + 1; i++) {
-            var rowData = csvData[i];
+            var rowData = this.csvData[i];
             var tds = [];
             for (var j = 0; j < rowData.length; j++) {
                 var td = {
@@ -1185,9 +1175,9 @@ var templateMetadata;
     }
 
     this.setDatatypesFromTemplate = function() {
-        if (columnSet && templateMetadata) {
-            for (var i = 0; i < columnSet.length; i++) {
-                var colName = columnSet[i];
+        if (this.columnSet && this.templateMetadata) {
+            for (var i = 0; i < this.columnSet.length; i++) {
+                var colName = this.columnSet[i];
                 var colTemplate = getMetadataColumnTemplate(colName);
                 var colDatatype = getColumnDatatype(colTemplate);
                 if (colDatatype) {
@@ -1202,7 +1192,8 @@ var templateMetadata;
 //end ui functions
 
 //schema/template functions 
-    this.loadSchemaBeforeDisplay = function() {
+    this.loadSchemaBeforeDisplay = function () {
+        var self = this;
         if (this.opts.schemaId) {
             var options = {
                 url: "/api/schemas",
@@ -1215,8 +1206,8 @@ var templateMetadata;
                     console.log("Template returned from DataDock schema API");
                     console.log(response);
                     if (response["schema"] && response["schema"]["metadata"]) {
-                        schemaTitle = response["schema"]["dc:title"] || "";
-                        templateMetadata = response["schema"]["metadata"];
+                        self.schemaTitle = response["schema"]["dc:title"] || "";
+                        self.templateMetadata = response["schema"]["metadata"];
                     } else {
                         console.error("Could not find a template in the response");
                     }
