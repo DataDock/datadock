@@ -1,5 +1,5 @@
 
-var stepped = 0, chunks = 0, rows = 0, columnCount = 0;
+var chunks = 0, rows = 0, columnCount = 0;
 var start, end;
 var parser;
 var pauseChecked = false;
@@ -16,7 +16,9 @@ var templateMetadata;
 
 (function($) {
 
-    metadataEditor = function() {
+    metadataEditor = function(opts) {
+
+        this.opts = opts;
         // event subscriptions
 
         $("#fileSelectTextBox").click(function(e) {
@@ -111,16 +113,16 @@ var templateMetadata;
 
     }
 
-    function begin() {
+    this.begin = function() {
         showLoading();
-        if (schemaId) {
+        if (this.opts.schemaId) {
             loadSchemaBeforeDisplay();
         } else {
             displayFileSelector();
         }
     }
 
-    function displayFileSelector() {
+    this.displayFileSelector = function() {
         if (schemaTitle) {
             $("#templateTitle").html(schemaTitle);
             $("#metadataEditorForm").addClass("info");
@@ -129,7 +131,7 @@ var templateMetadata;
         showStep1();
     }
 
-    function constructCsvwMetadata() {
+    this.constructCsvwMetadata = function() {
         var csvw = {};
         csvw["@context"] = "http://www.w3.org/ns/csvw";
 
@@ -162,7 +164,7 @@ var templateMetadata;
         return csvw;
     }
 
-    function constructCsvwtableSchema() {
+    this.constructCsvwtableSchema = function() {
         var tableSchema = {};
 
         var columns = [];
@@ -182,7 +184,7 @@ var templateMetadata;
         return tableSchema;
     }
 
-    function constructCsvwColumn(columnName, skip) {
+    this.constructCsvwColumn = function(columnName, skip) {
         var colId = "#" + columnName;
         var datatype = $(colId + "_datatype").val();
         var column = {};
@@ -205,15 +207,15 @@ var templateMetadata;
         return column;
     }
 
-    sendData = function(e) {
+    this.sendData = function(e) {
         clearErrors();
 
         $("#step2").removeClass("active");
         $("#step3").addClass("active");
 
         var formData = new FormData();
-        formData.append("ownerId", ownerId); // global variable set on Import.cshtml
-        formData.append("repoId", repoId); // global variable set on Import.cshtml
+        formData.append("ownerId", this.opts.ownerId); // global variable set on Import.cshtml
+        formData.append("repoId", this.opts.repoId); // global variable set on Import.cshtml
         formData.append("file", csvFile, filename);
         formData.append("filename", filename);
         formData.append("metadata", JSON.stringify(constructCsvwMetadata()));
@@ -242,10 +244,10 @@ var templateMetadata;
         return false;
     }
 
-    function sendDataSuccess(response) {
-        var jobsUrl = "/dashboard/jobs/" + ownerId + "/" + repoId;
-        if (baseUrl) {
-            jobsUrl = baseUrl + jobsUrl;
+    this.sendDataSuccess = function(response) {
+        var jobsUrl = "/dashboard/jobs/" + this.opts.ownerId + "/" + this.opts.repoId;
+        if (this.opts.baseUrl) {
+            jobsUrl = this.opts.baseUrl + jobsUrl;
         }
         if (response) {
             if (response["statusCode"] === 200) {
@@ -266,7 +268,7 @@ var templateMetadata;
 
     }
 
-    function sendDataFailure(response) {
+    this.sendDataFailure = function(response) {
         $("#metadataEditor").show();
         $("#loading").hide();
 
@@ -279,7 +281,7 @@ var templateMetadata;
     }
 
 //papaparse
-    function buildConfig() {
+    this.buildConfig = function() {
         var config = {
             header: false,
             preview: 0,
@@ -313,7 +315,7 @@ var templateMetadata;
 
     }
 
-    function stepFn(results, parserHandle) {
+    this.stepFn = function(results, parserHandle) {
         stepped++;
         rows += results.data.length;
 
@@ -331,7 +333,7 @@ var templateMetadata;
 
     }
 
-    function chunkFn(results, streamer, file) {
+    this.chunkFn = function(results, streamer, file) {
         if (!results)
             return;
         chunks++;
@@ -349,11 +351,11 @@ var templateMetadata;
         }
     }
 
-    function errorFn(error, file) {
+    this.errorFn = function(error, file) {
         console.log("ERROR:", error, file);
     }
 
-    function completeFn() {
+    this.completeFn = function() {
         end = performance.now();
         if (!$("#stream").prop("checked") && !$("#chunk").prop("checked") && arguments[0] && arguments[0].data)
             rows = arguments[0].data.length;
@@ -374,7 +376,7 @@ var templateMetadata;
 //end papaparse
 
 //jquery.dform
-    function loadEditor() {
+    this.loadEditor = function() {
 
         columnSet = [];
 
@@ -553,7 +555,7 @@ var templateMetadata;
 
     }
 
-    function constructBasicTabContent() {
+    this.constructBasicTabContent = function() {
         var datasetVoidFields = [
             {
                 "type": "div",
@@ -628,7 +630,7 @@ var templateMetadata;
         return datasetVoidFields;
     }
 
-    function constructIdentifiersTabContent() {
+    this.constructIdentifiersTabContent = function() {
         var prefix = getPrefix();
         var datasetId = slugify(filename, "", "", "camelCase");
         var idFromFilename = prefix + "/id/dataset/" + datasetId;
@@ -759,7 +761,7 @@ var templateMetadata;
         return identifierSection;
     }
 
-    function constructColumnDefinitionsTabContent() {
+    this.constructColumnDefinitionsTabContent = function() {
         var columnDefinitionsTableElements = [];
 
         columnDefinitionsTableElements.push(
@@ -852,7 +854,7 @@ var templateMetadata;
         return columnDefinitionsTable;
     }
 
-    function constructAdvancedTabContent() {
+    this.constructAdvancedTabContent = function() {
         var predicateTableElements = [];
         predicateTableElements.push(
             {
@@ -929,7 +931,7 @@ var templateMetadata;
 
     }
 
-    function constructPreviewTabContent() {
+    this.constructPreviewTabContent = function() {
 
         var ths = [];
         for (var i = 0; i < header.length; i++) {
@@ -1014,7 +1016,7 @@ var templateMetadata;
         return container;
     }
 
-    function constructPublishOptionsCheckboxes() {
+    this.constructPublishOptionsCheckboxes = function() {
 
         var showOnHomepage = {
             "type": "div",
@@ -1078,15 +1080,15 @@ var templateMetadata;
 //end jquery.dform
 
 //helper functions
-    function getPrefix() {
-        return publishUrl + "/" + ownerId + "/" + repoId;
+    this.getPrefix = function() {
+        return this.opts.publishUrl + "/" + this.opts.ownerId + "/" + this.opts.repoId;
     }
 
-    function getIdentifierPrefix() {
+    this.getIdentifierPrefix = function() {
         return getPrefix() + "/id/resource";
     }
 
-    function slugify(original, whitespaceReplacement, specCharReplacement, casing) {
+    this.slugify = function(original, whitespaceReplacement, specCharReplacement, casing) {
         switch (casing) {
         case "lowercase":
             var lowercase = original.replace(/\s+/g, whitespaceReplacement).replace(/[^A-Z0-9]+/ig, specCharReplacement)
@@ -1104,7 +1106,7 @@ var templateMetadata;
         }
     }
 
-    function camelize(str) {
+    this.camelize = function(str) {
         var camelised = str.split(/[\s_\-]/).map(function(word, index) {
             if (index === 0) {
                 return word.toLowerCase();
@@ -1115,17 +1117,17 @@ var templateMetadata;
         return slug;
     }
 
-    function isArray(value) {
+    this.isArray = function(value) {
         return value && typeof value === 'object' && value.constructor === Array;
     }
 
-    function sniffDatatype() {
+    this.sniffDatatype = function() {
 
     }
 //end helper functions
 
 //ui and window location functions
-    function hideAllTabContent() {
+    this.hideAllTabContent = function() {
         $("#datasetInfo").hide();
         $("#datasetInfoTab").removeClass("active");
         $("#columnDefinitions").hide();
@@ -1138,13 +1140,13 @@ var templateMetadata;
         $("#previewTab").removeClass("active");
     }
 
-    function showStep1() {
+    this.showStep1 = function() {
         $("#fileSelector").show();
         $("#metadataEditor").hide();
         $("#loading").hide();
     }
 
-    function showStep2() {
+    this.showStep2 = function() {
         $("#fileSelector").hide();
         $("#metadataEditor").show();
         $("#step1").removeClass("active");
@@ -1152,19 +1154,19 @@ var templateMetadata;
         $("#loading").hide();
     }
 
-    function showLoading() {
+    this.showLoading = function() {
         $("#fileSelector").hide();
         $("#metadataEditor").hide();
         $("#loading").show();
     }
 
-    function displaySingleError(error) {
+    this.displaySingleError = function(error) {
         //console.error(error);
         $("#error-messages").append("<div><i class=\"warning sign icon\"></i><span>" + error + "</span></div>");
         $("#error-messages").show();
     }
 
-    function displayErrors(errors) {
+    this.displayErrors = function(errors) {
         if (errors) {
             $("#error-messages").append("<div><i class=\"warning sign icon\"></i></div>");
             var list = $("<ul/>");
@@ -1177,12 +1179,12 @@ var templateMetadata;
         $("#error-messages").show();
     }
 
-    function clearErrors() {
+    this.clearErrors = function() {
         $("#error-messages").html("");
         $("#error-messages").hide();
     }
 
-    function setDatatypesFromTemplate() {
+    this.setDatatypesFromTemplate = function() {
         if (columnSet && templateMetadata) {
             for (var i = 0; i < columnSet.length; i++) {
                 var colName = columnSet[i];
@@ -1200,14 +1202,14 @@ var templateMetadata;
 //end ui functions
 
 //schema/template functions 
-    function loadSchemaBeforeDisplay() {
-        if (schemaId) {
+    this.loadSchemaBeforeDisplay = function() {
+        if (this.opts.schemaId) {
             var options = {
                 url: "/api/schemas",
                 type: "get",
                 data: {
-                    "ownerId": ownerId,
-                    "schemaId": schemaId
+                    "ownerId": this.opts.ownerId,
+                    "schemaId": this.opts.schemaId
                 },
                 success: function(response) {
                     console.log("Template returned from DataDock schema API");
@@ -1236,4 +1238,4 @@ var templateMetadata;
     }
 
 //end schema/template functions
-})(jQuery)
+})(jQuery);
