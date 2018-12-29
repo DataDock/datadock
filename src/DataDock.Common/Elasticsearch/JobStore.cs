@@ -21,8 +21,8 @@ namespace DataDock.Common.Elasticsearch
             Log.Debug("Create JobStore. Index={indexName}", indexName);
             _client = client;
             // Ensure the index exists
-            var indexExistsReponse = _client.IndexExists(indexName);
-            if (!indexExistsReponse.Exists)
+            var indexExistsResponse = _client.IndexExists(indexName);
+            if (!indexExistsResponse.Exists)
             {
                 Log.Debug("Create ES index {indexName} for type {indexType}", indexName, typeof(JobInfo));
                 var createIndexResponse = _client.CreateIndex(indexName, c => c.Mappings(
@@ -34,7 +34,7 @@ namespace DataDock.Common.Elasticsearch
                         $"Could not create index {indexName} for JobStore. Cause: {createIndexResponse.DebugInformation}");
                 }
             }
-
+            Log.Information("Connecting JobStore to ES index {indexName}", indexName);
             _client.ConnectionSettings.DefaultIndices[typeof(JobInfo)] = indexName;
 
         }
