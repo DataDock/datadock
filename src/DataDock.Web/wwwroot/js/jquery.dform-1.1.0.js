@@ -782,8 +782,7 @@
 							$(input).removeClass("ui-state-highlight");
 						}
 					};
-                }
-                
+				}
 				if (typeof (options.validate) == 'object') {
 					$.extend(defaults, options.validate);
 				}
