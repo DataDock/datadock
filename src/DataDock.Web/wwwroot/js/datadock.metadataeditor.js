@@ -29,8 +29,6 @@
             $("input:file", $(e.target).parents()).click();
         });
 
-        // Note: DataDock specific jquery-validate configuration is in jquery.dform-1.1.0.js (line 786)
-
         // add types to dForm
         $.dform.subscribe("changeTab",
             function(options, type) {
