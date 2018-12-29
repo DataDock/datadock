@@ -498,8 +498,56 @@
 
         var formTemplate = {
             "class": "ui form",
-            "method": "POST"
-        };
+            "method": "POST",
+            "validate": {
+                debug: true,
+                ignore: ".skip-validation",
+                onkeyup: false,
+                onfocusout: false,
+                onclick: false,
+                showErrors: function(errorMap, errorList) {
+                    console.log(errorMap);
+                    console.log(errorList);
+                    var numErrors = this.numberOfInvalids();
+                    if (numErrors) {
+                        var validationMessage = numErrors === 1
+                            ? "1 field is missing or invalid, please correct this before submitting your data."
+                            : numErrors +
+                            " fields are missing or invalid, please correct this before submitting your data.";
+
+                        $("#validation-messages").html(validationMessage);
+                        var invalidFieldList = $("<ul />");
+                        $.each(errorList,
+                            function(i) {
+                                var error = errorList[i];
+                                $("<li/>")
+                                    .addClass("invalid-field")
+                                    .appendTo(invalidFieldList)
+                                    .text(error.message);
+                            });
+                        $("#validation-messages").append(invalidFieldList);
+                        $("#validation-messages").css("margin", "0.5em");
+                        $("#validation-messages").show();
+                        this.defaultShowErrors();
+                    } else {
+                        $("#validation-messages").hide();
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    error.insertBefore(element);
+                },
+                highlight: function(element, errorClass, validClass) {
+                    $(element).parents(".field").addClass(errorClass);
+                },
+                unhighlight: function(element, errorClass, validClass) {
+                    $(element).parents(".field").removeClass(errorClass);
+                },
+                submitHandler: function(e) {
+                    sendData(e);
+                }
+            }
+        }
+
         formTemplate.html = [mainForm, configCheckboxes, submitButton];
 
         $("#metadataEditorForm").dform(formTemplate);

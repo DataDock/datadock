@@ -783,69 +783,7 @@
 						}
 					};
                 }
-                if (this.is("#metadataEditorForm")) {
-                    // DataDock specific jquery.validate configuration
-                    defaults = {
-                        debug: true,
-                        ignore: ".skip-validation",
-                        onkeyup: false,
-                        onfocusout: false,
-                        onclick: false,
-                        showErrors: function (errorMap, errorList) {
-                            console.log(errorMap);
-                            console.log(errorList);
-                            var numErrors = this.numberOfInvalids();
-                            if (numErrors) {
-                                var validationMessage = numErrors === 1
-                                    ? '1 field is missing or invalid, please correct this before submitting your data.'
-                                    : numErrors +
-                                    ' fields are missing or invalid, please correct this before submitting your data.';
-
-                                $("#validation-messages").html(validationMessage);
-                                var invalidFieldList = $('<ul />');
-                                $.each(errorList,
-                                    function(i) {
-                                        var error = errorList[i];
-                                        $('<li/>')
-                                            .addClass('invalid-field')
-                                            .appendTo(invalidFieldList)
-                                            .text(error.message);
-                                    });
-                                $("#validation-messages").append(invalidFieldList);
-                                $("#validation-messages").css("margin", "0.5em");
-                                $("#validation-messages").show();
-                                this.defaultShowErrors();
-                            } else {
-                                $("#validation-messages").hide();
-                            }
-                        },
-                       /* invalidHandler: function (event, validator) {
-                            // 'this' refers to the form
-                            var errors = validator.numberOfInvalids();
-                            if (errors) {
-                                var message = errors === 1
-                                    ? 'You missed 1 field. It has been highlighted'
-                                    : 'You missed ' + errors + ' fields. They have been highlighted';
-                                $("#validation-messages").html(message);
-                                $("#validation-messages").show();
-                            } else {
-                                $("#validation-messages").hide();
-                            }
-                        },*/
-                        errorPlacement: function (error, element) {
-                            error.insertBefore(element);
-                        },
-                        highlight: function(element, errorClass, validClass) {
-                            $(element).parents(".field").addClass(errorClass);
-                        },
-                        unhighlight: function(element, errorClass, validClass) {
-                            $(element).parents(".field").removeClass(errorClass);
-                        },
-                        submitHandler: function (e) {
-                            sendData(e);
-                        }
-                };
-			    }
+                
 				if (typeof (options.validate) == 'object') {
 					$.extend(defaults, options.validate);
 				}
