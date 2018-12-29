@@ -4,8 +4,6 @@
     metadataEditor = function(opts) {
 
         this.opts = opts;
-        this.chunks = 0;
-        this.stepped = 0;
         this.rows = 0;
         this.columnCount = 0;
         this.pauseChecked = false;
@@ -60,7 +58,6 @@
         $("#fileSelect").on("change",
             function() {
                 clearErrors();
-                self.stepped = 0;
                 self.chunks = 0;
                 self.rows = 0;
 
@@ -286,23 +283,6 @@
                 return "";
         }
 
-
-    }
-
-    this.stepFn = function(results, parserHandle) {
-        this.stepped++;
-        this.rows += results.data.length;
-        this.parser = parserHandle;
-
-        if (this.pauseChecked) {
-            //console.log(results, results.data[0]);
-            parserHandle.pause();
-            return;
-        }
-
-        if (this.printStepChecked) {
-            //console.log(results, results.data[0]);
-        }
 
     }
 
