@@ -506,7 +506,7 @@
 
         // set selected license from template
         if (this.templateMetadata) {
-            var licenseFromTemplate = getMetadataLicenseUri();
+            var licenseFromTemplate = schemaHelper.getLicenseUri(this.templateMetadata, "");
             if (licenseFromTemplate) {
                 $("#datasetLicense").val(licenseFromTemplate);
             }
@@ -556,7 +556,7 @@
                     "caption": "Title",
                     "type": "text",
                     "updateDatasetId": "this",
-                    "value": getMetadataTitle(this.filename) || this.filename,
+                    "value": schemaHelper.getTitle(this.templateMetadata, this.filename),
                     "validate": {
                         "required": true,
                         "minlength": 2,
@@ -575,7 +575,7 @@
                     "id": "datasetDescription",
                     "caption": "Description",
                     "type": "textarea",
-                    "value": getMetadataDescription() || ""
+                    "value": schemaHelper.getDescription(this.templateMetadata, "")
                 }
             },
             {
@@ -613,7 +613,7 @@
                     "id": "keywords",
                     "caption": "Keywords (separate using commas)",
                     "type": "text",
-                    "value": getMetadataTags()
+                    "value": schemaHelper.getTags(this.templateMetadata)
                 }
             }
         ];
@@ -624,7 +624,7 @@
         var prefix = getPrefix();
         var datasetId = slugify(this.filename, "", "", "camelCase");
         var idFromFilename = prefix + "/id/dataset/" + datasetId;
-        var defaultValue = getMetadataDatasetId(idFromFilename);
+        var defaultValue = schemaHelper.getDatasetId(this.templateMetadata, idFromFilename);
 
         var dsIdTable = {
             "type": "table",
@@ -787,8 +787,8 @@
 
             this.columnSet.push(colName);
 
-            var colTemplate = getMetadataColumnTemplate(colName);
-            var defaultTitleValue = getColumnTitle(colTemplate, colTitle);
+            var colTemplate = schemaHelper.getColumnTemplate(this.templateMetadata, colName);
+            var defaultTitleValue = schemaHelper.getColumnTitle(colTemplate, colTitle);
             var titleField = {
                 name: colName + "_title",
                 id: colName + "_title",
@@ -829,7 +829,7 @@
                 type: "checkbox",
                 "class": "center aligned"
             };
-            var suppressedInTemplate = getColumnSuppressed(colTemplate);
+            var suppressedInTemplate = schemaHelper.getColumnSuppressed(colTemplate);
             if (suppressedInTemplate) {
                 suppressField["checked"] = "checked";
             }
@@ -881,8 +881,8 @@
             trElements.push(tdTitle);
 
             var predicate = getPrefix() + "/id/definition/" + colName;
-            var colTemplate = getMetadataColumnTemplate(colName);
-            var defaultValue = getColumnPropertyUrl(colTemplate, predicate);
+            var colTemplate = schemaHelper.getColumnTemplate(this.templateMetadata, colName);
+            var defaultValue = schemaHelper.getColumnPropertyUrl(colTemplate, predicate);
             var predicateField = {
                 name: colName + "_property_url",
                 id: colName + "_property_url",
@@ -1178,8 +1178,8 @@
         if (this.columnSet && this.templateMetadata) {
             for (var i = 0; i < this.columnSet.length; i++) {
                 var colName = this.columnSet[i];
-                var colTemplate = getMetadataColumnTemplate(colName);
-                var colDatatype = getColumnDatatype(colTemplate);
+                var colTemplate = schemaHelper.getColumnTemplate(this.templateMetadata, colName);
+                var colDatatype = schemaHelper.getColumnDatatype(colTemplate, "");
                 if (colDatatype) {
                     var selector = $("#" + colName + "_datatype");
                     if (selector) {

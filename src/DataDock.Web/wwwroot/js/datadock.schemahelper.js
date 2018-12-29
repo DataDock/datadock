@@ -1,107 +1,62 @@
-﻿function getMetadataDatasetId(ifNotFound) {
-    if (templateMetadata) {
-        var templatePrefix = templateMetadata["url"];
-        if (templatePrefix) {
-            return templatePrefix;
-        }
-    }
-    return ifNotFound;
-}
+﻿var schemaHelper = {};
 
-function getMetadataIdentifier(aboutUrlPrefix, ifNotFound) {
-    if (templateMetadata) {
-        var templateIdentifier = templateMetadata["aboutUrl"];
-        var templatePrefix = templateMetadata["url"];
-        if (templateIdentifier && templatePrefix) {
-            var templateAboutUrl = templatePrefix.replace("id/dataset/", "id/resource/");
-            // swap template prefix to current prefix
-            var identifier = templateIdentifier.replace(templateAboutUrl, aboutUrlPrefix);
-            return identifier;
-        }
-    }
-    return ifNotFound;
-}
+(function() {
+    var getPropertyValue = function(obj, propertyName, defaultValue) {
+        return (obj && obj.hasOwnProperty(propertyName)) ? obj[propertyName] : defaultValue;
+    };
 
-function getMetadataTitle(ifNotFound) {
-    if (templateMetadata) {
-        var title = templateMetadata["dc:title"];
-        return title;
-    }
-    return ifNotFound;
-}
+    this.getDatasetId = function(metadata, defaultValue) {
+        return getPropertyValue(metadata, "url", defaultValue);
+    };
 
-function getMetadataDescription() {
-    if (templateMetadata) {
-        var desc = templateMetadata["dc:description"];
-        return desc;
+    this.getTitle = function(metadata, defaultValue) {
+        return getPropertyValue(metadata, "dc:title", defaultValue);
     }
-    return "";
-}
 
-function getMetadataLicenseUri() {
-    if (templateMetadata) {
-        var licenseUri = templateMetadata["dc:license"];
-        return licenseUri;
+    this.getDescription = function(metadata, defaultValue) {
+        return getPropertyValue(metadata, "dc:description", defaultValue);
     }
-    return "";
-}
 
-function getMetadataTags() {
-    if (templateMetadata) {
-        var tags = templateMetadata["dcat:keyword"];
+    this.getLicenseUri = function(metadata, defaultValue) {
+        return getPropertyValue(metadata, "dc:license", defaultValue);
+    }
+
+    this.getTags = function(metadata) {
+        var tags = getPropertyValue(metadata, "dcat:keyword", []);
+        if (!Array.isArray(tags)) tags = [tags];
         return tags.join();
     }
-    return "";
-}
 
-function getMetadataColumnTemplate(columnName) {
-    if (templateMetadata) {
-        var tableSchema = templateMetadata["tableSchema"];
+    this.getColumnTemplate = function(metadata, columnName) {
+        var tableSchema = getPropertyValue(metadata, "tableSchema", null);
         if (tableSchema) {
-            var metadataColumns = tableSchema["columns"]; // array
-            if (metadataColumns) {
-                for (let i = 0; i < metadataColumns.length; i++) {
-                    if (metadataColumns[i].name === columnName) {
-                        return metadataColumns[i];
-                    }
-                }
+            var columns = getPropertyValue(tableSchema, "columns", null);
+            if (columns) {
+                var col = columns.find(c => { return c.name === columnName; });
+                return col || {};
             }
         }
-    }
-    return {};
-}
+        return {};
+    };
 
-function getColumnTitle(template, ifNotFound) {
-    if (template) {
-        var titles = template["titles"];
+    this.getColumnTitle = function(colTemplate, defaultValue) {
+        var titles = getPropertyValue(colTemplate, "titles", null);
         if (titles) {
-            // first item of array
-            return titles[0];
+            return (Array.isArray("titles")) ? titles[0] : titles;
         }
+        return defaultValue;
     }
-    return ifNotFound;
-}
 
-function getColumnPropertyUrl(template, ifNotFound) {
-    if (template) {
-        var propUrl = template["propertyUrl"];
-        if (propUrl) {
-            return propUrl;
-        }
+    this.getColumnPropertyUrl = function(colTemplate, defaultValue) {
+        return getPropertyValue(colTemplate, "propertyUrl", defaultValue);
     }
-    return ifNotFound;
-}
 
-function getColumnDatatype(template) {
-    if (template) {
-        return template["datatype"];
+    this.getColumnDatatype = function(colTemplate, defaultValue) {
+        return getPropertyValue(colTemplate, "datatype", defaultValue);
     }
-    return "";
-}
 
-function getColumnSuppressed(template) {
-    if (template) {
-        return template["suppressOutput"];
+    this.getColumnSuppressed = function(colTemplate) {
+        return getPropertyValue(colTemplate, "suppressOutput", false);
     }
-    return false;
-}
+
+}).apply(schemaHelper);
