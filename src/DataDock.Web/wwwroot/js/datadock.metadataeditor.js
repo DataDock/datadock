@@ -68,43 +68,19 @@
                 var files = $("#fileSelect")[0].files;
                 var config = buildConfig();
 
-                // pauseChecked = $("#step-pause").prop("checked");
-                // printStepChecked = $("#print-steps").prop("checked");
-
-
                 if (files.length > 0) {
                     var file = files[0];
                     if (file.size > 1024 * 1024 * 10) {
                         displaySingleError("File size is over the 4MB limit. Reduce file size before trying again.");
                         return false;
                     }
-
                     Papa.parse(file, config);
                 } else {
                     displaySingleError("No file found. Please try again.");
+                    return false;
                 }
+                return true;
             });
-
-        $("#submit-unparse").click(function() {
-            var input = $("#input").val();
-            var delim = $("#delimiter").val();
-            var header = $("#header").prop("checked");
-
-            var results = Papa.unparse(input,
-                {
-                    delimiter: delim,
-                    header: header
-                });
-
-            console.log("Unparse complete!");
-            console.log("--------------------------------------");
-            console.log(results);
-            console.log("--------------------------------------");
-        });
-
-        $("#insert-tab").click(function() {
-            $("#delimiter").val("\t");
-        });
 
         begin();
 
@@ -294,7 +270,6 @@
             error: errorFn,
             download: false,
             skipEmptyLines: true,
-            //chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
             chunk: undefined,
             beforeFirstChunk: undefined
         };
@@ -329,23 +304,6 @@
             //console.log(results, results.data[0]);
         }
 
-    }
-
-    this.chunkFn = function(results, streamer, file) {
-        if (!results) return;
-
-        this.chunks++;
-        this.rows += results.data.length;
-        this.parser = streamer;
-
-        if (this.printStepChecked)
-            console.log("Chunk data:", results.data.length, results);
-
-        if (this.pauseChecked) {
-            console.log("Pausing; " + results.data.length + " rows in chunk; file:", file);
-            streamer.pause();
-            return;
-        }
     }
 
     this.errorFn = function (error, file) {
