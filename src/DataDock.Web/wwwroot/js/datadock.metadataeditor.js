@@ -1212,5 +1212,6 @@
         }
     }
 
+    return this;
 //end schema/template functions
 })(jQuery);

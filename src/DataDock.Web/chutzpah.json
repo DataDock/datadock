@@ -1,0 +1,17 @@
+{
+  "Framework": "jasmine",
+  "Tests": [
+    {
+      "Path": "wwwroot/js/tests",
+      "Includes": ["*.spec.js"]
+    }
+  ],
+  "References": [
+    { "Path": "wwwroot/js/tests/metadataEditor.spec.html", "IsTestFrameworkFile" : true},
+    {
+      "Excludes": [ "site.*" ],
+      "Includes": [ "*.js" ],
+      "Path": "wwwroot/js"
+    }
+  ]
+}
