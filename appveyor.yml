@@ -34,7 +34,7 @@ test_script:
   - sh: dotnet test -c Release src/DataDock.Common.Tests
   - sh: dotnet test -c Release src/DataDock.Web.Tests
   - sh: dotnet test -c Release src/DataDock.Worker.Tests
-  - mono chutzpah/chutzpah.console.exe src/DataDock.Web/chutzpah.json
+  - dotnet chutzpah/chutzpah.console.exe src/DataDock.Web/chutzpah.json
 
 deploy_script:
   - sh: |
