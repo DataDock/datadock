@@ -1,0 +1,22 @@
+{
+  "Framework": "jasmine",
+  "Tests": [
+    {
+      "Path": "wwwroot/js/tests",
+      "Includes": ["*.spec.js"]
+    }
+  ],
+  "References": [
+    { "Path": "https://code.jquery.com/jquery-3.3.1.js" },
+    { "Path": "https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" },
+    { "Path": "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" },
+    { "Path": "https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js" },
+    { "Path": "https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/additional-methods.min.js" },
+    { "Path": "https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.5.0/papaparse.min.js" },
+    {
+      "Includes": [ "*.js" ],
+      "Excludes": [ "site.js", "site.min.js" ],
+      "Path": "wwwroot/js"
+    }
+  ]
+}

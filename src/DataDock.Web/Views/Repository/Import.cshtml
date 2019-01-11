@@ -3,7 +3,7 @@
   Layout = "~/Views/Shared/_DashboardBaseLayout.cshtml";
   Model.Title = Model.Title + " Add Data";
 }
-
+<div id="importController">
 <div class="ui top attached steps">
   <a class="step active no-underline" id="step1" onclick="chooseFile()">
     <i class="search icon"></i>
@@ -100,13 +100,13 @@
     <form class="ui form" id="metadataEditorForm"></form>
   </div>
   
-  <div id="loading" class="ui text container">
+  <div id="loading" class="ui text container" style="display: none">
     <img src="/images/cube.gif" alt="Loading..." class="ui centered image"/>
   </div>
 
 
 </div>
-
+    </div>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js" type="text/javascript"></script>
@@ -116,13 +116,53 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.5.0/papaparse.min.js" type="text/javascript"></script>
 
     <script>
-        var baseUrl = "@Html.Raw(ViewData["BaseUrl"])";
-        var publishUrl = "@Html.Raw(ViewData["PublishUrl"])";
-        var ownerId = "@Html.Raw(ViewData["OwnerId"])";
-        var repoId = "@Html.Raw(ViewData["RepoId"])";
-        var schemaId = "@Html.Raw(ViewData["SchemaId"])";
-        var apiUrl = baseUrl + "/api/data";
-        metadataEditor();
+        // Overall UI / flow methods
+
+        $("#importController").controller({
+            baseUrl: "@Html.Raw(ViewData["BaseUrl"])",
+            publishUrl: "@Html.Raw(ViewData["PublishUrl"])",
+            ownerId: "@Html.Raw(ViewData["OwnerId"])",
+            repoId: "@Html.Raw(ViewData["RepoId"])",
+            schemaId: "@Html.Raw(ViewData["SchemaId"])",
+            apiUrl: "@Html.Raw(ViewData["BaseUrl"])/api/data"
+        });
+        @*
+        var loader = $("#fileSelector").loader({ schemaId: "@Html.Raw(ViewData["SchemaId"])" });
+
+        loader.bind("loadererror",
+                function(ev, data) {
+                    displayErrors([data.msg]);
+                })
+            .bind("loadercomplete",
+                function(ev, data) {
+                    console.log(data);
+                    var editor = $("#metadataEditor").metadataEditor({
+                        baseUrl: "@Html.Raw(ViewData["BaseUrl"])",
+                        publishUrl: "@Html.Raw(ViewData["PublishUrl"])",
+                        ownerId: "@Html.Raw(ViewData["OwnerId"])",
+                        repoId: "@Html.Raw(ViewData["RepoId"])",
+                        schemaId: "@Html.Raw(ViewData["SchemaId"])",
+                        apiUrl: "@Html.Raw(ViewData["BaseUrl"])/api/data",
+                        csvData: data.csvData,
+                        header: data.csvData[0],
+                        filename: data.filename
+                    }).bind("metadataeditorsubmit",
+                        function(ev, data) {
+                            console.log(data);
+                        });
+                    showStep2();
+                });
+        *@
+        
+
+        @*metadataEditor({
+            baseUrl: "@Html.Raw(ViewData["BaseUrl"])",
+            publishUrl: "@Html.Raw(ViewData["PublishUrl"])",
+            ownerId: "@Html.Raw(ViewData["OwnerId"])",
+            repoId: "@Html.Raw(ViewData["RepoId"])",
+            schemaId: "@Html.Raw(ViewData["SchemaId"])",
+            apiUrl: "@Html.Raw(ViewData["BaseUrl"])/api/data"
+        });*@
     </script>
 
 }

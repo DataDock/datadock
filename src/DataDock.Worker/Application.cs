@@ -25,6 +25,7 @@ namespace DataDock.Worker
         {
             Log.Information("Worker application started");
             var jobRepo = Services.GetRequiredService<IJobStore>();
+            Log.Information("Worker connected to JobStore successfully");
             while (true)
             {
                 Thread.Sleep(1000);

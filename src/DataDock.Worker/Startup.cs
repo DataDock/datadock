@@ -85,6 +85,7 @@ namespace DataDock.Worker
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
+                .Enrich.WithProperty("ImageType", "Worker")
                 .MinimumLevel.Debug()
                 .WriteTo.Elasticsearch(
                     new ElasticsearchSinkOptions(new Uri(elasticsearchUrl))

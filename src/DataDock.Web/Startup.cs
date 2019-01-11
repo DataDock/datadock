@@ -54,6 +54,7 @@ namespace DataDock.Web
             // Set up logging
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
+                .Enrich.WithProperty("ImageType", "Web")
                 .WriteTo.Elasticsearch(
                     new ElasticsearchSinkOptions(new Uri(config.ElasticsearchUrl))
                     {
