@@ -13,7 +13,8 @@ var gulp = require("gulp"),
     merge = require('merge-stream'),
     cssmin = require("gulp-cssmin"),
     uglify = require("gulp-uglify-es").default,
-    rename = require("gulp-rename");
+    rename = require("gulp-rename"),
+    jasmineBrowser = require("gulp-jasmine-browser");
 
 
 var paths = {
@@ -84,6 +85,18 @@ gulp.task("nm_copy", function () {
     return merge(streams);
 
 });
+
+gulp.task("jasmine-phantom",
+    function () {
+        return gulp.src([
+            "wwwroot/lib/jquery/jquery.min.js",
+            "wwwroot/lib/jquery-ui/jquery-ui.min.js",
+            "wwwroot/lib/semantic-ui/dist/semantic.js",
+            "wwwroot/js/*.js", "wwwroot/js/tests/*.spec.js",
+            "!wwwroot/js/site.js", "!wwwroot/js/site.min.js"])
+            .pipe(jasmineBrowser.specRunner({ console: true }))
+            .pipe(jasmineBrowser.headless({ driver: "phantomjs" }));
+    });
 
 gulp.task('default', function () {
     // place code for your default task here

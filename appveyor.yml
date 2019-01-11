@@ -23,6 +23,7 @@ before_build:
       mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
       export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
       echo $DockerImageVersion
+      npm install --global gulp-cli
 
 configuration: Release
 
@@ -34,7 +35,10 @@ test_script:
   - sh: dotnet test -c Release src/DataDock.Common.Tests
   - sh: dotnet test -c Release src/DataDock.Web.Tests
   - sh: dotnet test -c Release src/DataDock.Worker.Tests
-  - dotnet chutzpah/chutzpah.console.exe src/DataDock.Web/chutzpah.json
+  - sh: |
+      pushd src/DataDock.Web
+      gulp jasmine-phantom
+      popd
 
 deploy_script:
   - sh: |

@@ -7,10 +7,6 @@
     }
   ],
   "References": [
-    {
-      "Path": "wwwroot/js/tests/metadataEditor.spec.html",
-      "Mode": "Raw"
-    },
     { "Path": "https://code.jquery.com/jquery-3.3.1.js" },
     { "Path": "https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" },
     { "Path": "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" },
