@@ -10,5 +10,6 @@
   "PublishUrl": "http://mydatadock.com/",
   "GitPath": "/usr/bin/git",
   "RepoBaseDir": "/data/repos",
-  "GitHubClientHeader": "MyDataDock" 
+  "GitHubClientHeader": "MyDataDock",
+  "SignalRHubUrl":  "http://datadock.web/progress" 
 }

@@ -35,7 +35,7 @@ namespace DataDock.Worker.Tests
             appConfig.GitHubClientHeader.Should().Be("");
             appConfig.PublishUrl.Should().Be("http://datadock.io/");
             appConfig.RepoBaseDir.Should().Be("/datadock/repositories");
-
+            appConfig.SignalRHubUrl.Should().Be("http://web/progress");
         }
         [Fact]
         public void ItCanReadFromJson()
@@ -60,6 +60,7 @@ namespace DataDock.Worker.Tests
             appConfig.GitHubClientHeader.Should().Be("MyDataDock");
             appConfig.PublishUrl.Should().Be("http://mydatadock.com/");
             appConfig.RepoBaseDir.Should().Be("/data/repos");
+            appConfig.SignalRHubUrl.Should().Be("http://datadock.web/progress");
         }
     }
 
