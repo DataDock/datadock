@@ -32,7 +32,13 @@
         if (tableSchema) {
             var columns = getPropertyValue(tableSchema, "columns", null);
             if (columns) {
-                var col = columns.find(c => { return c.name === columnName; });
+                var col = {};
+                for (var i = 0; i < columns.length; i++) {
+                    if (columns[i].name === columnName) {
+                        col = columns[i];
+                        break;
+                    }
+                }
                 return col || {};
             }
         }
@@ -42,7 +48,7 @@
     this.getColumnTitle = function(colTemplate, defaultValue) {
         var titles = getPropertyValue(colTemplate, "titles", null);
         if (titles) {
-            return (Array.isArray("titles")) ? titles[0] : titles;
+            return (Array.isArray(titles)) ? titles[0] : titles;
         }
         return defaultValue;
     }

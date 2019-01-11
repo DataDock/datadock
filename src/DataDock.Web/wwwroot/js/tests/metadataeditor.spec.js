@@ -1,19 +1,26 @@
 ﻿describe("metadata editor", function () {
-    it("starts up",
-        function() {
-            metadataEditor({
+    describe("on start up", function() {
+        var editor;
+        beforeEach(function() {
+            editor = $('#metadataEditor').metadataEditor({
                 "baseUrl": "http://example.org/",
                 "publishUrl": "http://datadock.io/",
                 "ownerId": "owner",
                 "repoId": "repo",
                 "schemaId": null,
-                "apiUrl": "http://example.org/api/data"
+                "apiUrl": "http://example.org/api/data",
+                "csvData": [
+                    ["Name", "Age", "Email"],
+                    ["Alice", "35", "alice@example.org"],
+                    ["Bob", "21", "bob@example.org"]
+                ],
+                header: ["Name", "Age", "Email"],
+                filename: "people.csv",
+                schemaTitle: null,
+                templateMetadata: null
             });
-            expect(window.opts.baseUrl).toBe("http://example.org/");
-            expect(window.opts.publishUrl).toBe("http://datadock.io/");
-            expect(window.opts.ownerId).toBe("owner");
-            expect(window.opts.repoId).toBe("repo");
-            expect(window.opts.schemaId).toBe(null);
-            expect(window.opts.apiUrl).toBe("http://example.org/api/data");
         });
+        it("shows the dataset info tab", function() { expect($("#datasetInfo").is(":visible")).toBe(true) });
+        it("hides the columnDefinitions tab", function() { expect($("#columnDefinitions").is(":hidden")).toBe(true) });
+    });
 });
