@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -9,7 +7,7 @@ using Serilog;
 
 namespace DataDock.Worker
 {
-    public class SignalrProgressLog : IProgressLog
+    public class SignalRProgressLog : IProgressLog
     {
         private readonly JobInfo _jobInfo;
         private readonly IJobStore _jobRepository;
@@ -17,7 +15,7 @@ namespace DataDock.Worker
         private readonly ILogger _log;
         private readonly StringBuilder _fullLog;
 
-        public SignalrProgressLog(JobInfo jobInfo, IJobStore jobRepository, HubConnection hubConnection)
+        public SignalRProgressLog(JobInfo jobInfo, IJobStore jobRepository, HubConnection hubConnection)
         {
             _jobInfo = jobInfo;
             _jobRepository = jobRepository;

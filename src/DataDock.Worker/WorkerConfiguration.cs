@@ -15,6 +15,11 @@ namespace DataDock.Worker
         /// </summary>
         public string RepoBaseDir { get; set; } = "/datadock/repositories";
 
+        /// <summary>
+        /// The URL of the SignalR hub to send progress messages to
+        /// </summary>
+        public string SignalRHubUrl { get; set; } = "http://web/progress";
+
         public override void LogSettings()
         {
             base.LogSettings();
@@ -22,6 +27,7 @@ namespace DataDock.Worker
             Log.Information("Configured Git Path {GitPath}", GitPath);
             Log.Information("Configured Repository Base Directory {RepoBaseDir}", RepoBaseDir);
             Log.Information("Configured GitHub Client Header {GitHubClientHeader}", GitHubClientHeader);
+            Log.Information("Configured SignalR Hub Url {SignalRHubUrl}", SignalRHubUrl);
         }
     }
 }

@@ -9,32 +9,29 @@ using Serilog;
 
 namespace DataDock.Worker
 {
-    public class SignalrProgressLogFactory : IProgressLogFactory
+    public class SignalRProgressLogFactory : IProgressLogFactory
     {
+        private readonly string _hubConnectionUrl;
         private readonly IJobStore _jobRepository;
         private HubConnection _hubConnection;
 
-        public SignalrProgressLogFactory(IJobStore jobRepository)
+        public SignalRProgressLogFactory(WorkerConfiguration configuration, IJobStore jobRepository)
         {
+            _hubConnectionUrl = configuration.SignalRHubUrl;
             _jobRepository = jobRepository;
-        }
-
-        public void SetHubConnection(HubConnection hubConnection)
-        {
-            _hubConnection = hubConnection;
         }
 
         public async Task<IProgressLog> MakeProgressLogForJobAsync(JobInfo job)
         {
             await EnsureHubConnectionAsync();
-            return new SignalrProgressLog(job, _jobRepository, _hubConnection);
+            return new SignalRProgressLog(job, _jobRepository, _hubConnection);
         }
 
         private async Task<HubConnection> EnsureHubConnectionAsync()
         {
             if (_hubConnection != null) return _hubConnection;
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://web/progress", HttpTransportType.WebSockets)
+                .WithUrl(_hubConnectionUrl, HttpTransportType.WebSockets)
                 .Build();
             _hubConnection.Closed += OnHubConnectionLost;
             var connectionStarted = false;
@@ -47,8 +44,8 @@ namespace DataDock.Worker
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "signalr connection failed");
-                    Console.WriteLine("Error connecting to Signalr Hub: " + ex);
+                    Log.Error(ex, "SignalR connection failed");
+                    Console.WriteLine("Error connecting to SignalR Hub: " + ex);
                     Thread.Sleep(1000);
                 }
             }
@@ -57,8 +54,11 @@ namespace DataDock.Worker
 
         private async Task OnHubConnectionLost(Exception exc)
         {
-            Log.Warning(exc, "SignalR hub connection was lost.");
-            _hubConnection = null;
+            await Task.Run(() =>
+            {
+                Log.Warning(exc, "SignalR hub connection was lost.");
+                _hubConnection = null;
+            });
         }
     }
 }

@@ -71,7 +71,7 @@ namespace DataDock.Worker
             serviceCollection.AddSingleton<IOwnerSettingsStore, OwnerSettingsStore>();
             serviceCollection.AddSingleton<IRepoSettingsStore, RepoSettingsStore>();
             serviceCollection.AddSingleton<ISchemaStore, SchemaStore>();
-            serviceCollection.AddSingleton<IProgressLogFactory, SignalrProgressLogFactory>();
+            serviceCollection.AddSingleton<IProgressLogFactory, SignalRProgressLogFactory>();
             serviceCollection.AddSingleton<ILogStore, DirectoryLogStore>();
             serviceCollection.AddSingleton<IGitHubClientFactory>(new GitHubClientFactory(config.GitHubClientHeader));
             serviceCollection.AddSingleton<IGitWrapperFactory>(new DefaultGitWrapperFactory(config.GitPath));
