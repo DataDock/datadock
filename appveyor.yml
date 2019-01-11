@@ -13,6 +13,8 @@ services:
 install:
   - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-net40-v4.0.0.zip
   - unzip -d gitversion GitVersion-bin-net40-v4.0.0.zip
+  - wget https://github.com/mmanela/chutzpah/releases/download/v4.4.4/Chutzpah.4.4.4.zip
+  - unzip -d chutzpah Chutzpah.4.4.4.zip
   - sh: nvm install $nodejs_version
 
 before_build:
@@ -31,7 +33,8 @@ build_script:
 test_script:
   - sh: dotnet test -c Release src/DataDock.Common.Tests
   - sh: dotnet test -c Release src/DataDock.Web.Tests
-  - sh: dotnet test -c Release src/DataDock.Worker.Tests     
+  - sh: dotnet test -c Release src/DataDock.Worker.Tests
+  - mono chutzpah/chutzpah.console.exe src/DataDock.Web/chutzpah.json
 
 deploy_script:
   - sh: |
