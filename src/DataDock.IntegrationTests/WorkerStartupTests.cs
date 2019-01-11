@@ -28,7 +28,7 @@ namespace DataDock.IntegrationTests
         [InlineData(typeof(IRepoSettingsStore), typeof(RepoSettingsStore))]
         [InlineData(typeof(IDataDockRepositoryFactory), typeof(DataDockRepositoryFactory))]
         [InlineData(typeof(IGitCommandProcessorFactory), typeof(GitCommandProcessorFactory))]
-        [InlineData(typeof(IProgressLogFactory), typeof(SignalrProgressLogFactory))]
+        [InlineData(typeof(IProgressLogFactory), typeof(SignalRProgressLogFactory))]
         [InlineData(typeof(IDataDockUriService), typeof(DataDockUriService))]
         public void ItProvidesExpectedServices(Type serviceType, Type expectImplType)
         {
