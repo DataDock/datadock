@@ -10,6 +10,7 @@ using DataDock.Web.Models;
 using DataDock.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Nest;
 using Serilog;
 
@@ -171,22 +172,36 @@ namespace DataDock.Web.Controllers
         /// <param name="remoteUri"></param>
         /// <param name="overrideContentType">OPTIONAL: The media type to return as the Content-Type header if the proxied server returns application/octet-stream</param>
         /// <returns></returns>
-        private async Task<IActionResult> ProxyRequest(Uri remoteUri, string overrideContentType=null)
+        public async Task<IActionResult> ProxyRequest(Uri remoteUri, string overrideContentType=null)
         {
             using (var http = new HttpClient())
             {
-                // TODO: Add proxy headers
-                var response =  await http.GetAsync(remoteUri);
-                var proxiedContentType = response.Content.Headers.ContentType.ToString();
-                this.Response.StatusCode = (int)response.StatusCode;
-                if (response.StatusCode == HttpStatusCode.OK)
+                var upstreamResponse =  await http.GetAsync(remoteUri);
+                var proxiedContentType = upstreamResponse.Content.Headers.ContentType.ToString();
+                Log.Information(
+                    "Proxy: {upstreamUrl} responded with {upstreamResponseStatus}. Headers: {@upstreamHeaders}",
+                    upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode, upstreamResponse.Headers);
+                Response.StatusCode = (int)upstreamResponse.StatusCode;
+                if (upstreamResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    this.Response.ContentType =
+                    Response.ContentType =
                         proxiedContentType.Equals("application/octet-stream") && overrideContentType != null
                             ? overrideContentType
                             : proxiedContentType;
-                    // TODO: Copy other headers - e.g. cache-control?
-                    await response.Content.CopyToAsync(this.Response.Body);
+                    // Copy other headers - e.g. cache-control?
+                    foreach (var h in upstreamResponse.Headers)
+                    {
+                        if (!Response.Headers.ContainsKey(h.Key))
+                        {
+                            Response.Headers.Add(h.Key, h.Value.ToArray());
+                        }
+                    }
+                    await upstreamResponse.Content.CopyToAsync(Response.Body);
+                }
+                else
+                {
+                    Log.Error("Proxy: {upstreamUrl} responded with {upstreamResponseStatus}",
+                        upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode);
                 }
 
                 return new EmptyResult();
