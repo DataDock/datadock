@@ -67,10 +67,10 @@ namespace DataDock.Common.Stores
         /// <remarks>Currently implemented as an exact match on tag string</remarks>
         /// <param name="ownerId"></param>
         /// <param name="tags">An array of one or more tags to match</param>
-        /// <param name="take"></param>
         /// <param name="matchAll">True to require a matching dataset to match all of the specified tags, false to require a matching dataset to match any one of the specified tags. Defaults to false</param>
         /// <param name="showHidden">True to include datasets that are hidden from the DD homepage in the results. Default to false</param>
-        /// <param name="skip"></param>
+        /// <param name="skip">The number of results to skip</param>
+        /// <param name="take">The number of results to return</param>
         /// <returns></returns>
         Task<IEnumerable<DatasetInfo>> GetDatasetsForTagsAsync(string ownerId, string[] tags, int skip, int take, bool matchAll = false, bool showHidden = false);
 
@@ -83,6 +83,8 @@ namespace DataDock.Common.Stores
         /// <param name="tags">An array of one or more tags to match</param>
         /// <param name="matchAll">True to require a matching dataset to match all of the specified tags, false to require a matching dataset to match any one of the specified tags. Defaults to false</param>
         /// <param name="showHidden">True to include datasets that are hidden from the DD homepage in the results. Default to false</param>
+        /// <param name="skip">The number of results to skip</param>
+        /// <param name="take">The number of results to return</param>
         /// <returns></returns>
         Task<IEnumerable<DatasetInfo>> GetDatasetsForTagsAsync(string ownerId, string repositoryId, string[] tags, int skip, int take, bool matchAll = false, bool showHidden = false);
 
@@ -96,5 +98,14 @@ namespace DataDock.Common.Stores
         Task<bool> DeleteDatasetsForOwnerAsync(string ownerId);
 
         Task<bool> DeleteDatasetAsync(string ownerId, string repositoryId, string datasetId);
+
+        /// <summary>
+        /// Search for datasets matching the specified search string in tags, title or description
+        /// </summary>
+        /// <param name="searchString"></param>
+        /// <param name="skip">The number of results to skip</param>
+        /// <param name="take">The number of results to return</param>
+        /// <returns></returns>
+        Task<IEnumerable<DatasetInfo>> SearchDatasetsAsync(string searchString, int skip, int take);
     }
 }
