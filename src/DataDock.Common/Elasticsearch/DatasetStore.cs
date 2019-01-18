@@ -354,6 +354,37 @@ namespace DataDock.Common.Elasticsearch
             var response = await _client.DeleteAsync<DatasetInfo>(documentId);
             return response.IsValid;
         }
-        
+
+        public async Task<IEnumerable<DatasetInfo>> SearchDatasetsAsync(string searchString, int skip, int take)
+        {
+            if (searchString == null) throw new ArgumentNullException(nameof(searchString));
+            var terms = searchString.Split(' ');
+            var searchClauses = new List<QueryContainer>
+            {
+                new TermsQuery {Field = "tags", Terms = searchString.Split(' '), Boost = 2.0},
+                new TermsQuery {Field = "csvwMetadata.dc:title", Terms = terms, Boost = 1.5},
+                new TermsQuery {Field = "csvwMetadata.dc:description", Terms = terms}
+            };
+            var search = new SearchDescriptor<DatasetInfo>().Query(q => new BoolQuery{Should = searchClauses});
+#if DEBUG
+            using (var ms = new MemoryStream())
+            {
+                _client.RequestResponseSerializer.Serialize(search, ms);
+                var rawQuery = Encoding.UTF8.GetString(ms.ToArray());
+                Console.WriteLine(rawQuery);
+            }
+#endif
+            var searchResponse =
+                await _client.SearchAsync<DatasetInfo>(search
+                    .From(skip).Size(take));
+
+            if (!searchResponse.IsValid)
+            {
+                throw new DatasetStoreException(
+                    $"Error retrieving datasets for search string repository {searchString}. Cause: {searchResponse.DebugInformation}");
+            }
+            if (searchResponse.Total < 1) throw new DatasetNotFoundException($"No datasets found for search string '{searchString}'.");
+            return searchResponse.Documents;
+        }
     }
 }

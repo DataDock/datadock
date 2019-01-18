@@ -89,7 +89,10 @@ namespace DataDock.IntegrationTests
                         {
                             tags.Add("foo");
                         }
-                        var csvwJson = new JObject(new JProperty("dc:title", $"Test Dataset {d} (Owner {o} Repo {r})"), new JProperty("dcat:keyword", new JArray(tags)));
+
+                        var csvwJson = new JObject(new JProperty("dc:title", $"Test Dataset {d} (Owner {o} Repo {r})"),
+                            new JProperty("dc:description", $"Dataset description {o}.{r}.{d}"),
+                            new JProperty("dcat:keyword", new JArray(tags)));
                         var voidJson = new JObject(
                             new JProperty("void:triples", "100"),
                             new JProperty("void:dataDump", 
@@ -372,5 +375,22 @@ namespace DataDock.IntegrationTests
 
             Assert.StartsWith($"No datasets found for repository owner-0/repo-0 with tags set-3, foo", ex.Result.Message);
         }
+
+        [Fact]
+        public async void ItCanSearchOnDescription()
+        {
+            var result = await _store.SearchDatasetsAsync("description", 0, 200);
+            result.Should().NotBeNull();
+            result.Count().Should().Be(125); // All datasets contain the text "description" in the description field
+        }
+
+        [Fact]
+        public async void ItCanSearchOnTitle()
+        {
+            var result = await _store.SearchDatasetsAsync("test", 0, 200);
+            result.Should().NotBeNull();
+            result.Count().Should().Be(125); // All datasets contain the text "test" in the title field
+        }
+
     }
 }
