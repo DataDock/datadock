@@ -28,7 +28,8 @@ namespace DataDock.Web.Controllers
                 if (!string.IsNullOrEmpty(tag))
                 {
                     var tags = new [] {tag};
-                    var results = await _datasetStore.GetDatasetsForTagsAsync(tags, skip, take);
+                    //var results = await _datasetStore.GetDatasetsForTagsAsync(tags, skip, take);
+                    var results = await _datasetStore.SearchDatasetsAsync(tag, skip, take);
                     model = new SearchResultViewModel(tag, results);
                 }
             }
