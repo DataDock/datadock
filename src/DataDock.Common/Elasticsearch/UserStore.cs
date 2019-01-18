@@ -80,13 +80,15 @@ namespace DataDock.Common.Elasticsearch
             var updateResponse = await _client.IndexDocumentAsync(userSettings);
             if (!updateResponse.IsValid)
             {
-                throw new UserStoreException($"Error udpating user settings for user ID {userSettings.UserId}");
+                throw new UserStoreException($"Error updating user settings for user ID {userSettings.UserId}");
             }
+            await _client.RefreshAsync(Indices.Index<UserSettings>());
         }
 
         public async Task<bool> DeleteUserSettingsAsync(string userId)
         {
             var response = await _client.DeleteAsync<UserSettings>(userId);
+            await _client.RefreshAsync(Indices.Index<UserSettings>());
             return response.IsValid;
         }
 
@@ -100,6 +102,7 @@ namespace DataDock.Common.Elasticsearch
             var existsResponse = await _client.DocumentExistsAsync<UserAccount>(user);
             if (existsResponse.Exists) throw new UserAccountExistsException(userId);
             await _client.IndexDocumentAsync(user);
+            await _client.RefreshAsync(Indices.Index<UserAccount>());
             return user;
         }
 
@@ -113,12 +116,14 @@ namespace DataDock.Common.Elasticsearch
             var existsResponse = await _client.DocumentExistsAsync<UserAccount>(user);
             if (!existsResponse.Exists) throw new UserAccountNotFoundException(userId);
             await _client.IndexDocumentAsync(user);
+            await _client.RefreshAsync(Indices.Index<UserAccount>());
             return user;
         }
 
         public async Task<bool> DeleteUserAsync(string userId)
         {
             var response = await _client.DeleteAsync<UserAccount>(userId);
+            await _client.RefreshAsync(Indices.Index<UserAccount>());
             return response.IsValid;
         }
 

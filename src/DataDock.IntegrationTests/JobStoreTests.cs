@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using DataDock.Common.Elasticsearch;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
-using DataDock.Common;
 using FluentAssertions;
-using Nest;
 using Xunit;
 
 namespace DataDock.IntegrationTests
@@ -65,11 +60,10 @@ namespace DataDock.IntegrationTests
     public class JobStoreFixture : ElasticsearchFixture
     {
         public JobStore Store { get; }
-        public JobStoreFixture() : base()
+        public JobStoreFixture()
         {
             Store = new JobStore(Client, Configuration);
             InitializeRepository().Wait();
-            Thread.Sleep(1000);
         }
 
         private async Task InitializeRepository()
@@ -142,16 +136,16 @@ namespace DataDock.IntegrationTests
             var ex = Assert.ThrowsAsync<JobNotFoundException>(async () =>
                 await _store.GetJobsForOwner("owner_100"));
 
-            Assert.StartsWith($"No jobs found for ownerId owner_100", ex.Result.Message);
+            Assert.StartsWith("No jobs found for ownerId owner_100", ex.Result.Message);
         }
 
         [Fact]
-        public async void ItThrowsNotFoundExceptionForASingleRepositoryWhenNoneExist()
+        public void ItThrowsNotFoundExceptionForASingleRepositoryWhenNoneExist()
         {
            var ex = Assert.ThrowsAsync<JobNotFoundException>(async () =>
                 await _store.GetJobsForRepository("owner_0", "repo_100"));
 
-            Assert.StartsWith($"No jobs found for ownerId owner_0 and repositoryId repo_100", ex.Result.Message);
+            Assert.StartsWith("No jobs found for ownerId owner_0 and repositoryId repo_100", ex.Result.Message);
         }
     }
 }
