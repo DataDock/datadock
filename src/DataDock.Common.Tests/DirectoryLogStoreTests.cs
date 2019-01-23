@@ -80,7 +80,7 @@ namespace DataDock.Common.Tests
             var now = DateTime.UtcNow;
             timeProvider.SetupSequence(t => t.UtcNow)
                 .Returns(now.Subtract(TimeSpan.FromDays(89)))
-                .Returns(now.Subtract(TimeSpan.FromDays(90)))
+                .Returns(now.Subtract(TimeSpan.FromDays(89.9)))
                 .Returns(now.Subtract(TimeSpan.FromDays(91)))
                 .Returns(now);
 
@@ -92,7 +92,7 @@ namespace DataDock.Common.Tests
             var log2Id = await store.AddLogAsync("jen", "other", job2Id, "This is a different log file!");
             var log3Id = await store.AddLogAsync("kal", "test", job3Id, "This is a third log file!");
 
-            // Before pruning, all logs should be accesible
+            // Before pruning, all logs should be accessible
             Assert.Equal("This is a log file!", await store.GetLogContentAsync(log1Id));
             Assert.Equal("This is a different log file!", await store.GetLogContentAsync(log2Id));
             Assert.Equal("This is a third log file!", await store.GetLogContentAsync(log3Id));
@@ -101,7 +101,7 @@ namespace DataDock.Common.Tests
 
             // After pruning log3 should be deleted
             await Assert.ThrowsAsync<LogNotFoundException>(() => store.GetLogContentAsync(log3Id));
-            // log2 should still be available (its age matches TTL)
+            // log2 should still be available (its age is < TTL)
             Assert.Equal("This is a different log file!", await store.GetLogContentAsync(log2Id));
             // log1 should still be available (its age is < TTL)
             Assert.Equal("This is a log file!", await store.GetLogContentAsync(log1Id));
