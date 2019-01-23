@@ -37,7 +37,6 @@ namespace DataDock.IntegrationTests
                 Schema = _dummySchema
             };
             await _repo.CreateOrUpdateSchemaRecordAsync(schemaInfo);
-            Thread.Sleep(1000);
             var retrievedSchema = await _repo.GetSchemaInfoAsync("the_owner", "the_schema_id");
             retrievedSchema.Id.Should().Be("the_owner/the_repo/the_schema_id");
             Assert.Equal("foo", retrievedSchema.Schema["foo"].Value<string>());
@@ -102,7 +101,6 @@ namespace DataDock.IntegrationTests
         {
             Store = new SchemaStore(Client, Configuration);
             InitializeRepository().Wait();
-            Thread.Sleep(1000);
         }
 
         private async Task InitializeRepository()

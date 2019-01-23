@@ -2,7 +2,6 @@
 using Serilog;
 using System;
 using System.Threading.Tasks;
-using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using DataDock.Common.Validators;
@@ -18,8 +17,8 @@ namespace DataDock.Common.Elasticsearch
             Log.Debug("Create OwnerSettingsStore. Index={indexName}", indexName);
             _client = client;
             // Ensure the index exists
-            var indexExistsReponse = _client.IndexExists(indexName);
-            if (!indexExistsReponse.Exists)
+            var indexExistsResponse = _client.IndexExists(indexName);
+            if (!indexExistsResponse.Exists)
             {
                 Log.Debug("Create ES index {indexName} for type {indexType}", indexName, typeof(JobInfo));
                 var createIndexResponse = _client.CreateIndex(indexName,
@@ -60,14 +59,16 @@ namespace DataDock.Common.Elasticsearch
             var updateResponse = await _client.IndexDocumentAsync(ownerSettings);
             if (!updateResponse.IsValid)
             {
-                throw new OwnerSettingsStoreException($"Error udpating owner settings for owner ID {ownerSettings.OwnerId}");
+                throw new OwnerSettingsStoreException($"Error updating owner settings for owner ID {ownerSettings.OwnerId}");
             }
+            await _client.RefreshAsync(Indices.Index<OwnerSettings>());
         }
 
         public async Task<bool> DeleteOwnerSettingsAsync(string ownerId)
         {
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
             var response = await _client.DeleteAsync<OwnerSettings>(ownerId);
+            await _client.RefreshAsync(Indices.Index<OwnerSettings>());
             return response.IsValid;
         }
     }

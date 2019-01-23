@@ -42,7 +42,7 @@ namespace DataDock.IntegrationTests
             };
 
             await _store.CreateOrUpdateDatasetRecordAsync(datasetInfo);
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
             var retrievedDataset = await _store.GetDatasetInfoAsync("owner-1", "repo-1", "test.csv");
             retrievedDataset.Id.Should().Be($"owner-1/repo-1/test.csv");
             ((string)retrievedDataset.OwnerId).Should().Be("owner-1");

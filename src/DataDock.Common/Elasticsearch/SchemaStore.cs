@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using DataDock.Common.Validators;
@@ -22,8 +21,8 @@ namespace DataDock.Common.Elasticsearch
             Log.Debug("Create SchemaStore. Index={indexName}", indexName);
             _client = client;
             // Ensure the index exists
-            var indexExistsReponse = _client.IndexExists(indexName);
-            if (!indexExistsReponse.Exists)
+            var indexExistsResponse = _client.IndexExists(indexName);
+            if (!indexExistsResponse.Exists)
             {
                 Log.Debug("Create ES index {indexName} for type {indexType}", indexName, typeof(SchemaInfo));
                 var createIndexResponse = _client.CreateIndex(indexName,
@@ -123,15 +122,6 @@ namespace DataDock.Common.Elasticsearch
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
 
             var search = new SearchDescriptor<SchemaInfo>().Query(q => QueryHelper.FilterByOwnerIdAndRepositoryId(ownerId, repositoryId));
-            var rawQuery = "";
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
             var searchResponse = _client.Search<SchemaInfo>(search.Skip(skip).Take(take));
 
             if (!searchResponse.IsValid)
@@ -141,11 +131,7 @@ namespace DataDock.Common.Elasticsearch
                 throw new SchemaStoreException(
                     $"Failed to retrieve schema list by repository. Cause: {searchResponse.DebugInformation}");
             }
-            if (searchResponse.Total < 1)
-            {
-                Log.Information($"No schemas found with query {rawQuery}");
-            }
-            Log.Debug("GetSchemasByRepository {repositoryId}. Skip={skip}, Take={take}. Returns {docCount} results", repositoryId, skip, take, searchResponse.Documents.Count);
+            Log.Debug("GetSchemasByRepository {ownerId}/{repositoryId}. Skip={skip}, Take={take}. Returns {docCount} results", ownerId, repositoryId, skip, take, searchResponse.Documents.Count);
             return searchResponse.Documents;
         }
 
@@ -155,15 +141,6 @@ namespace DataDock.Common.Elasticsearch
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
 
             var search = new SearchDescriptor<SchemaInfo>().Query(q => QueryHelper.FilterByOwnerIdAndRepositoryIds(ownerId, repositoryIds));
-            var rawQuery = "";
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
             var searchResponse = _client.Search<SchemaInfo>(search.Skip(skip).Take(take));
             
             if (!searchResponse.IsValid)
@@ -175,7 +152,7 @@ namespace DataDock.Common.Elasticsearch
             }
             if (searchResponse.Total < 1)
             {
-                Log.Information($"No schemas found with query {rawQuery}");
+                Log.Information("No schemas found for ownerId={ownerId}, repositoryIds=[{repositoryIds}]", ownerId, repositoryIds);
             }
             Log.Debug("GetSchemasByRepositoryList [{repositoryIds}]. Skip={skip}, Take={take}. Returns {docCount} results", repositoryIds, skip, take, searchResponse.Documents.Count);
             return searchResponse.Documents;
@@ -237,6 +214,7 @@ namespace DataDock.Common.Elasticsearch
             {
                 throw new SchemaStoreException($"Failed to insert or update schema record: {indexResponse.DebugInformation}");
             }
+            await _client.RefreshAsync(Indices.Index<SchemaInfo>());
         }
 
         public async Task DeleteSchemaRecordsForOwnerAsync(string ownerId)
@@ -247,6 +225,7 @@ namespace DataDock.Common.Elasticsearch
                 throw new SchemaStoreException(
                     $"Failed to delete schema record for all schemas owned by {ownerId}");
             }
+            await _client.RefreshAsync(Indices.Index<SchemaInfo>());
         }
 
         public async Task DeleteSchemaAsync(string ownerId, string schemaId)
@@ -257,6 +236,7 @@ namespace DataDock.Common.Elasticsearch
                 throw new SchemaStoreException(
                     $"Failed to delete schema record for schema {schemaId} owned by {ownerId}");
             }
+            await _client.RefreshAsync(Indices.Index<SchemaInfo>());
         }
     }
 }

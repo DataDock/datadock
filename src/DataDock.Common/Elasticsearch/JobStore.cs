@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using Nest;
@@ -15,6 +12,7 @@ namespace DataDock.Common.Elasticsearch
     public class JobStore : IJobStore
     {
         private readonly IElasticClient _client;
+
         public JobStore(IElasticClient client, ApplicationConfiguration config)
         {
             var indexName = config.JobsIndexName;
@@ -36,7 +34,6 @@ namespace DataDock.Common.Elasticsearch
             }
             Log.Information("Connecting JobStore to ES index {indexName}", indexName);
             _client.ConnectionSettings.DefaultIndices[typeof(JobInfo)] = indexName;
-
         }
 
         public async Task<JobInfo> SubmitImportJobAsync(ImportJobRequestInfo jobDescription)
@@ -63,12 +60,14 @@ namespace DataDock.Common.Elasticsearch
             return await SubmitJobAsync(jobInfo);
         }
 
-        private async Task<JobInfo> SubmitJobAsync(JobInfo jobInfo) { 
-            var indexResponse = await _client.IndexDocumentAsync<JobInfo>(jobInfo);
+        private async Task<JobInfo> SubmitJobAsync(JobInfo jobInfo)
+        {
+            var indexResponse = await _client.IndexDocumentAsync(jobInfo);
             if (!indexResponse.IsValid)
             {
                 throw new JobStoreException($"Failed to insert new job record: {indexResponse.DebugInformation}");
             }
+            await _client.RefreshAsync(Indices.Index<JobInfo>());
             return jobInfo;
         }
 
@@ -120,15 +119,6 @@ namespace DataDock.Common.Elasticsearch
                 .Sort(s => s
                     .Field(f => f.Field("queuedAt").Order(SortOrder.Descending))); 
 
-            var rawQuery = "";
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
             var response =
                 await _client.SearchAsync<JobInfo>(search);
 
@@ -140,7 +130,7 @@ namespace DataDock.Common.Elasticsearch
 
             if (response.Total < 1)
             {
-                Log.Warning($"No jobs found with query {rawQuery}");
+                Log.Warning("No jobs found for {ownerId}", ownerId);
                 throw new JobNotFoundException(ownerId, "");
             }
             return response.Documents;
@@ -159,15 +149,6 @@ namespace DataDock.Common.Elasticsearch
                 .Sort(s => s
                     .Field(f => f.Field("queuedAt").Order(SortOrder.Descending)));
 
-            var rawQuery = "";
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
             var response =
                 await _client.SearchAsync<JobInfo>(search);
 
@@ -179,7 +160,7 @@ namespace DataDock.Common.Elasticsearch
 
             if (response.Total < 1)
             {
-                Log.Warning($"No jobs found with query {rawQuery}");
+                Log.Warning("No jobs found for {ownerId}/{repositoryId}", ownerId, repositoryId);
                 throw new JobNotFoundException(ownerId, repositoryId);
             }
             return response.Documents;
@@ -262,7 +243,7 @@ namespace DataDock.Common.Elasticsearch
         
         public async Task<bool> DeleteJobsForOwnerAsync(string ownerId)
         {
-            var deleteResponse = await _client.DeleteByQueryAsync<JobInfo>(s => s.Query(q => QueryByOwnerId(q, ownerId)));
+            var deleteResponse = await _client.DeleteByQueryAsync<JobInfo>(s => s.Query(q => QueryByOwnerId(ownerId)));
             if (!deleteResponse.IsValid)
             {
                 throw new JobStoreException(
@@ -271,7 +252,7 @@ namespace DataDock.Common.Elasticsearch
             return true;
         }
 
-        private static QueryContainer QueryByOwnerId(QueryContainerDescriptor<JobInfo> q, string ownerId)
+        private static QueryContainer QueryByOwnerId(string ownerId)
         {
             var filterClauses = new List<QueryContainer>
             {

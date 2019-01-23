@@ -2,11 +2,8 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using DataDock.Common.Validators;
@@ -22,8 +19,8 @@ namespace DataDock.Common.Elasticsearch
             Log.Debug("Create RepoSettingsStore. Index={indexName}", indexName);
             _client = client;
             // Ensure the index exists
-            var indexExistsReponse = _client.IndexExists(indexName);
-            if (!indexExistsReponse.Exists)
+            var indexExistsResponse = _client.IndexExists(indexName);
+            if (!indexExistsResponse.Exists)
             {
                 Log.Debug("Create ES index {indexName} for type {indexType}", indexName, typeof(JobInfo));
                 var createIndexResponse = _client.CreateIndex(indexName,
@@ -44,15 +41,6 @@ namespace DataDock.Common.Elasticsearch
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
             
             var search = new SearchDescriptor<RepoSettings>().Query(q => QueryHelper.FilterByOwnerId(ownerId));
-            var rawQuery = "";
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
             var response =
                 await _client.SearchAsync<RepoSettings>(search);
 
@@ -64,7 +52,7 @@ namespace DataDock.Common.Elasticsearch
 
             if (response.Total < 1)
             {
-                Log.Warning($"No settings found with query {rawQuery}");
+                Log.Warning("No repository settings found for {ownerId}", ownerId);
                 throw new RepoSettingsNotFoundException(ownerId);
             }
             return response.Documents;
@@ -74,19 +62,8 @@ namespace DataDock.Common.Elasticsearch
         {
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
             if (repositoryId == null) throw new ArgumentNullException(nameof(repositoryId));
-            var rawQuery = "";
             var search = new SearchDescriptor<RepoSettings>().Query(q => QueryHelper.FilterByOwnerIdAndRepositoryId(ownerId, repositoryId));
-#if DEBUG
-            using (var ms = new MemoryStream())
-            {
-                _client.RequestResponseSerializer.Serialize(search, ms);
-                rawQuery = Encoding.UTF8.GetString(ms.ToArray());
-                Console.WriteLine(rawQuery);
-            }
-#endif
-
-            var response =
-                await _client.SearchAsync<RepoSettings>(search);
+            var response = await _client.SearchAsync<RepoSettings>(search);
             
             if (!response.IsValid)
             {
@@ -96,7 +73,7 @@ namespace DataDock.Common.Elasticsearch
 
             if (response.Total < 1)
             {
-                Log.Warning($"No settings found with query {rawQuery}");
+                Log.Information("No settings found for {ownerId}/{repositoryId}", ownerId, repositoryId);
                 throw new RepoSettingsNotFoundException(ownerId, repositoryId);
             }
             return response.Documents.FirstOrDefault();
@@ -107,13 +84,13 @@ namespace DataDock.Common.Elasticsearch
             if (id == null) throw new ArgumentNullException(nameof(id));
             try
             {
-                var datasetInfo = await _client.GetAsync<RepoSettings>(new DocumentPath<RepoSettings>(id));
+                var datasetInfo = await _client.GetAsync(new DocumentPath<RepoSettings>(id));
                 return datasetInfo.Source;
             }
             catch (Exception e)
             {
                 throw new RepoSettingsStoreException(
-                    $"Error retrieving dataset with ID {id}. Cause: {e.ToString()}");
+                    $"Error retrieving dataset with ID {id}. Cause: {e}");
             }
         }
 
@@ -135,6 +112,8 @@ namespace DataDock.Common.Elasticsearch
             {
                 throw new OwnerSettingsStoreException($"Error updating repo settings for owner/repo ID {settings.RepositoryId}");
             }
+
+            await _client.RefreshAsync(Indices.Index<RepoSettings>());
         }
 
         public async Task<bool> DeleteRepoSettingsAsync(string ownerId, string repositoryId)
@@ -142,8 +121,9 @@ namespace DataDock.Common.Elasticsearch
             if (ownerId == null) throw new ArgumentNullException(nameof(ownerId));
             if (repositoryId == null) throw new ArgumentNullException(nameof(repositoryId));
 
-            string documentId = $"{ownerId}/{repositoryId}";
+            var documentId = $"{ownerId}/{repositoryId}";
             var response = await _client.DeleteAsync<RepoSettings>(documentId);
+            await _client.RefreshAsync(Indices.Index<RepoSettings>());
             return response.IsValid;
         }
 

@@ -329,6 +329,8 @@ namespace DataDock.Common.Elasticsearch
                 throw new DatasetStoreException(
                     $"Failed to index dataset record. Cause: {indexResponse.DebugInformation}");
             }
+
+            await _client.RefreshAsync(Indices.Index<DatasetInfo>());
             return datasetInfo;
         }
 
@@ -341,6 +343,7 @@ namespace DataDock.Common.Elasticsearch
                 throw new DatasetStoreException(
                     $"Failed to delete all datasets owned by {ownerId}");
             }
+            await _client.RefreshAsync(Indices.Index<DatasetInfo>());
             return true;
         }
 
@@ -352,6 +355,7 @@ namespace DataDock.Common.Elasticsearch
 
             var documentId = $"{ownerId}/{repositoryId}/{datasetId}";
             var response = await _client.DeleteAsync<DatasetInfo>(documentId);
+            await _client.RefreshAsync(Indices.Index<DatasetInfo>());
             return response.IsValid;
         }
 
