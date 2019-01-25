@@ -38,7 +38,7 @@ gulp.task("clean:css", function (cb) {
     rimraf(paths.concatCssDest, cb);
 });
 
-gulp.task("clean", ["clean:js", "clean:css"]);
+gulp.task("clean", gulp.parallel("clean:js", "clean:css"));
 
 gulp.task("min:js", function () {
     return gulp.src([paths.js, "!" + paths.minJs], { base: "." })
@@ -56,7 +56,7 @@ gulp.task("min:css", function () {
         .pipe(gulp.dest("."));
 });
 
-gulp.task("min", ["min:js", "min:css"]);
+gulp.task("min", gulp.parallel("min:js", "min:css"));
 
 
 // Dependency Dirs
@@ -85,18 +85,6 @@ gulp.task("nm_copy", function () {
     return merge(streams);
 
 });
-
-gulp.task("jasmine-phantom",
-    function () {
-        return gulp.src([
-            "wwwroot/lib/jquery/jquery.min.js",
-            "wwwroot/lib/jquery-ui/jquery-ui.min.js",
-            "wwwroot/lib/semantic-ui/dist/semantic.js",
-            "wwwroot/js/*.js", "wwwroot/js/tests/*.spec.js",
-            "!wwwroot/js/site.js", "!wwwroot/js/site.min.js"])
-            .pipe(jasmineBrowser.specRunner({ console: true }))
-            .pipe(jasmineBrowser.headless({ driver: "phantomjs" }));
-    });
 
 gulp.task('default', function () {
     // place code for your default task here
