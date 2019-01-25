@@ -21,7 +21,7 @@ before_build:
       mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
       export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable SemVer)
       echo $DockerImageVersion
-      npm install --global gulp-cli
+      npm install --global gulp-cli karma-cli
 
 configuration: Release
 
@@ -34,7 +34,7 @@ test_script:
   - dotnet test -c Release src/DataDock.Web.Tests
   - dotnet test -c Release src/DataDock.Worker.Tests
   - pushd src/DataDock.Web
-  - gulp jasmine-phantom
+  - karma start karma.conf.js --single-run 
   - popd
 
 deploy_script:

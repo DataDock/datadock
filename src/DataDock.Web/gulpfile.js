@@ -86,18 +86,6 @@ gulp.task("nm_copy", function () {
 
 });
 
-gulp.task("jasmine-tests",
-    function () {
-        return gulp.src([
-            "wwwroot/lib/jquery/jquery.min.js",
-            "wwwroot/lib/jquery-ui/jquery-ui.min.js",
-            "wwwroot/lib/semantic-ui/dist/semantic.js",
-            "wwwroot/js/*.js", "wwwroot/js/tests/*.spec.js",
-            "!wwwroot/js/site.js", "!wwwroot/js/site.min.js"])
-            .pipe(jasmineBrowser.specRunner({ console: true }))
-            .pipe(jasmineBrowser.headless({ driver: "slimerjs" }));
-    });
-
 gulp.task('default', function () {
     // place code for your default task here
 });
