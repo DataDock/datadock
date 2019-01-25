@@ -28,7 +28,8 @@
                         templateMetadata: schemaInfo.templateMetadata
                     });
 
-                    loader.bind("loadererror",
+                    loader
+                        .bind("loadererror",
                             function(ev, data) {
                                 self.displayErrors([data.msg]);
                             })
@@ -226,7 +227,7 @@
 
             _create: function() {
                 var self = this;
-
+               
                 this.element.find("#fileSelectTextBox,#fileSelectButton").click(function(e) {
                     $("input:file", $(e.target).parents()).click();
                 });
@@ -312,6 +313,12 @@
             _create: function() {
                 var self = this;
                 this.columnSet = [];
+
+                $("#step1").click(function(e) {
+                    $("#fileSelector").show();
+                    $("#metadataEditor").hide();
+                    $("#loading").hide();
+                });
 
                 $.dform.subscribe("changeTab",
                     function(options, type) {
