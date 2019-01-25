@@ -6,7 +6,7 @@
 
 <div class="ui container">
   <p class="ui message">
-    <i class="ui book icon"></i> Templates can be created when you <a href="/@Model.SelectedOwnerId/import">add data</a>, simply select the option to save the metadata as a template and then visit the template library to use with new uploads.
+    <i class="ui book icon"></i> Templates can be created when you <a href="@Url.RouteUrl("OwnerImport", new {ownerId=Model.SelectedOwnerId})">add data</a>, simply select the option to save the metadata as a template and then visit the template library to use with new uploads.
   </p>
   <div class="ui hidden divider"></div>
 </div>
