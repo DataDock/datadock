@@ -31,63 +31,87 @@
                 });
 
             connection.on('progressUpdated',
-                function (userId, jobId, progressMessage) {
-                    console.log(userId, jobId, progressMessage);
-                    var item = $('#' + jobId);
-                    if (!item) {
-                        console.log('Cannot find an element with that jobId');
+                function(ownerId, jobId, progressMessage) {
+                    console.log('progressUpdated', ownerId, jobId, progressMessage);
+                    if (ownerId === '@Model.SelectedOwnerId') {
+                        ensureJobEntry(jobId);
+                        var m = $('#' + jobId + ' > .processing-messages');
+                        m.removeClass('hidden')
+                            .append($('<div/>').html(progressMessage))
+                            .scrollTop(m.prop('scrollHeight'));
                     }
-                    var m = $('#' + jobId + ' > .processing-messages');
-                    m.removeClass('hidden')
-                        .append($('<div/>').html(progressMessage))
-                        .scrollTop(m.prop('scrollHeight'));
                 });
 
             connection.on('statusUpdated',
-                function(userId, jobId, jobStatus) {
-                    var item = $('#' + jobId);
-                    if (!item) {
-                        console.log('Cannot find an element with that jobId');
-                    }
-                    var statusText = getJobStatusText(jobStatus);
-                    $('#' + jobId + ' .job-status')
-                        .html(statusText);
-                    $('#' + jobId)
-                        .removeClass('positive negative info warning')
-                        .addClass(getJobStatusClass(jobStatus));
-                    if (statusText === "Failed" || statusText === "Completed") {
-                        var ll = $('#' + jobId + ' > .log-link');
-                        ll.removeClass('hidden');
-                        var m = $('#' + jobId + ' > .processing-messages');
-                        m.addClass('hidden');
+                function(ownerId, jobId, jobStatus) {
+                    console.log('statusUpdated', ownerId, jobId, jobStatus);
+                    if (ownerId === '@Model.SelectedOwnerId') {
+                        ensureJobEntry(jobId);
+                        var statusText = getJobStatusText(jobStatus);
+                        $('#' + jobId + ' .job-status')
+                            .html(statusText);
+                        $('#' + jobId)
+                            .removeClass('positive negative info warning')
+                            .addClass(getJobStatusClass(jobStatus));
+                        if (statusText === "Failed" || statusText === "Completed") {
+                            var ll = $('#' + jobId + ' > .log-link');
+                            ll.removeClass('hidden');
+                            var m = $('#' + jobId + ' > .processing-messages');
+                            m.addClass('hidden');
+                        }
                     }
                 });
 
-            connection.on('logUpdated',
-                function(userId, jobId, logLink) {
-                    var item = $('#' + jobId);
-                    if (!item) {
-                        console.log('Cannot find an element with that jobId');
-                    }
-                    $('#' + jobId + ' .log-link').append($("<a/>").attr('href', logLink).html('Download full log'));
-                    var dsUrl = $('#' + jobId + ' p#iri').text();
-                    var dsLink = $("<a />",
-                        {
-                            href: dsUrl,
-                            text: dsUrl,
-                            'style': 'font-weight:bold;'
-                        });
-                    $('#' + jobId + ' p#iri').text().append(dsLink);
+            connection.on('datasetUpdated',
+                function(ownerId, repoId, datasetInfo) {
+                    console.log('datasetUpdated', ownerId, repoId, datasetInfo);
                 });
+
+//            connection.on('logUpdated',
+//                function(ownerId, jobId, logLink) {
+//                    if (ownerId === '@Model.SelectedOwnerId') {
+//                        ensureJobEntry(jobId);
+//                        $('#' + jobId + ' .log-link').append($("<a/>").attr('href', logLink).html('Download full log'));
+//                        var dsUrl = $('#' + jobId + ' p#iri').text();
+//                        var dsLink = $("<a />",
+//                            {
+//                                href: dsUrl,
+//                                text: dsUrl,
+//                                'style': 'font-weight:bold;'
+//                            });
+//                        $('#' + jobId + ' p#iri').text().append(dsLink);
+//                    }
+//                });
 
             connection.start().then(() => {
                 console.log('ProgressHub Connected');
-                if('@Model.SelectedOwnerId' !== '@Model.UserId') { 
-                    console.log('Subscribe to channel: @Model.SelectedOwnerId');
-                    connection.invoke('subscribe', '@Model.SelectedOwnerId');
+                @{
+                    if (String.IsNullOrEmpty(Model.SelectedRepoId))
+                    {
+                        <text>
+                            console.log('Subscribe to channel: @(Model.SelectedOwnerId)');
+                            connection.invoke('subscribe', '@(Model.SelectedOwnerId)');
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            console.log('Subscribe to channel: @(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                            connection.invoke('subscribe', '@(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                        </text>
+                    }
                 }
             });
         });
+
+        function ensureJobEntry(jobId) {
+            var match = $('#' + jobId);
+            if (match.length === 0) {
+                console.log('No element found for ', jobId, 'Page will be reloaded');
+                document.location.reload(true);
+            }
+            return match;
+        }
 
         function htmlEncode(value) {
             var encodedValue = $('<div/>').text(value).html();
