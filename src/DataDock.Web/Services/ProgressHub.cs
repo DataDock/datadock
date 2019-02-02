@@ -15,9 +15,9 @@ namespace DataDock.Web.Services
         /// <param name="jobId">The ID of the job</param>
         /// <param name="progressMessage">The progress message</param>
         /// <returns></returns>
-        public async Task ProgressUpdated(string ownerId, string jobId, string progressMessage)
+        public async Task ProgressUpdated(string ownerId, string repoId, string jobId, string progressMessage)
         {
-            await Clients.Group(ownerId).SendAsync("progressUpdated", ownerId, jobId, progressMessage);
+            await Clients.Groups(ownerId, ownerId + "_" + repoId).SendAsync("progressUpdated", ownerId, jobId, progressMessage);
         }
 
         /// <summary>
@@ -27,9 +27,9 @@ namespace DataDock.Web.Services
         /// <param name="jobId">The ID of the job</param>
         /// <param name="jobStatus">The new status of the job</param>
         /// <returns></returns>
-        public async Task StatusUpdated(string ownerId, string jobId, JobStatus jobStatus)
+        public async Task StatusUpdated(string ownerId, string repoId, string jobId, JobStatus jobStatus)
         {
-            await Clients.Group(ownerId).SendAsync("statusUpdated", ownerId, jobId, jobStatus);
+            await Clients.Groups(ownerId, ownerId + "_" + repoId).SendAsync("statusUpdated", ownerId, jobId, jobStatus);
         }
 
         /// <summary>
@@ -46,12 +46,13 @@ namespace DataDock.Web.Services
         /// <summary>
         /// Broadcast a notification of an update to a dataset or creation of a new dataset to all subscribed clients
         /// </summary>
-        /// <param name="ownerId">The ID of the owner of the repository where the dataset is located. This is used as the ID of the group that will receive the broadcast</param>
+        /// <param name="ownerId">The ID of the owner of the repository where the dataset is located.</param>
+        /// <param name="repoId">The ID of the repository where the dataset is located</param>
         /// <param name="datasetInfo">The metadata for the updated dataset</param>
         /// <returns></returns>
-        public async Task DatasetUpdated(string ownerId, DatasetInfo datasetInfo)
+        public async Task DatasetUpdated(string ownerId, string repoId, DatasetInfo datasetInfo)
         {
-            await Clients.Group(ownerId).SendAsync("datasetUpdated", ownerId, datasetInfo);
+            await Clients.Groups(ownerId, ownerId + "_" + repoId).SendAsync("datasetUpdated", ownerId, repoId, datasetInfo);
         }
 
         /// <summary>
@@ -63,25 +64,7 @@ namespace DataDock.Web.Services
         /// <returns></returns>
         public async Task DatasetDeleted(string ownerId, string repoId, string datasetId)
         {
-            await Clients.Group(ownerId).SendAsync("datasetDeleted", ownerId, repoId, datasetId);
-        }
-
-        public override async Task OnConnectedAsync()
-        {
-            try
-            {
-                // By default we always subscribe to the group for the logged in user
-                if (Context.User?.Identity?.Name != null)
-                {
-                    await Subscribe(Context.User.Identity.Name);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ProgressHub.OnConnectedAsync");
-            }
-
-            await base.OnConnectedAsync();
+            await Clients.Groups(ownerId, ownerId + "_" + repoId).SendAsync("datasetDeleted", ownerId, repoId, datasetId);
         }
 
         /// <summary>
