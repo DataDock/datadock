@@ -11,111 +11,117 @@
 
 @section Scripts {
 
-  <environment names="Development">
-    <script src="~/lib/signalr/signalr.js"></script>
-  </environment>
-  <environment names="Staging,Production">
-    <script src="~/lib/signalr/signalr.min.js"></script>
-  </environment>
-  <script>
-    $(function () {
+    <environment names="Development">
+        <script src="~/lib/signalr/signalr.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/signalr/signalr.min.js"></script>
+    </environment>
+    <script>
+        $(function() {
 
-      //var connection = new signalR.HubConnection('/progress');
-        var connection = new signalR.HubConnectionBuilder().withUrl('/progress')
-            .configureLogging(signalR.LogLevel.Information).build();
+            //var connection = new signalR.HubConnection('/progress');
+            var connection = new signalR.HubConnectionBuilder().withUrl('/progress')
+                .configureLogging(signalR.LogLevel.Information).build();
 
-      // Create a function that the hub can call to broadcast messages.
-      connection.on('sendMessage', function (userId, message) {
-        console.log(userId + ' ' + message);
-      });
+            // Create a function that the hub can call to broadcast messages.
+            connection.on('sendMessage',
+                function(userId, message) {
+                    console.log(userId + ' ' + message);
+                });
 
-      connection.on('progressUpdated',
-        function (userId, jobId, progressMessage) {
-          var item = $('#' + jobId);
-          if (!item) {
-            console.log('Cannot find an element with that jobId');
-          }
-          var m = $('#' + jobId + ' > .processing-messages');
-          m.removeClass('hidden')
-            .append($('<div/>').html(progressMessage))
-            .scrollTop(m.prop('scrollHeight'));
-        });
+            connection.on('progressUpdated',
+                function (userId, jobId, progressMessage) {
+                    console.log(userId, jobId, progressMessage);
+                    var item = $('#' + jobId);
+                    if (!item) {
+                        console.log('Cannot find an element with that jobId');
+                    }
+                    var m = $('#' + jobId + ' > .processing-messages');
+                    m.removeClass('hidden')
+                        .append($('<div/>').html(progressMessage))
+                        .scrollTop(m.prop('scrollHeight'));
+                });
 
-      connection.on('statusUpdated',
-        function (userId, jobId, jobStatus) {
-          var item = $('#' + jobId);
-          if (!item) {
-            console.log('Cannot find an element with that jobId');
-          }
-          var statusText = getJobStatusText(jobStatus);
-          $('#' + jobId + ' .job-status')
-            .html(statusText);
-          $('#' + jobId)
-            .removeClass('positive negative info warning')
-            .addClass(getJobStatusClass(jobStatus));
-          if (statusText === "Failed" || statusText === "Completed") {
-            var ll = $('#' + jobId + ' > .log-link');
-            ll.removeClass('hidden');
-            var m = $('#' + jobId + ' > .processing-messages');
-            m.addClass('hidden');
-          }
-        });
+            connection.on('statusUpdated',
+                function(userId, jobId, jobStatus) {
+                    var item = $('#' + jobId);
+                    if (!item) {
+                        console.log('Cannot find an element with that jobId');
+                    }
+                    var statusText = getJobStatusText(jobStatus);
+                    $('#' + jobId + ' .job-status')
+                        .html(statusText);
+                    $('#' + jobId)
+                        .removeClass('positive negative info warning')
+                        .addClass(getJobStatusClass(jobStatus));
+                    if (statusText === "Failed" || statusText === "Completed") {
+                        var ll = $('#' + jobId + ' > .log-link');
+                        ll.removeClass('hidden');
+                        var m = $('#' + jobId + ' > .processing-messages');
+                        m.addClass('hidden');
+                    }
+                });
 
-      connection.on('logUpdated',
-        function (userId, jobId, logLink) {
-          var item = $('#' + jobId);
-          if (!item) {
-            console.log('Cannot find an element with that jobId');
-          }
-          $('#' + jobId + ' .log-link').append($("<a/>").attr('href', logLink).html('Download full log'));
-          var dsUrl = $('#' + jobId + ' p#iri').text();
-          var dsLink = $("<a />",
-            {
-              href: dsUrl,
-              text: dsUrl,
-              'style': 'font-weight:bold;'
+            connection.on('logUpdated',
+                function(userId, jobId, logLink) {
+                    var item = $('#' + jobId);
+                    if (!item) {
+                        console.log('Cannot find an element with that jobId');
+                    }
+                    $('#' + jobId + ' .log-link').append($("<a/>").attr('href', logLink).html('Download full log'));
+                    var dsUrl = $('#' + jobId + ' p#iri').text();
+                    var dsLink = $("<a />",
+                        {
+                            href: dsUrl,
+                            text: dsUrl,
+                            'style': 'font-weight:bold;'
+                        });
+                    $('#' + jobId + ' p#iri').text().append(dsLink);
+                });
+
+            connection.start().then(() => {
+                console.log('ProgressHub Connected');
+                if('@Model.SelectedOwnerId' !== '@Model.UserId') { 
+                    console.log('Subscribe to channel: @Model.SelectedOwnerId');
+                    connection.invoke('subscribe', '@Model.SelectedOwnerId');
+                }
             });
-          $('#' + jobId + ' p#iri').text().append(dsLink);
         });
 
-      connection.start().then(() => {
-        console.log('ProgressHub Connected');
-      });
-    });
+        function htmlEncode(value) {
+            var encodedValue = $('<div/>').text(value).html();
+            return encodedValue;
+        }
 
-    function htmlEncode(value) {
-      var encodedValue = $('<div/>').text(value).html();
-      return encodedValue;
-    }
+        function getJobStatusText(statusCode) {
+            switch (statusCode) {
+            case 0:
+                return "Queued";
+            case 1:
+                return "Running";
+            case 2:
+                return "Completed";
+            case 3:
+                return "Failed";
+            default:
+                return "--";
+            }
+        }
 
-    function getJobStatusText(statusCode) {
-      switch (statusCode) {
-        case 0:
-          return "Queued";
-        case 1:
-          return "Running";
-        case 2:
-          return "Completed";
-        case 3:
-          return "Failed";
-        default:
-          return "--";
-      }
-    }
-
-    function getJobStatusClass(statusCode) {
-      switch (statusCode) {
-        case 0:
-          return "info";
-        case 1:
-          return "warning";
-        case 2:
-          return "positive";
-        case 3:
-          return "negative";
-        default:
-          return "info";
-      }
-    }
-  </script>
+        function getJobStatusClass(statusCode) {
+            switch (statusCode) {
+            case 0:
+                return "info";
+            case 1:
+                return "warning";
+            case 2:
+                return "positive";
+            case 3:
+                return "negative";
+            default:
+                return "info";
+            }
+        }
+    </script>
 }
