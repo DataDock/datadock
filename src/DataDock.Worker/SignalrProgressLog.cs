@@ -24,8 +24,6 @@ namespace DataDock.Worker
             _fullLog = new StringBuilder();
         }
 
-       
-
 
         public void UpdateStatus(JobStatus newStatus, string progressMessage, params object[] args)
         {
@@ -109,7 +107,7 @@ namespace DataDock.Worker
             try
             {
                 
-                _hubConnection.InvokeAsync("StatusUpdated", _jobInfo.UserId, _jobInfo.JobId, jobStatus);
+                _hubConnection.InvokeAsync("StatusUpdated", _jobInfo.OwnerId, _jobInfo.JobId, jobStatus);
             }
             catch (Exception ex)
             {
@@ -121,11 +119,35 @@ namespace DataDock.Worker
         {
             try
             {
-                _hubConnection.InvokeAsync("ProgressUpdated", _jobInfo.UserId, _jobInfo.JobId, message);
+                _hubConnection.InvokeAsync("ProgressUpdated", _jobInfo.OwnerId, _jobInfo.JobId, message);
             }
             catch (Exception ex)
             {
                 _log.Error(ex, "Error notifying SignalR hub ProgressUpdated method");
+            }
+        }
+
+        public void DatasetUpdated(DatasetInfo datasetInfo)
+        {
+            try
+            {
+                _hubConnection.InvokeAsync("DatasetUpdated", datasetInfo.OwnerId, datasetInfo);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, "Error notifying SignalR hub DatasetUpdated method");
+            }
+        }
+
+        public void DatasetDeleted(string ownerId, string repoId, string datasetId)
+        {
+            try
+            {
+                _hubConnection.InvokeAsync("DatasetDeleted", ownerId, repoId, datasetId);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, "Error notifying SignalR hub DatasetDeleted method");
             }
         }
     }
