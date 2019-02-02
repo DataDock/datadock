@@ -107,7 +107,7 @@ namespace DataDock.Worker
             try
             {
                 
-                _hubConnection.InvokeAsync("StatusUpdated", _jobInfo.OwnerId, _jobInfo.JobId, jobStatus);
+                _hubConnection.InvokeAsync("StatusUpdated", _jobInfo.OwnerId, _jobInfo.RepositoryId, _jobInfo.JobId, jobStatus);
             }
             catch (Exception ex)
             {
@@ -119,7 +119,7 @@ namespace DataDock.Worker
         {
             try
             {
-                _hubConnection.InvokeAsync("ProgressUpdated", _jobInfo.OwnerId, _jobInfo.JobId, message);
+                _hubConnection.InvokeAsync("ProgressUpdated", _jobInfo.OwnerId, _jobInfo.RepositoryId, _jobInfo.JobId, message);
             }
             catch (Exception ex)
             {
@@ -131,7 +131,7 @@ namespace DataDock.Worker
         {
             try
             {
-                _hubConnection.InvokeAsync("DatasetUpdated", datasetInfo.OwnerId, datasetInfo);
+                _hubConnection.InvokeAsync("DatasetUpdated", datasetInfo.OwnerId, datasetInfo.RepositoryId, datasetInfo);
             }
             catch (Exception ex)
             {
