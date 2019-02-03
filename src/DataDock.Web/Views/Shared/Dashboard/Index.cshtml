@@ -5,42 +5,98 @@
 }
 
 <div class="ui grid">
-  <div class="eight wide column">
-    <h3>Datasets</h3>
-      <div class="data-loader"
-           data-endpoint="@Url.RouteUrl("DatasetsLoader", new {ownerId = @Model.SelectedOwnerId, repoId = @Model.SelectedRepoId})">
-          <div id="loadingJobs">
-              @await Html.PartialAsync("_SpinnerPartial")
-          </div>
-      </div>
-  </div>
-  <div class="eight wide column">
-      <h3>Jobs</h3>
-      <div class="data-loader"
-           data-endpoint="@Url.RouteUrl("JobsLoader", new {ownerId = @Model.SelectedOwnerId, repoId = @Model.SelectedRepoId})">
-          <div id="loadingJobs">
-              @await Html.PartialAsync("_SpinnerPartial")
-          </div>
-      </div>
-  </div>
+    <div class="eight wide column">
+        <h3>Datasets</h3>
+        <div id="datasets" class="data-loader"
+             data-endpoint="@Url.RouteUrl("DatasetsLoader", new {ownerId = @Model.SelectedOwnerId, repoId = @Model.SelectedRepoId})">
+            <div id="loadingJobs">
+                @await Html.PartialAsync("_SpinnerPartial")
+            </div>
+        </div>
+    </div>
+    <div class="eight wide column">
+        <h3>Jobs</h3>
+        <div id="jobs" class="data-loader"
+             data-endpoint="@Url.RouteUrl("JobsLoader", new {ownerId = @Model.SelectedOwnerId, repoId = @Model.SelectedRepoId})">
+            <div id="loadingJobs">
+                @await Html.PartialAsync("_SpinnerPartial")
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
+    <environment names="Development">
+        <script src="~/lib/signalr/signalr.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/signalr/signalr.min.js"></script>
+    </environment>
     <script type="text/javascript">
-        $(document).ready(function() { refresh() });
-
-        function refresh() {
-            $('.data-loader').each(function() {
-                var endpoint = $(this).data('endpoint');
-                var container = this;
-                $.ajax({
-                    type: "GET",
-                    url: endpoint
-                }).done(function(data) {
-                    $(container).html(data);
+        $(function () {
+            refreshAll();
+            var connection = new signalR.HubConnectionBuilder().withUrl('/progress')
+                .configureLogging(signalR.LogLevel.Information).build();
+            connection.on('datasetUpdated',
+                function(ownerId, repoId, datasetInfo) {
+                    console.log(ownerId, repoId, datasetInfo);
+                    refreshDatasets();
                 });
+            connection.on('datasetDeleted',
+                function (ownerId, repoId, datasetId) {
+                    console.log(ownerId, repoId, datasetId);
+                    refreshDatasets();
+                });
+            connection.on('sendMessage', function() {});
+            connection.on('statusUpdated', function(ownerId, jobId, jobStatus) {
+                console.log(ownerId, jobId, jobStatus);
+                setTimeout(refreshJobs, 2000);
             });
-            setTimeout(function() { refresh(); }, 5000);
+            connection.on('progressUpdated', function() {});
+            connection.start().then(() => {
+                @{
+                if (String.IsNullOrEmpty(Model.SelectedRepoId))
+                {
+                    <text>
+                        console.log('Subscribe to channel: @(Model.SelectedOwnerId)');
+                        connection.invoke('subscribe', '@(Model.SelectedOwnerId)');
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        console.log('Subscribe to channel: @(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                        connection.invoke('subscribe', '@(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                    </text>
+                }
+            }
+
+            });
+
+        });
+
+        function refreshJobs() {
+            $('#jobs').each(function() { refreshContainer(this) });
+        }
+
+        function refreshDatasets() {
+            $('#datasets').each(function() { refreshContainer(this) });
+        }
+
+        function refreshAll() {
+            $('.data-loader').each(function() {
+                refreshContainer(this);
+            });
+        }
+
+        function refreshContainer(container) {
+            var endpoint = $(container).data('endpoint');
+            $.ajax({
+                type: "GET",
+                url: endpoint
+            }).done(function(data) {
+                $(container).html(data);
+            });
         }
     </script>
 }

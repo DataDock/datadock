@@ -53,6 +53,7 @@ namespace DataDock.Worker.Processors
             {
                 await _git.PushChanges(jobInfo.GitRepositoryUrl, targetDirectory, authenticationToken);
             }
+
             try
             {
                 await _datasetStore.DeleteDatasetAsync(jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
@@ -62,6 +63,10 @@ namespace DataDock.Worker.Processors
                 Log.Error(ex, "Failed to remove dataset record.");
                 throw new WorkerException(ex, "Failed to remove dataset record. Your repository is updated but the dataset may still show in the main lodlab portal");
             }
+
+            Log.Information("Dataset Deleted: {OwnerId}/RepositoryId/{DatasetId}",
+                jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
+            progressLog.DatasetDeleted(jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
 
         }
 

@@ -20,6 +20,7 @@ namespace DataDock.Worker.Tests
         protected readonly Mock<IFileGeneratorFactory> FileGeneratorFactory;
         protected readonly Mock<ITripleCollectionHandler> MockRdfFileGenerator;
         protected readonly Mock<IResourceStatementHandler> MockHtmlFileGenerator;
+        protected readonly MockProgressLog MockProgressLog;
 
         public BaseDataDockRepositorySpec()
         {
@@ -48,6 +49,7 @@ namespace DataDock.Worker.Tests
                     It.IsAny<int>(),
                     It.IsAny<Dictionary<string, object>>()))
                 .Returns(MockHtmlFileGenerator.Object);
+            MockProgressLog = new MockProgressLog();
 
             var uriService = new DataDockUriService("http://datadock.io/");
             BaseUri = new Uri("http://datadock.io/test/repo/");
@@ -56,7 +58,8 @@ namespace DataDock.Worker.Tests
             var htmlResourceMapper = new ResourceFileMapper(
                 new ResourceMapEntry(new Uri(BaseUri, "id"), "doc"));
 
-            Repo = new DataDockRepository(RepoPath, BaseUri, new MockProgressLog(),
+
+            Repo = new DataDockRepository(RepoPath, BaseUri, MockProgressLog,
                 quinceStoreFactory.Object, FileGeneratorFactory.Object,
                 rdfResourceMapper, htmlResourceMapper, uriService);
 
