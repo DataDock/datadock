@@ -670,8 +670,10 @@
             _constructIdentifiersTabContent: function() {
                 var prefix = this._getPrefix();
                 var datasetId = this._slugify(this.options.filename, "", "", "camelCase");
-                var idFromFilename = prefix + "/id/dataset/" + datasetId;
-                var defaultValue = schemaHelper.getDatasetId(this.options.templateMetadata, idFromFilename);
+                // KA: If we do this, then the owner and repo from the template gets used in the new dataset id which is probably not what the user wants
+                // var idFromFilename = prefix + "/id/dataset/" + datasetId;
+                // var defaultValue = schemaHelper.getDatasetId(this.options.templateMetadata, idFromFilename);
+                var defaultValue = prefix + "/id/dataset/" + datasetId;
 
                 var dsIdTable = {
                     "type": "table",
@@ -744,6 +746,7 @@
                 var rowIdentifier = this._getIdentifierPrefix() + "/" + datasetId + "/row_{_row}";
                 var identifierOptions = {};
                 var columnCount = this.options.header.length;
+                var aboutUrl = schemaHelper.getAboutUrl(this.options.templateMetadata);
                 identifierOptions[rowIdentifier] = "Row Number";
 
                 for (var colIdx = 0; colIdx < columnCount; colIdx++) {
@@ -751,6 +754,10 @@
                     var colName = this._slugify(colTitle, "_", "_", "lowercase");
                     var colIdentifier = this._getIdentifierPrefix() + "/" + colName + "/{" + colName + "}";
                     identifierOptions[colIdentifier] = colTitle;
+                }
+
+                if (aboutUrl && !identifierOptions.hasOwnProperty(aboutUrl)) {
+                    identifierOptions[aboutUrl] = "Template pattern: " + aboutUrl;
                 }
                 identifierTableElements.push(
                     {
