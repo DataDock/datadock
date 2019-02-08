@@ -116,7 +116,7 @@ namespace DataDock.Web
                     options.LogoutPath = new PathString("/account/logoff/");
                     options.AccessDeniedPath = "/account/forbidden/";
                 })
-                .AddOAuth("GitHub", options =>
+                .AddReverseProxyOAuth("GitHub", options =>
                 {
                     options.ClientId = config.OAuthClientId;
                     options.ClientSecret = config.OAuthClientSecret;

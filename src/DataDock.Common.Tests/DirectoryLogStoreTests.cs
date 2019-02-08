@@ -80,7 +80,7 @@ namespace DataDock.Common.Tests
             var now = DateTime.UtcNow;
             timeProvider.SetupSequence(t => t.UtcNow)
                 .Returns(now.Subtract(TimeSpan.FromDays(89)))
-                .Returns(now.Subtract(TimeSpan.FromDays(89.9)))
+                .Returns(now.Subtract(TimeSpan.FromDays(90)))
                 .Returns(now.Subtract(TimeSpan.FromDays(91)))
                 .Returns(now);
 
