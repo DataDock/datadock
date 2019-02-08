@@ -75,7 +75,6 @@ namespace DataDock.Common.Stores
         {
             _log.Information("PruneLogs Started");
             var today = _timeProvider.UtcNow;
-                DateTimeKind.Utc);
             foreach (var dir in Directory.EnumerateDirectories(_basePath))
             {
                 _log.Debug("PruneLog evaluated directory {LogDir}", dir);
