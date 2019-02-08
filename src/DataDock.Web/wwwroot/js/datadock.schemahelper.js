@@ -45,6 +45,10 @@
         return {};
     };
 
+    this.getAboutUrl = function(metadata) {
+        return getPropertyValue(metadata, "aboutUrl", null);
+    };
+
     this.getColumnTitle = function(colTemplate, defaultValue) {
         var titles = getPropertyValue(colTemplate, "titles", null);
         if (titles) {
