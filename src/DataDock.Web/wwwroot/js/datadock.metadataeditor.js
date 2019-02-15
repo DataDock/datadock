@@ -1075,8 +1075,8 @@
                             "type": "checkbox",
                             "name": "showOnHomepage",
                             "id": "showOnHomepage",
-                            "caption": "Include my published dataset on DataDock homepage and search",
-                            "value": true
+                            "caption": "Include my published dataset on DataDock search",
+                            "checked": "checked"
                         }
                     }
                 };
@@ -1091,7 +1091,6 @@
                             "id": "addToExistingData",
                             "caption":
                                 "Add to existing data if dataset already exists (default is to overwrite existing data)",
-                            "value": false
                         }
                     }
                 };
@@ -1105,7 +1104,6 @@
                             "name": "saveAsTemplate",
                             "id": "saveAsTemplate",
                             "caption": "Save this information as a template for future imports",
-                            "value": false
                         }
                     }
                 };
