@@ -3,47 +3,59 @@
 
 @if (Model != null)
 {
+  var datasetVisible = Model.ShowOnHomePage.HasValue && Model.ShowOnHomePage.Value;
   <div class="ui segments">
-      <div class="ui fluid raised card">
-        <div class="content">
-          <div class="right floated">
-            <div class="ui vertical labeled icon buttons">
-                <a href="@Model.GetIri()" target="_blank" class="ui small basic primary button" title="Explore"><i class="external icon"></i>Explore</a>
-                @if (Model.IsOwner)
-                {
-                    <a href="@Url.RouteUrl("DeleteDataset", new {ownerId=@Model.OwnerId, repoId=@Model.RepositoryId, datasetId=@Model.Id})" class="ui small basic negative button" title="Delete"><i class="delete icon"></i>Delete</a>
-                }
-            </div>
-          </div>
-            <div class="header">@Model.GetTitle()</div>
-            <div class="meta">Last Modified: @Model.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
-            <div class="meta">License: @if (!string.IsNullOrEmpty(Model.LicenseIcon))
-                                       {
-                                           <a href="@Model.LicenseUri"><img src="/images/license/@Model.LicenseIcon" alt="@Model.LicenseUri"/></a>
-                                       }
-                                       else
-                                       {
-                                           <a href="@Model.LicenseUri">@Model.LicenseUri</a>
-                                       }
-                </div>
-          <div class="description">
-            <p>@Model.GetDescription()</p>
-          </div>
-        </div>
-        <div class="extra content">
-          <div class="meta">@Model.GetIri()</div>
-        </div>
-        @if (Model.GetTags().Any())
-        {
-          <div class="extra content">
-            @foreach (var tag in Model.GetTags())
+    <div class="ui fluid raised card">
+     @if (!datasetVisible)
+     {
+       <div class="ui top attached label"> <i class="eye slash icon"></i> Hidden from searches</div>
+     }
+      
+      <div class="content">
+        <div class="right floated">
+          <div class="ui vertical labeled icon buttons">
+            <a href="@Model.GetIri()" target="_blank" class="ui small basic primary button" title="Explore"><i class="external icon"></i>Explore</a>
+            @if (Model.IsOwner)
             {
-              <a class="ui tag label" href="/search?tag=@tag">@tag</a>
+              <a href="@Url.RouteUrl("DatasetVisibility", new {ownerId = @Model.OwnerId, repoId = @Model.RepositoryId, datasetId = @Model.Id, showOrHide = string.Format("{0}", datasetVisible ? "hide" : "show")})" class="ui small basic blue button" title="@string.Format("{0}", datasetVisible ? "Hide dataset from DataDock searches" : "Show dataset in DataDock searches")"><i class="@string.Format("eye {0} icon", datasetVisible ? "" : "slash")"></i>@string.Format(datasetVisible ? "Hide" : "Show")</a>
+            }
+            @if (Model.IsOwner)
+            {
+              <a href="@Url.RouteUrl("DeleteDataset", new {ownerId = @Model.OwnerId, repoId = @Model.RepositoryId, datasetId = @Model.Id})" class="ui small basic negative button" title="Delete Dataset"><i class="delete icon"></i>Delete</a>
             }
           </div>
-
-        }
+        </div>
+        <div class="header">@Model.GetTitle()</div>
+        <div class="meta">Last Modified: @Model.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
+        <div class="meta">
+          License:
+          @if (!string.IsNullOrEmpty(Model.LicenseIcon))
+          {
+            <a href="@Model.LicenseUri"><img src="/images/license/@Model.LicenseIcon" alt="@Model.LicenseUri" /></a>
+          }
+          else
+          {
+            <a href="@Model.LicenseUri">@Model.LicenseUri</a>
+          }
+        </div>
+        <div class="description">
+          <p>@Model.GetDescription()</p>
+        </div>
       </div>
+      <div class="extra content">
+        <div class="meta">@Model.GetIri()</div>
+      </div>
+      @if (Model.GetTags().Any())
+      {
+        <div class="extra content">
+          @foreach (var tag in Model.GetTags())
+          {
+            <a class="ui tag label" href="/search?tag=@tag">@tag</a>
+          }
+        </div>
+
+      }
+    </div>
   </div>
 }
 else
