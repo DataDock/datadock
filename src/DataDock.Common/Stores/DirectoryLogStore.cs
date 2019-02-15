@@ -80,7 +80,7 @@ namespace DataDock.Common.Stores
                 _log.Debug("PruneLog evaluated directory {LogDir}", dir);
                 var dirDate = DateTime.ParseExact(Path.GetFileName(dir), "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                 _log.Debug("PruneLog evaluated log directory date as {DirDate} for {LogDir}", dirDate, dir );
-                var dirAge = Math.Floor(today.Subtract(dirDate).TotalDays);
+                var dirAge = Math.Floor(today.Date.Subtract(dirDate).TotalDays);
                 if (dirAge > LogTimeToLive)
                 {
                     try

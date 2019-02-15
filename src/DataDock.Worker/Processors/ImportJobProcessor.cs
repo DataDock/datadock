@@ -162,7 +162,7 @@ namespace DataDock.Worker.Processors
             try
             {
                 var voidMetadataJson = ExtractVoidMetadata(metadataGraph);
-                await _datasetStore.CreateOrUpdateDatasetRecordAsync(new DatasetInfo
+                var datasetInfo = new DatasetInfo
                 {
                     OwnerId = job.OwnerId,
                     RepositoryId = job.RepositoryId,
@@ -172,15 +172,16 @@ namespace DataDock.Worker.Processors
                     VoidMetadata = voidMetadataJson,
                     ShowOnHomePage = job.IsPublic,
                     Tags = metadataJson["dcat:keyword"]?.ToObject<List<string>>()
-                });
+                };
+                await _datasetStore.CreateOrUpdateDatasetRecordAsync(datasetInfo);
+                _progressLog.DatasetUpdated(datasetInfo);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to update dataset record");
                 throw new WorkerException(ex,
-                    "Failed to update dataset record. Your repository is updated, but may not show in the main lodlab portal.");
+                    "Failed to update dataset record. Your repository is updated, but may not show in the portal.");
             }
-
         }
 
         private async Task AddCsvFilesToRepository(string repositoryDirectory, string datasetId, string csvFileName, string csvFileId, string csvmFileId)

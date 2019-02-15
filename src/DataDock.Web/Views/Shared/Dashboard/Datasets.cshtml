@@ -16,22 +16,67 @@
     </div>
 </div>
 
-@section Scripts { 
-  <script type="text/javascript">
-      $(document).ready(function() { refresh() });
+@section Scripts {
 
-      function refresh() {
-          $('.data-loader').each(function() {
-              var endpoint = $(this).data('endpoint');
-              var container = this;
-              $.ajax({
-                  type: "GET",
-                  url: endpoint
-              }).done(function(data) {
-                  $(container).html(data);
-              });
-          });
-          setTimeout(function() { refresh(); }, 5000);
-      }
-  </script>
+<environment names="Development">
+    <script src="~/lib/signalr/signalr.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/lib/signalr/signalr.min.js"></script>
+</environment>
+
+<script>
+    $(function () {
+        refresh();
+        var connection = new signalR.HubConnectionBuilder().withUrl('/progress')
+            .configureLogging(signalR.LogLevel.Information).build();
+        connection.on('datasetUpdated',
+            function(ownerId, repoId, datasetInfo) {
+                console.log(ownerId, repoId, datasetInfo);
+                refresh();
+            });
+        connection.on('datasetDeleted',
+            function (ownerId, repoId, datasetId) {
+                console.log(ownerId, repoId, datasetId);
+                refresh();
+            });
+        connection.on('sendMessage', function() {});
+        connection.on('statusUpdated', function () { });
+        connection.on('progressUpdated', function() {});
+        connection.start().then(() => {
+            @{
+                if (String.IsNullOrEmpty(Model.SelectedRepoId))
+                {
+                    <text>
+                        console.log('Subscribe to channel: @(Model.SelectedOwnerId)');
+                        connection.invoke('subscribe', '@(Model.SelectedOwnerId)');
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        console.log('Subscribe to channel: @(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                        connection.invoke('subscribe', '@(Model.SelectedOwnerId)_@(Model.SelectedRepoId)');
+                    </text>
+                }
+            }
+
+        });
+
+    });
+
+    function refresh() {
+        $('.data-loader').each(function() {
+            var endpoint = $(this).data('endpoint');
+            var container = this;
+            $.ajax({
+                type: "GET",
+                url: endpoint
+            }).done(function(data) {
+                $(container).html(data);
+            });
+        });
+    }
+
+</script>
 }

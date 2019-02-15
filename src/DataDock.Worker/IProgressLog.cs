@@ -13,6 +13,9 @@ namespace DataDock.Worker
         /// <param name="args"></param>
         void UpdateStatus(JobStatus newStatus, string progressMessage, params object[] args);
 
+        void DatasetUpdated(DatasetInfo datasetInfo);
+        void DatasetDeleted(string ownerId, string repoId, string datasetId);
+
         /// <summary>
         /// Log an informational message
         /// </summary>
