@@ -5,9 +5,12 @@
 }
 
 <div class="ui grid">
-    <div class="sixteen wide column">
-        @await Component.InvokeAsync("Dataset", new { ownerId=Model.SelectedOwnerId, repoId=Model.SelectedRepoId, datasetId=@Model.SelectedDatasetId})
-    </div>
+  <div class="sixteen wide column">
+    <a href="@Url.RouteUrl("RepoDatasets", new {ownerId = Model.SelectedOwnerId, repoId = Model.SelectedRepoId})" class="ui small basic button" title="Back to repository dataset list"><i class="arrow left icon"></i>@string.Format("Back to dataset list for {0} repository", Model.SelectedRepoId)</a>
+  </div>
+  <div class="sixteen wide column">
+    @await Component.InvokeAsync("Dataset", new {ownerId = Model.SelectedOwnerId, repoId = Model.SelectedRepoId, datasetId = @Model.SelectedDatasetId})
+  </div>
 </div>
 
 
