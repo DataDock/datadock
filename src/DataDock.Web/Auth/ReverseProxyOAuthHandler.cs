@@ -52,12 +52,12 @@ namespace DataDock.Web.Auth
             return schema + "://" + host + OriginalPathBase + targetPath;
         }
 
-        protected virtual async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
+        protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
         {
             var tokenRequestParameters = new Dictionary<string, string>()
             {
                 {"client_id", Options.ClientId},
-                {"redirect_uri", redirectUri},
+                {"redirect_uri", BuildRedirectUri(Options.CallbackPath)},
                 {"client_secret", Options.ClientSecret},
                 {"code", code},
                 {"grant_type", "authorization_code"},
