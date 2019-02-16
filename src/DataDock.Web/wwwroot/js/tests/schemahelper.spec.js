@@ -138,5 +138,60 @@
                     expect(schemaHelper.getColumnSuppressed(col)).toBe(false);
                 });
         });
-        
+
+    describe("makeAbsolute",
+        function() {
+            it("updates a top level aboutUrl property",
+                function() {
+                    var schema = { "aboutUrl": "some/relative/path" };
+                    schemaHelper.makeAbsolute(schema, "http://datadock.io/foo/bar/");
+                    expect(schema.aboutUrl).toBe("http://datadock.io/foo/bar/some/relative/path");
+                });
+            it("updates a nested aboutUrl property",
+                function() {
+                    var schema = { "metadata": { "aboutUrl": "some/relative/path" } };
+                    schemaHelper.makeAbsolute(schema, "http://datadock.io/foo/bar/");
+                    expect(schema.metadata.aboutUrl).toBe("http://datadock.io/foo/bar/some/relative/path");
+                });
+            it("updates a propertyUrl in a nested array",
+                function() {
+                    var schema = {
+                        "metadata": {
+                            "tableSchema": {
+                                "columns": [
+                                    {
+                                        "name": "colName",
+                                        "propertyUrl": "id/definition/colName",
+                                        "datatype": "string"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                    schemaHelper.makeAbsolute(schema, "http://datadock.io/foo/bar/");
+                    expect(schema.metadata.tableSchema.columns[0].propertyUrl)
+                        .toBe("http://datadock.io/foo/bar/id/definition/colName");
+                });
+            it("updates a valueUrl in a nested array and does not update an absolute propertyUrl",
+                function() {
+                    var schema = {
+                        "metadata": {
+                            "tableSchema": {
+                                "columns": [
+                                    {
+                                        "name": "colName",
+                                        "propertyUrl": "http://example.org/foo",
+                                        "valueUrl": "id/resource/widget/{colName}"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                    schemaHelper.makeAbsolute(schema, "http://datadock.io/foo/bar/");
+                    expect(schema.metadata.tableSchema.columns[0].propertyUrl)
+                        .toBe("http://example.org/foo");
+                    expect(schema.metadata.tableSchema.columns[0].valueUrl)
+                        .toBe("http://datadock.io/foo/bar/id/resource/widget/{colName}");
+                });
+        });
 });
