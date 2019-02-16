@@ -81,15 +81,15 @@ namespace DataDock.Worker.Tests
             };
             await proc.ProcessJob(job, new UserAccount(), _mockProgressLog.Object);
             _mockSchemeStore.Verify(s=>s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p=>
-                (p.Schema["aboutUrl"] as JValue).Value<string>().Equals("/id/resource/mydataset/monument_record_no/{monument_record_no}"))));
+                (p.Schema["aboutUrl"] as JValue).Value<string>().Equals("id/resource/mydataset/monument_record_no/{monument_record_no}"))));
             _mockSchemeStore.Verify(s => s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p =>
                 (p.Schema["dc:title"] as JValue).Value<string>().Equals("http://datadock.io/datadock/test/foo"))));
             _mockSchemeStore.Verify(s => s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p =>
                 (p.Schema["tableSchema"]["columns"][0]["propertyUrl"] as JValue).Value<string>()
-                .Equals("/id/definition/foo"))));
+                .Equals("id/definition/foo"))));
             _mockSchemeStore.Verify(s => s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p =>
                 (p.Schema["tableSchema"]["columns"][0]["valueUrl"] as JValue).Value<string>()
-                .Equals("/id/bar/{bar}"))));
+                .Equals("id/bar/{bar}"))));
         }
     }
 }

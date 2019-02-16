@@ -51,7 +51,7 @@ namespace DataDock.Worker.Processors
                         _progressLog.UpdateStatus(JobStatus.Running, "Retrieved DataDock schema file.");
 
                         MakeRelative(schemaJson,
-                            $"{_configuration.PublishUrl}{(_configuration.PublishUrl.EndsWith("/") ? string.Empty : "/")}{job.OwnerId}/{job.RepositoryId}");
+                            $"{_configuration.PublishUrl}{(_configuration.PublishUrl.EndsWith("/") ? string.Empty : "/")}{job.OwnerId}/{job.RepositoryId}/");
 
                         Log.Debug("Create schema: OwnerId: {ownerId} RepositoryId: {repoId} SchemaFileId: {schemaFileId}",
                             job.OwnerId, job.RepositoryId, job.SchemaFileId);
