@@ -68,5 +68,27 @@
     this.getColumnSuppressed = function(colTemplate) {
         return getPropertyValue(colTemplate, "suppressOutput", false);
     }
+    
+    this.makeAbsolute = function (tok, baseUri) {
+        if (Array.isArray(tok)) {
+            tok.forEach((item) => { schemaHelper.makeAbsolute(item, baseUri) });
+        } else if (typeof (tok) === "object" && tok !== null) {
+            Object.keys(tok).forEach((k) => {
+                if (tok.hasOwnProperty(k)) {
+                    if (k === "aboutUrl" ||
+                        k === "propertyUrl" ||
+                        k === "valueUrl") {
+                        if (!tok[k].includes("://")) {
+                            tok[k] = baseUri + tok[k];
+                        }
+                    } else {
+                        if (tok[k] != null && (Array.isArray(tok[k]) || typeof(tok[k]) === "object")) {
+                            schemaHelper.makeAbsolute(tok[k], baseUri);
+                        }
+                    }
+                }
+            });
+        }
+    }
 
 }).apply(schemaHelper);

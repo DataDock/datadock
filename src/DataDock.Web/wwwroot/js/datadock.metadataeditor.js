@@ -59,7 +59,8 @@
                 });
             },
 
-            loadSchema: function(onLoad) {
+            loadSchema: function (onLoad) {
+                var self = this;
                 if (this.options.schemaId) {
                     var options = {
                         url: "/api/schemas",
@@ -72,6 +73,8 @@
                             console.log("Template returned from DataDock schema API");
                             console.log(response);
                             if (response["schema"] && response["schema"]["metadata"]) {
+                                schemaHelper.makeAbsolute(response.schema.metadata,
+                                    self.options.publishUrl + "/" + self.options.ownerId + "/" + self.options.repoId + "/");
                                 onLoad({
                                     success: true,
                                     schemaTitle: response["schema"]["dc:title"] || "",
