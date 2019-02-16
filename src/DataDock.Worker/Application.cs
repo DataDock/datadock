@@ -84,7 +84,10 @@ namespace DataDock.Worker
                         break;
                     }
                     case JobType.SchemaCreate:
-                        processor = new ImportSchemaProcessor(Services.GetRequiredService<ISchemaStore>(), Services.GetRequiredService<IFileStore>());
+                        processor = new ImportSchemaProcessor(
+                            Services.GetRequiredService<WorkerConfiguration>(), 
+                            Services.GetRequiredService<ISchemaStore>(), 
+                            Services.GetRequiredService<IFileStore>());
                         break;
                     case JobType.SchemaDelete:
                         processor = new DeleteSchemaProcessor(Services.GetRequiredService<ISchemaStore>());
