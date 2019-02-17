@@ -74,13 +74,15 @@ namespace DataDock.Worker
                     }
                     case JobType.Delete:
                     {
-                        var ddRepoFactory = Services.GetRequiredService<IDataDockRepositoryFactory>();
                         var cmdProcessorFactory = Services.GetRequiredService<IGitCommandProcessorFactory>();
                         processor = new DeleteDatasetProcessor(
                             Services.GetRequiredService<WorkerConfiguration>(),
                             cmdProcessorFactory.MakeGitCommandProcessor(progressLog),
+                            Services.GetRequiredService<IGitHubClientFactory>(),
+                            Services.GetRequiredService<IOwnerSettingsStore>(),
+                            Services.GetRequiredService<IRepoSettingsStore>(),
                             Services.GetRequiredService<IDatasetStore>(),
-                            ddRepoFactory.GetRepositoryForJob(jobInfo, progressLog));
+                            Services.GetRequiredService<IDataDockRepositoryFactory>());
                         break;
                     }
                     case JobType.SchemaCreate:

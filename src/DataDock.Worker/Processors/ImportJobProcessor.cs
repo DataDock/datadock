@@ -20,16 +20,12 @@ using FileMode = System.IO.FileMode;
 
 namespace DataDock.Worker.Processors
 {
-    public class ImportJobProcessor : IDataDockProcessor, IProgress<int>
+    public class ImportJobProcessor : PublishingJobProcessor, IProgress<int>
     {
         private readonly WorkerConfiguration _configuration;
         private readonly GitCommandProcessor _git;
-        private readonly IGitHubClientFactory _gitHubClientFactory;
         private readonly IDatasetStore _datasetStore;
-        private readonly IOwnerSettingsStore _ownerSettingsStore;
-        private readonly IRepoSettingsStore _repoSettingsStore;
         private readonly IFileStore _jobFileStore;
-        private IProgressLog _progressLog;
         private readonly IDataDockRepositoryFactory _dataDataDockRepositoryFactory;
         private readonly IDataDockUriService _dataDockUriService;
         private const int CsvConversionReportInterval = 250;
@@ -43,38 +39,25 @@ namespace DataDock.Worker.Processors
             IOwnerSettingsStore ownerSettingsStore,
             IRepoSettingsStore repoSettingsStore,
             IDataDockRepositoryFactory dataDockRepositoryFactory,
-            IDataDockUriService dataDockUriService)
+            IDataDockUriService dataDockUriService) : base(configuration, ownerSettingsStore, repoSettingsStore, gitHubClientFactory)
         {
             _configuration = configuration;
             _git = gitProcessor;
-            _gitHubClientFactory = gitHubClientFactory;
             _datasetStore = datasetStore;
-            _ownerSettingsStore = ownerSettingsStore;
-            _repoSettingsStore = repoSettingsStore;
             _jobFileStore = jobFileStore;
             _dataDataDockRepositoryFactory = dataDockRepositoryFactory;
             _dataDockUriService = dataDockUriService;
         }
 
-        public async Task ProcessJob(JobInfo job, UserAccount userAccount, IProgressLog progressLog)
+        protected override async Task RunJob(JobInfo job, UserAccount userAccount)
         {
-            _progressLog = progressLog;
-            _progressLog.Info("Starting import job processing for " + userAccount.UserId);
-
-            var authenticationClaim =
-                userAccount.Claims.FirstOrDefault(c => c.Type.Equals(DataDockClaimTypes.GitHubAccessToken));
-            var authenticationToken = authenticationClaim?.Value;
-            if (string.IsNullOrEmpty(authenticationToken))
-            {
-                Log.Error("No authentication token found for user {userId}", userAccount.UserId);
-                _progressLog.Error("Could not find a valid GitHub access token for this user account. Please check your account settings.");
-            }
+            ProgressLog.Info("Starting import job processing for " + userAccount.UserId);
 
             var targetDirectory = Path.Combine(_configuration.RepoBaseDir, job.JobId);
             Log.Information("Using local directory {localDirPath}", targetDirectory);
 
             // Clone the repository
-            await _git.CloneRepository(job.GitRepositoryUrl, targetDirectory, authenticationToken, userAccount);
+            await _git.CloneRepository(job.GitRepositoryUrl, targetDirectory, AuthenticationToken, userAccount);
 
             // Retrieve CSV and CSVM files to src directory in the repository
             await AddCsvFilesToRepository(targetDirectory,
@@ -126,7 +109,7 @@ namespace DataDock.Worker.Processors
 
             
 
-            var dataDataDockRepository = _dataDataDockRepositoryFactory.GetRepositoryForJob(job, progressLog);
+            var dataDataDockRepository = _dataDataDockRepositoryFactory.GetRepositoryForJob(job, ProgressLog);
             dataDataDockRepository.UpdateDataset(
                 datasetGraph, datasetUri, job.OverwriteExistingData,
                 metadataGraph, datasetMetadataGraphIri, 
@@ -135,27 +118,15 @@ namespace DataDock.Worker.Processors
                 "", "",
                 rootMetadataGraphIri);
 
-            var portalInfo = await GetPortalSettingsInfo(job.OwnerId, job.RepositoryId, authenticationToken);
-            //TODO get datadock-publish-url from config? page template are always remote as they are pushed to github
-            var templateVariables =
-                new Dictionary<string, object>
-                {
-                    {"datadock-publish-url", "https://datadock.io" }, 
-                    {"owner-id", job.OwnerId},
-                    {"repo-id", job.RepositoryId},
-                    {"portal-info", portalInfo},
-                };
-
-            dataDataDockRepository.Publish(
-                new[] { datasetUri, datasetMetadataGraphIri, rootMetadataGraphIri },
-                templateVariables);
+            await UpdateHtmlPagesAsync(dataDataDockRepository,
+                new[] {datasetUri, datasetMetadataGraphIri, rootMetadataGraphIri});
 
             // Add and Commit all changes
             if (await _git.CommitChanges(targetDirectory,
                 $"Added {job.CsvFileName} to dataset {job.DatasetIri}", userAccount))
             {
-                await _git.PushChanges(job.GitRepositoryUrl, targetDirectory, authenticationToken);
-                await _git.MakeRelease(datasetGraph, releaseTag, job.OwnerId, job.RepositoryId, job.DatasetId, targetDirectory, authenticationToken);
+                await _git.PushChanges(job.GitRepositoryUrl, targetDirectory, AuthenticationToken);
+                await _git.MakeRelease(datasetGraph, releaseTag, job.OwnerId, job.RepositoryId, job.DatasetId, targetDirectory, AuthenticationToken);
             }
 
             // Update the dataset repository
@@ -174,7 +145,7 @@ namespace DataDock.Worker.Processors
                     Tags = metadataJson["dcat:keyword"]?.ToObject<List<string>>()
                 };
                 await _datasetStore.CreateOrUpdateDatasetRecordAsync(datasetInfo);
-                _progressLog.DatasetUpdated(datasetInfo);
+                ProgressLog.DatasetUpdated(datasetInfo);
             }
             catch (Exception ex)
             {
@@ -188,7 +159,7 @@ namespace DataDock.Worker.Processors
         {
             try
             {
-                _progressLog.Info("Copying source CSV and metadata files to repository directory csv/{0}", datasetId);
+                ProgressLog.Info("Copying source CSV and metadata files to repository directory csv/{0}", datasetId);
                 var datasetCsvDirPath = Path.Combine(repositoryDirectory, "csv", datasetId);
                 if (!Directory.Exists(datasetCsvDirPath)) Directory.CreateDirectory(datasetCsvDirPath);
                 var csvFilePath = Path.Combine(datasetCsvDirPath, csvFileName);
@@ -223,133 +194,36 @@ namespace DataDock.Worker.Processors
         {
             try
             {
-                _progressLog.Info("Attempting to retrieve publisher contact information from repository settings");
+                ProgressLog.Info("Attempting to retrieve publisher contact information from repository settings");
                 // get repoSettings
-                var repoSettings = await _repoSettingsStore.GetRepoSettingsAsync(ownerId, repoId);
+                var repoSettings = await RepoSettingsStore.GetRepoSettingsAsync(ownerId, repoId);
                 if (repoSettings?.DefaultPublisher != null)
                 {
-                    _progressLog.Info("Returning publisher from repository settings");
+                    ProgressLog.Info("Returning publisher from repository settings");
                     return repoSettings.DefaultPublisher;
                 }
                 // no repo settings publisher, try at owner level
-                _progressLog.Info("No publisher info found in repository settings");
+                ProgressLog.Info("No publisher info found in repository settings");
                 if (ownerId != null)
                 {
-                    _progressLog.Info("Attempting to retrieve publisher contact information from repository owner's settings");
-                    var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
+                    ProgressLog.Info("Attempting to retrieve publisher contact information from repository owner's settings");
+                    var ownerSettings = await OwnerSettingsStore.GetOwnerSettingsAsync(ownerId);
                     if (ownerSettings?.DefaultPublisher != null)
                     {
-                        _progressLog.Info("Returning publisher from repository owner's settings");
+                        ProgressLog.Info("Returning publisher from repository owner's settings");
                         return ownerSettings.DefaultPublisher;
                     }
                 }
                 // no settings / publisher found for that repo
-                _progressLog.Info("No publisher info found in repository owner's settings");
+                ProgressLog.Info("No publisher info found in repository owner's settings");
                 return null;
             }
             catch (Exception)
             {
-                _progressLog.Error("Error when attempting to retrieve publisher contact information from repository/owner settings");
+                ProgressLog.Error("Error when attempting to retrieve publisher contact information from repository/owner settings");
                 return null;
             }
 
-        }
-
-        private async Task<PortalInfoDrop> GetPortalSettingsInfo(string ownerId, string repoId, string authenticationToken)
-        {
-            try
-            {
-                _progressLog.Info("Attempting to retrieve portal settings information from owner settings");
-                if (ownerId != null)
-                {
-                    var portalInfo = new PortalInfoDrop
-                    {
-                        OwnerId = ownerId,
-                        RepositoryName = repoId
-                    };
-
-                    _progressLog.Info("Attempting to retrieve publisher contact information from repository owner's settings");
-                    var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
-                    if (ownerSettings != null)
-                    {
-                        portalInfo.IsOrg = ownerSettings.IsOrg;
-                        portalInfo.ShowDashboardLink = ownerSettings.DisplayDataDockLink;
-                        if (!string.IsNullOrEmpty(ownerSettings.TwitterHandle)) portalInfo.Twitter = ownerSettings.TwitterHandle;
-
-                        var client = _gitHubClientFactory.CreateClient(authenticationToken);
-                        if (ownerSettings.IsOrg)
-                        {
-                            var org = await client.Organization.Get(ownerId);
-                            if (org == null) return portalInfo;
-
-                            portalInfo.OwnerDisplayName = org.Name;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
-                            if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = org.AvatarUrl;
-                            if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = org.Bio;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
-                            if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = org.Location;
-                            if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = org.HtmlUrl;
-                        }
-                        else
-                        {
-                            var user = await client.User.Get(ownerId);
-                            if (user == null) return portalInfo;
-
-                            portalInfo.OwnerDisplayName = user.Name;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
-                            if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = user.AvatarUrl;
-                            if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = user.Bio;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
-                            if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = user.Location;
-                            if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = user.HtmlUrl;
-                        }
-                    }
-                    _progressLog.Info("Looking up repository portal search buttons from settings for {0} repository.", repoId);
-
-                    var repoSettings = await _repoSettingsStore.GetRepoSettingsAsync(ownerId, repoId);
-                    var repoSearchButtons = repoSettings?.SearchButtons;
-                    if (!string.IsNullOrEmpty(repoSearchButtons))
-                    {
-
-                        portalInfo.RepoSearchButtons = GetSearchButtons(repoSearchButtons);
-
-                    }
-                    return portalInfo;
-                }
-                // no settings 
-                _progressLog.Info("No owner settings found");
-                return null;
-            }
-            catch (Exception e)
-            {
-                _progressLog.Error("Error when attempting to retrieve portal information from owner settings");
-                return null;
-            }
-
-        }
-
-        private List<SearchButtonDrop> GetSearchButtons(string searchButtonsString)
-        {
-            var sbSplit = searchButtonsString.Split(',');
-            var searchButtons = new List<SearchButtonDrop>();
-            foreach (var b in sbSplit)
-            {
-                var sb = new SearchButtonDrop();
-                if (b.IndexOf(';') >= 0)
-                {
-                    // has different button text
-                    var bSplit = b.Split(';');
-                    sb.Tag = bSplit[0];
-                    sb.Text = bSplit[1];
-                    searchButtons.Add(sb);
-                }
-                else
-                {
-                    sb.Tag = b;
-                    searchButtons.Add(sb);
-                }
-            }
-            return searchButtons;
         }
 
         private Graph GenerateDatasetGraph(TextReader csvReader, JObject metadataJson)
@@ -371,15 +245,15 @@ namespace DataDock.Worker.Processors
             }
 
             var graph = new Graph();
-            _progressLog.Info("Running CSV to RDF conversion");
+            ProgressLog.Info("Running CSV to RDF conversion");
             var graphHandler = new GraphHandler(graph);
-            var converter = new Converter(tableMeta, graphHandler, (msg) => _progressLog.Error(msg), this, reportInterval: CsvConversionReportInterval);
+            var converter = new Converter(tableMeta, graphHandler, (msg) => ProgressLog.Error(msg), this, reportInterval: CsvConversionReportInterval);
             converter.Convert(csvReader);
             if (converter.Errors.Any())
             {
                 foreach (var e in converter.Errors)
                 {
-                    _progressLog.Error(e);
+                    ProgressLog.Error(e);
                 }
                 throw new WorkerException("One or more errors where encountered during the CSV to RDF conversion.");
             }
@@ -390,7 +264,7 @@ namespace DataDock.Worker.Processors
         {
             var metadataGraph = new Graph();
             var metadataExtractor = new MetdataExtractor();
-            _progressLog.Info("Extracting dataset metadata");
+            ProgressLog.Info("Extracting dataset metadata");
             metadataExtractor.Run(metadataJson, metadataGraph, publisherIri, dataGraph.Triples.Count, DateTime.UtcNow);
             var dsNode = metadataGraph.CreateUriNode(datasetUri);
             var ddNode = metadataGraph.CreateUriNode(new Uri("http://rdfs.org/ns/void#dataDump"));
@@ -438,7 +312,7 @@ namespace DataDock.Worker.Processors
         {
             var definitionsGraph = new Graph();
             var metadataExtractor = new MetdataExtractor();
-            _progressLog.Info("Extracting column property definitions");
+            ProgressLog.Info("Extracting column property definitions");
             metadataExtractor.GenerateColumnDefinitions(metadataJson, definitionsGraph);
             return definitionsGraph;
         }
@@ -446,7 +320,7 @@ namespace DataDock.Worker.Processors
 
         public void Report(int value)
         {
-            _progressLog.Info("CSV conversion processed {0} rows", value);
+            ProgressLog.Info("CSV conversion processed {0} rows", value);
         }
     }
 
