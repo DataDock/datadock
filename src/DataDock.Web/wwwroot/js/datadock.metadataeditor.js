@@ -885,7 +885,7 @@
                             "integer": "Whole Number",
                             "decimal": "Decimal Number",
                             "date": "Date",
-                            "datetime": "Data & Time",
+                            "datetime": "Date & Time",
                             "boolean": "True/False"
                         }
                     };
