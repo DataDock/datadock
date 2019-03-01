@@ -565,12 +565,13 @@
                     if (licenseFromTemplate) {
                         $("#datasetLicense").val(licenseFromTemplate);
                     }
-                }
-                // set the column datatypes from the template
-                this._setDatatypesFromTemplate();
-                // set the aboutUrl from the template
-                if (this.options.templateMetadata) {
+                    // set the column datatypes from the template
+                    this._setDatatypesFromTemplate();
+                    // set the aboutUrl from the template
                     $("#aboutUrlSuffix").val(this.options.templateMetadata["aboutUrl"]);
+                } else {
+                    // set the column datatypes using the datatype sniffer
+                    this._setDatatypesFromSniffer();
                 }
 
                 // inputosaurus
@@ -1193,6 +1194,24 @@
                     }
                 }
             },
+
+            _setDatatypesFromSniffer: function() {
+                if (this.columnSet && !this.options.templateMetadata) {
+                    var sniffedDatatypes = datatypeSniffer.getDatatypes(this.options.csvData);
+                    for (var i = 0; i < this.columnSet.length && i < sniffedDatatypes.length; i++) {
+                        var colName = this.columnSet[i];
+                        var colDatatype = sniffedDatatypes[i].type;
+                        if (colDatatype === "float") colDatatype = "string"; // Float types are not handled in the UI yet
+                        if (colDatatype) {
+                            var selector = $("#" + colName + "_datatype");
+                            if (selector) {
+                                selector.val(colDatatype);
+                            }
+                        }
+                    }
+                }
+            },
+
             // End Helper functions
 
             // CSVW Metadata builder
