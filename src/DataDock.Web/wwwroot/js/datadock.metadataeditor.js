@@ -37,6 +37,12 @@
                             function(ev, data) {
                                 console.log(data);
                                 self.loaderData = data;
+                                if ($("#metadataEditor").is(":data('ddMetadataEditor')")) {
+                                    // Reset the editor by destroying the widget and removing the dform-generated form
+                                    $("#metadataEditor").metadataEditor("destroy");
+                                    $('#metadataEditor form').remove();
+                                    $('#metadataEditor').unbind("metadataeditorsubmit");
+                                }
                                 $("#metadataEditor").metadataEditor({
                                     baseUrl: self.options.baseUrl,
                                     publishUrl: self.options.publishUrl,
@@ -355,6 +361,8 @@
                 $("#datasetInfo").show();
                 $("#datasetInfoTab").addClass("active");
             },
+
+            
 
             _hideAllTabContent: function() {
                 $("#datasetInfo").hide();
