@@ -2,43 +2,47 @@
 
 @if (Model != null && Model.Count > 0)
 {
-    
-  <div class="ui segments">
-    @foreach (var job in Model)
-    {
-      var logAvailable = !string.IsNullOrEmpty(job.LogId);
-      <div class="ui attached @job.StatusClass message" id="@job.JobId">
-        <div class="ui header">@job.JobType - <span class="job-status"> @job.CurrentStatus </span></div>
-        <div class="content">
-          <p>
-            <strong>@job.DatasetIri</strong>
-          </p>
-            <div class="meta">
-                @if (job.QueuedAt.Year > 2000)
-                {
-                    <span>Queued At: @job.QueuedAt</span>
-                }
-                @if (job.StartedAt.Year > 2000)
-                {
-                     <span>Started At: @job.StartedAt</span>
-                }
-                @if (job.CompletedAt.Year > 2000)
-                {
-                    <span>Completed At: @job.CompletedAt</span>
-                }
+    <div class="ui segments">
+        @foreach (var job in Model)
+        {
+            <div class="ui attached @job.StatusClass message" id="@job.JobId">
+                <div class="ui header">
+                    <img class="ui image" src="https://github.com/@(job.UserId).png?size=64" width="32" height="32" title="Job started by @job.UserId" alt="@job.UserId"/>
+                    <div class="content">
+                        @job.JobType started by @job.UserId <br/>
+                        <span class="job-status"> @job.CurrentStatus </span>
+                    </div>
+                </div>
+                <div class="content" style="padding-top: 1ex">
+                    <div>
+                        <strong>@job.DatasetIri</strong>
+                    </div>
+                    <div class="meta">
+                        @if (job.CompletedAt.Year > 2000)
+                        {
+                            <span>Completed At: @job.CompletedAt</span>
+                        }
+                        else if (job.StartedAt.Year > 2000)
+                        {
+                            <span>Started At: @job.StartedAt</span>
+                        }
+                        else if (job.QueuedAt.Year > 2000)
+                        {
+                            <span>Queued At: @job.QueuedAt</span>
+                        }
+                    </div>
+                </div>
+                <div class="processing-messages hidden"></div>
+                <div class="extra content log-link @(string.IsNullOrEmpty(job.LogId) ? "hidden" : "")">
+                    <a href="@Url.RouteUrl("JobLog", new {ownerId = job.OwnerId, repoId = job.RepositoryId, jobId = job.JobId})">View Full Log</a>
+                </div>
             </div>
-        </div>
-        <div class="processing-messages hidden"></div>
-        <div class="extra content log-link @(string.IsNullOrEmpty(job.LogId) ? "hidden" : "")">
-          <a href="@Url.RouteUrl("JobLog", new {ownerId=job.OwnerId, repoId=job.RepositoryId, jobId=job.JobId})">View Full Log</a>
-        </div>
-      </div>
-    }
-  </div>
+        }
+    </div>
 }
 else
 {
-  <div class="ui warning message">
-    None found.
-  </div>
+    <div class="ui warning message">
+        None found.
+    </div>
 }

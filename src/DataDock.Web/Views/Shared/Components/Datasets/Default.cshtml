@@ -4,7 +4,7 @@
 @if (Model != null && Model.Count > 0)
 {
 
-  <div class="ui segments">
+  <div class="ui one cards">
     @foreach (var ds in Model)
     {
       var datasetVisible = ds.ShowOnHomePage.HasValue && ds.ShowOnHomePage.Value;
@@ -22,10 +22,11 @@
             </div>
           </div>
           <div class="header">@ds.GetTitle()</div>
-          <div class="meta">Last Modified: @ds.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
-          <div class="description">
-            <p>@ds.GetDescription()</p>
-          </div>
+            <div class="meta">Last Modified: @ds.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
+            @if (!string.IsNullOrEmpty(ds.GetDescription()))
+            {
+                <div class="description"><p>@ds.GetDescription()</p></div>
+            }
         </div>
         <div class="extra content">
           <div class="meta">@ds.GetIri()</div>
