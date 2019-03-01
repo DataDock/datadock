@@ -66,6 +66,7 @@
         var hasEmptyValues = false;
         var allEmpty = true;
         for (var i = 1; i < rows.length; i++) {
+            if (colIx >= rows[i].length) continue;
             var val = rows[i][colIx].trim();
             if (val === '') {
                 hasEmptyValues = true;
