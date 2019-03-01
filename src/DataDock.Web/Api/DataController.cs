@@ -102,6 +102,19 @@ namespace DataDock.Web.Api
                         "Repository does not exist or you do not have the required authorization to publish to it.");
                 }
 
+                // create a settings record for the owner if one does not already exist
+                try
+                {
+                    var ownerSettings = await _importService.CheckOwnerSettingsAsync(User, jobRequest.OwnerId);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(
+                        $"api/data: unable to retrive ownerSettings for the supplied owner '{jobRequest.OwnerId}'");
+                    return BadRequest(
+                        "The user or organization does not exist or you do not have the required authorization to publish to it.");
+                }
+
                 var job = await _jobStore.SubmitImportJobAsync(jobRequest);
                 
                 Log.Information("api/data(POST): Conversion job started.");

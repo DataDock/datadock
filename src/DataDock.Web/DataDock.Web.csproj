@@ -31,6 +31,9 @@
     <Content Update="Views\Info\Temp.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\LinkedData\OwnerNotFound.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\LinkedData\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

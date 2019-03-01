@@ -13,11 +13,41 @@ namespace DataDock.Web.Services
     {
         private readonly IGitHubApiService _gitHubApiService;
         private readonly IRepoSettingsStore _repoSettingsStore;
+        private readonly IOwnerSettingsStore _ownerSettingsStore;
         public ImportService(IGitHubApiService gitHubApiService,
-            IRepoSettingsStore repoSettingsStore)
+            IRepoSettingsStore repoSettingsStore,
+            IOwnerSettingsStore ownerSettingsStore)
         {
             _gitHubApiService = gitHubApiService;
             _repoSettingsStore = repoSettingsStore;
+            _ownerSettingsStore = ownerSettingsStore;
+        }
+
+        public async Task<OwnerSettings> CheckOwnerSettingsAsync(ClaimsPrincipal user, string ownerId)
+        {
+            var isOrg = await CheckGitHubOwner(user.Identity, ownerId);
+            try
+            {
+                var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
+                return ownerSettings;
+            }
+            catch (OwnerSettingsNotFoundException osnf)
+            {
+                var newOwnerSettings = new OwnerSettings
+                {
+                    OwnerId = ownerId,
+                    IsOrg = isOrg
+                };
+             
+
+                await _ownerSettingsStore.CreateOrUpdateOwnerSettingsAsync(newOwnerSettings);
+                return newOwnerSettings;
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Error checking owner settings for '{ownerId}", e);
+                throw;
+            }
         }
 
         /// <summary>
@@ -72,6 +102,27 @@ namespace DataDock.Web.Services
             }
             var userHasOwner = await _gitHubApiService.UserIsAuthorizedForOrganization(user.Identity, ownerId);
             return userHasOwner;
+        }
+
+        private async Task<bool> CheckGitHubOwner(IIdentity identity, string ownerId)
+        {
+            if (identity == null) throw new ArgumentNullException();
+            if (string.IsNullOrEmpty(ownerId)) throw new ArgumentException("ownerId parameter is null or empty");
+            bool isOrg = false;
+            try
+            {
+                if (identity.Name.Equals(ownerId)) return isOrg;
+                isOrg = true;
+                var userHasOwner = await _gitHubApiService.UserIsAuthorizedForOrganization(identity, ownerId);
+                if (!userHasOwner) throw new UnauthorizedAccessException();
+
+                return isOrg;
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Error checking github existence for '{ownerId}", e);
+                throw;
+            }
         }
 
         private async Task<Repository> CheckGitHubRepository(IIdentity identity, string ownerId, string repoId)
