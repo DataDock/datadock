@@ -41,23 +41,30 @@ namespace DataDock.Web.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
 
-            var portalViewModel = new PortalViewModel(ownerSettings);
-            
-
-            // repos
             try
             {
-                var repos = await _repoSettingsStore.GetRepoSettingsForOwnerAsync(ownerId);
-                portalViewModel.RepoIds = repos.Select(r => r.RepositoryId).ToList();
+                var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
+                var portalViewModel = new PortalViewModel(ownerSettings);
+                
+                // repos
+                try
+                {
+                    var repos = await _repoSettingsStore.GetRepoSettingsForOwnerAsync(ownerId);
+                    portalViewModel.RepoIds = repos.Select(r => r.RepositoryId).ToList();
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error getting repositories for {0}", ownerId);
+                }
+
+                return View("Index", portalViewModel);
             }
-            catch (Exception e)
+            catch (OwnerSettingsNotFoundException osnf)
             {
-                Log.Error(e, "Error getting repositories for {0}", ownerId);
+                //redirect to a friendly warning page
+                return View("OwnerNotFound");
             }
-            
-            return View("Index", portalViewModel); ;
         }
 
         /// <summary>
