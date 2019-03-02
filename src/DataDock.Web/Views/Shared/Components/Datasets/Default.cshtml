@@ -3,22 +3,30 @@
 
 @if (Model != null && Model.Count > 0)
 {
-  <div class="ui segments">
+
+  <div class="ui one cards">
     @foreach (var ds in Model)
     {
+      var datasetVisible = ds.ShowOnHomePage.HasValue && ds.ShowOnHomePage.Value;
+
       <div class="ui fluid raised card">
+        @if (!datasetVisible)
+        {
+          <div class="ui top attached label"> <i class="eye slash icon"></i> Hidden from searches</div>
+        }
         <div class="content">
           <div class="right floated">
             <div class="ui vertical labeled icon buttons">
               <a href="@ds.GetIri()" target="_blank" class="ui small basic primary button" title="Explore"><i class="external icon"></i>Explore</a>
-              <a href="@Url.RouteUrl("Dataset", new {ownerId=ds.OwnerId, repoId=ds.RepositoryId, datasetId=ds.Id})" class="ui small basic secondary button" title="Admin"><i class="edit icon"></i>Admin</a>
+              <a href="@Url.RouteUrl("Dataset", new {ownerId = ds.OwnerId, repoId = ds.RepositoryId, datasetId = ds.Id})" class="ui small basic secondary button" title="Admin"><i class="edit icon"></i>Admin</a>
             </div>
           </div>
           <div class="header">@ds.GetTitle()</div>
-          <div class="meta">Last Modified: @ds.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
-          <div class="description">
-            <p>@ds.GetDescription()</p>
-          </div>
+            <div class="meta">Last Modified: @ds.LastModified.ToString("d", CultureInfo.CurrentUICulture)</div>
+            @if (!string.IsNullOrEmpty(ds.GetDescription()))
+            {
+                <div class="description"><p>@ds.GetDescription()</p></div>
+            }
         </div>
         <div class="extra content">
           <div class="meta">@ds.GetIri()</div>

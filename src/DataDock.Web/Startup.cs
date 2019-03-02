@@ -376,6 +376,12 @@ namespace DataDock.Web
                     constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
                 );
                 routes.MapRoute(
+                    name: "DatasetVisibility",
+                    template: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/visibilty/{showOrHide}",
+                    defaults: new { controller = "Dataset", action = "DatasetVisibility" },
+                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                );
+                routes.MapRoute(
                     name: "DeleteDataset",
                     template: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/delete",
                     defaults: new { controller = "Dataset", action = "DeleteDataset" },

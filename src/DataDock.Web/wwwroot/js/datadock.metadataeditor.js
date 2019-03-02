@@ -37,6 +37,12 @@
                             function(ev, data) {
                                 console.log(data);
                                 self.loaderData = data;
+                                if ($("#metadataEditor").is(":data('ddMetadataEditor')")) {
+                                    // Reset the editor by destroying the widget and removing the dform-generated form
+                                    $("#metadataEditor").metadataEditor("destroy");
+                                    $('#metadataEditor form').remove();
+                                    $('#metadataEditor').unbind("metadataeditorsubmit");
+                                }
                                 $("#metadataEditor").metadataEditor({
                                     baseUrl: self.options.baseUrl,
                                     publishUrl: self.options.publishUrl,
@@ -59,7 +65,8 @@
                 });
             },
 
-            loadSchema: function(onLoad) {
+            loadSchema: function (onLoad) {
+                var self = this;
                 if (this.options.schemaId) {
                     var options = {
                         url: "/api/schemas",
@@ -72,6 +79,8 @@
                             console.log("Template returned from DataDock schema API");
                             console.log(response);
                             if (response["schema"] && response["schema"]["metadata"]) {
+                                schemaHelper.makeAbsolute(response.schema.metadata,
+                                    self.options.publishUrl + "/" + self.options.ownerId + "/" + self.options.repoId + "/");
                                 onLoad({
                                     success: true,
                                     schemaTitle: response["schema"]["dc:title"] || "",
@@ -353,6 +362,8 @@
                 $("#datasetInfoTab").addClass("active");
             },
 
+            
+
             _hideAllTabContent: function() {
                 $("#datasetInfo").hide();
                 $("#datasetInfoTab").removeClass("active");
@@ -562,12 +573,13 @@
                     if (licenseFromTemplate) {
                         $("#datasetLicense").val(licenseFromTemplate);
                     }
-                }
-                // set the column datatypes from the template
-                this._setDatatypesFromTemplate();
-                // set the aboutUrl from the template
-                if (this.options.templateMetadata) {
+                    // set the column datatypes from the template
+                    this._setDatatypesFromTemplate();
+                    // set the aboutUrl from the template
                     $("#aboutUrlSuffix").val(this.options.templateMetadata["aboutUrl"]);
+                } else {
+                    // set the column datatypes using the datatype sniffer
+                    this._setDatatypesFromSniffer();
                 }
 
                 // inputosaurus
@@ -873,7 +885,7 @@
                             "integer": "Whole Number",
                             "decimal": "Decimal Number",
                             "date": "Date",
-                            "datetime": "Data & Time",
+                            "datetime": "Date & Time",
                             "boolean": "True/False"
                         }
                     };
@@ -1075,8 +1087,8 @@
                             "type": "checkbox",
                             "name": "showOnHomepage",
                             "id": "showOnHomepage",
-                            "caption": "Include my published dataset on DataDock homepage and search",
-                            "value": true
+                            "caption": "Include my published dataset on DataDock search",
+                            "checked": "checked"
                         }
                     }
                 };
@@ -1091,7 +1103,6 @@
                             "id": "addToExistingData",
                             "caption":
                                 "Add to existing data if dataset already exists (default is to overwrite existing data)",
-                            "value": false
                         }
                     }
                 };
@@ -1105,7 +1116,6 @@
                             "name": "saveAsTemplate",
                             "id": "saveAsTemplate",
                             "caption": "Save this information as a template for future imports",
-                            "value": false
                         }
                     }
                 };
@@ -1192,6 +1202,24 @@
                     }
                 }
             },
+
+            _setDatatypesFromSniffer: function() {
+                if (this.columnSet && !this.options.templateMetadata) {
+                    var sniffedDatatypes = datatypeSniffer.getDatatypes(this.options.csvData);
+                    for (var i = 0; i < this.columnSet.length && i < sniffedDatatypes.length; i++) {
+                        var colName = this.columnSet[i];
+                        var colDatatype = sniffedDatatypes[i].type;
+                        if (colDatatype === "float") colDatatype = "string"; // Float types are not handled in the UI yet
+                        if (colDatatype) {
+                            var selector = $("#" + colName + "_datatype");
+                            if (selector) {
+                                selector.val(colDatatype);
+                            }
+                        }
+                    }
+                }
+            },
+
             // End Helper functions
 
             // CSVW Metadata builder

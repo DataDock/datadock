@@ -5,6 +5,7 @@
             "wwwroot/lib/jquery/jquery.min.js",
             "wwwroot/lib/jquery-ui/jquery-ui.min.js",
             "wwwroot/semantic-ui/dist/semantic.js",
+            "wwwroot/lib/momentjs/moment.min.js",
             "wwwroot/js/!(site).js",
             "wwwroot/js/tests/*.spec.js"
         ],

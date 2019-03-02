@@ -1,57 +1,53 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using Serilog;
 
 namespace DataDock.Worker.Processors
 {
-    public class DeleteDatasetProcessor : IDataDockProcessor
+    public class DeleteDatasetProcessor : PublishingJobProcessor
     {
-        private readonly WorkerConfiguration _configuration;
         private readonly GitCommandProcessor _git;
         private readonly IDatasetStore _datasetStore;
-        private readonly IDataDockRepository _dataDockRepository;
+        private readonly IDataDockRepositoryFactory _repositoryFactory;
 
         public DeleteDatasetProcessor(
             WorkerConfiguration configuration,
             GitCommandProcessor gitProcessor,
+            IGitHubClientFactory gitHubClientFactory,
+            IOwnerSettingsStore ownerSettingsStore,
+            IRepoSettingsStore repoSettingsStore,
             IDatasetStore datasetStore,
-            IDataDockRepository dataDockRepository)
+            IDataDockRepositoryFactory repositoryFactory) : base(configuration, ownerSettingsStore, repoSettingsStore,
+            gitHubClientFactory)
         {
-            _configuration = configuration;
             _git = gitProcessor;
             _datasetStore = datasetStore;
-            _dataDockRepository = dataDockRepository;
+            _repositoryFactory = repositoryFactory;
         }
 
-        public async Task ProcessJob(JobInfo jobInfo, UserAccount userAccount, IProgressLog progressLog)
+        protected override async Task RunJob(JobInfo jobInfo, UserAccount userInfo)
         {
-            var authenticationClaim =
-                userAccount.Claims.FirstOrDefault(c => c.Type.Equals(DataDockClaimTypes.GitHubAccessToken));
-            var authenticationToken = authenticationClaim?.Value;
-            if (string.IsNullOrEmpty(authenticationToken))
-            {
-                Log.Error("No authentication token found for user {userId}", userAccount.UserId);
-                progressLog.Error("Could not find a valid GitHub access token for this user account. Please check your account settings.");
-            }
-
-            var targetDirectory = Path.Combine(_configuration.RepoBaseDir, jobInfo.JobId);
+            var targetDirectory = Path.Combine(Configuration.RepoBaseDir, jobInfo.JobId);
             Log.Information("Using local directory {localDirPath}", targetDirectory);
             Log.Information("Clone Repository: {gitRepositoryUrl} => {targetDirectory}", jobInfo.GitRepositoryUrl, targetDirectory);
-            await _git.CloneRepository(jobInfo.GitRepositoryUrl, targetDirectory, authenticationToken, userAccount);
+            await _git.CloneRepository(jobInfo.GitRepositoryUrl, targetDirectory, AuthenticationToken, userInfo);
 
             var datasetIri = new Uri(jobInfo.DatasetIri);
 
-            DeleteCsvAndMetadata(targetDirectory, jobInfo.DatasetId, progressLog);
-            _dataDockRepository.DeleteDataset(datasetIri);
-            _dataDockRepository.Publish();
+            DeleteCsvAndMetadata(targetDirectory, jobInfo.DatasetId, ProgressLog);
+            var dataDockRepository = _repositoryFactory.GetRepositoryForJob(jobInfo, ProgressLog);
+            dataDockRepository.DeleteDataset(datasetIri);
+            await UpdateHtmlPagesAsync(dataDockRepository, null);
 
-            if (await _git.CommitChanges(targetDirectory, $"Deleted dataset {datasetIri}", userAccount))
+            if (await _git.CommitChanges(targetDirectory, $"Deleted dataset {datasetIri}", userInfo))
             {
-                await _git.PushChanges(jobInfo.GitRepositoryUrl, targetDirectory, authenticationToken);
+                await _git.PushChanges(jobInfo.GitRepositoryUrl, targetDirectory, AuthenticationToken);
             }
 
             try
@@ -66,7 +62,7 @@ namespace DataDock.Worker.Processors
 
             Log.Information("Dataset Deleted: {OwnerId}/RepositoryId/{DatasetId}",
                 jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
-            progressLog.DatasetDeleted(jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
+            ProgressLog.DatasetDeleted(jobInfo.OwnerId, jobInfo.RepositoryId, jobInfo.DatasetId);
 
         }
 
