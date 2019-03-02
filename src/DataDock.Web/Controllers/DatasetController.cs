@@ -3,15 +3,15 @@ using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using DataDock.Web.Auth;
-using DataDock.Web.Models;
-using DataDock.Web.Routing;
-using DataDock.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace DataDock.Web.Controllers
 {
+    [Authorize]
+    [ServiceFilter(typeof(AccountExistsFilter))]
+    [ServiceFilter(typeof(OwnerAdminAuthFilter))]
     public class DatasetController : DashboardBaseController
     {
         private readonly IDatasetStore _datasetStore;
@@ -26,46 +26,42 @@ namespace DataDock.Web.Controllers
         }
 
 
-        // GET
-        [Authorize]
-        [ServiceFilter(typeof(AccountExistsFilter))]
-        [ServiceFilter(typeof(OwnerAdminAuthFilter))]
-        public IActionResult Index(string ownerId, string repositoryId, string datasetId)
+        /// <summary>
+        /// View the details of a particular dataset
+        /// </summary>
+        /// <param name="ownerId">Dataset owner</param>
+        /// <param name="repoId">Dataset repository</param>
+        /// <param name="datasetId">Dataset ID</param>
+        /// <returns></returns>
+        public IActionResult Index(string ownerId, string repoId, string datasetId)
         {
             DashboardViewModel.Area = "dataset";
             DashboardViewModel.SelectedDatasetId = datasetId;
-            DashboardViewModel.Title = string.Format("{0} > {1} Dataset", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
+            DashboardViewModel.Title =
+                $"{DashboardViewModel.SelectedOwnerId} / {DashboardViewModel.SelectedRepoId} Dataset";
+            DashboardViewModel.Heading =
+                $"Dataset: {DashboardViewModel.SelectedOwnerId} / {DashboardViewModel.SelectedRepoId}";
             return View("Dashboard/Dataset", this.DashboardViewModel);
         }
 
-        [Authorize]
-        [ServiceFilter(typeof(AccountExistsFilter))]
-        [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> DatasetVisibility(string ownerId, string repoId, string datasetId, string showOrHide)
         {
             this.DashboardViewModel.Area = "datasets";
             DashboardViewModel.SelectedDatasetId = datasetId;
-            DashboardViewModel.Heading = string.Format("Delete Dataset: {0}", datasetId);
+            DashboardViewModel.Heading = $"Dataset: {datasetId}";
 
-            var dataset =
-                await _datasetStore.GetDatasetInfoAsync(ownerId, repoId, datasetId);
-            if (string.IsNullOrEmpty(showOrHide))
+            if (!string.IsNullOrEmpty(showOrHide))
             {
-                // redirect back to admin without doing anything
-                return View("Dashboard/Dataset", this.DashboardViewModel);
+                var dataset =
+                    await _datasetStore.GetDatasetInfoAsync(ownerId, repoId, datasetId);
+                if (showOrHide.Equals("show")) dataset.ShowOnHomePage = true;
+                if (showOrHide.Equals("hide")) dataset.ShowOnHomePage = false;
+                await _datasetStore.CreateOrUpdateDatasetRecordAsync(dataset);
             }
 
-            if (showOrHide.Equals("show")) dataset.ShowOnHomePage = true;
-            if (showOrHide.Equals("hide")) dataset.ShowOnHomePage = false;
-
-            await _datasetStore.CreateOrUpdateDatasetRecordAsync(dataset);
-            return View("Dashboard/Dataset", this.DashboardViewModel);
+            return RedirectToRoute("Dataset", new {ownerId, repoId, datasetId});
         }
 
-        [Authorize]
-        [ServiceFilter(typeof(AccountExistsFilter))]
-        [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> DeleteDataset(string ownerId, string repoId, string datasetId, bool confirmed = false)
         {
             DashboardViewModel.Area = "datasets";
