@@ -57,23 +57,6 @@ namespace DataDock.Web.Controllers
         }
 
         /// <summary>
-        /// View the details of a particular dataset
-        /// </summary>
-        /// <param name="ownerId">Dataset owner</param>
-        /// <param name="repoId">Dataset repository</param>
-        /// <param name="datasetId">Dataset ID</param>
-        /// <returns></returns>
-        public IActionResult Dataset(string ownerId, string repoId, string datasetId)
-        {
-            DashboardViewModel.Area = "datasets";
-            DashboardViewModel.Heading = "Dataset";
-            DashboardViewModel.SelectedDatasetId = datasetId;
-            DashboardViewModel.Title = string.Format("{0} > {1} > {2}", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId, datasetId);
-            return View("Dashboard/Dataset", this.DashboardViewModel);
-        }
-
-        /// <summary>
         /// User or Org template library for a partcular repo
         /// Viewable by authorized users only
         /// </summary>
