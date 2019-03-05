@@ -93,7 +93,7 @@ namespace DataDock.Worker.Processors
                             var org = await client.Organization.Get(ownerId);
                             if (org == null) return portalInfo;
 
-                            portalInfo.OwnerDisplayName = org.Name;
+                            portalInfo.OwnerDisplayName = org.Name ?? ownerId;
                             if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
                             if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = org.AvatarUrl;
                             if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = org.Bio;
@@ -106,7 +106,7 @@ namespace DataDock.Worker.Processors
                             var user = await client.User.Get(ownerId);
                             if (user == null) return portalInfo;
 
-                            portalInfo.OwnerDisplayName = user.Name;
+                            portalInfo.OwnerDisplayName = user.Name ?? ownerId;
                             if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
                             if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = user.AvatarUrl;
                             if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = user.Bio;
