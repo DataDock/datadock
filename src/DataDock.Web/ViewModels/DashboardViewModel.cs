@@ -1,4 +1,7 @@
-﻿namespace DataDock.Web.ViewModels
+﻿using System.Reflection;
+using System.Security.Policy;
+
+namespace DataDock.Web.ViewModels
 {
     public class DashboardViewModel : BaseLayoutViewModel
     {
@@ -29,29 +32,29 @@
                     switch (value)
                     {
                         case "summary":
-                            this.Heading = "Dashboard";
+                            this.Heading = dashContext + " Summary";
                             
                             break;
                         case "repositories":
-                            this.Heading = "Repositories";
+                            this.Heading = dashContext + " Repositories";
                             break;
                         case "datasets":
-                            this.Heading = "Datasets";
+                            this.Heading = dashContext + " Datasets";
                             break;
                         case "library":
-                            this.Heading = "Template Library";
+                            this.Heading = dashContext + " Template Library";
                             break;
                         case "import":
-                            this.Heading = "Add Data";
+                            this.Heading = dashContext + " Add Data";
                             break;
                         case "jobs":
-                            this.Heading = "Job History";
+                            this.Heading = dashContext + " Job History";
                             break;
                         case "settings":
-                            this.Heading = "Settings";
+                            this.Heading = dashContext + " Settings";
                             break;
                         default:
-                            this.Heading = "";
+                            this.Heading = dashContext;
                             break;
                     }
                     this.Title = string.Format("DataDock.io > {0}{1}", dashContext, !string.IsNullOrEmpty(this.Heading) ? ": " + this.Heading : "");
