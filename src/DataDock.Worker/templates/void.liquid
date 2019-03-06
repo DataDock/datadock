@@ -281,30 +281,31 @@
       <div class="sixteen wide mobile twelve wide computer column">
 		
 		 {% if portal-info.repo_search_buttons -%}
-			<div class="ui center aligned container search-buttons" id="buttons">
-				<div class="ui link four cards">
+			<div class="ui grid" id="buttons">
 				{% for button in portal-info.repo_search_buttons %}
-
 					{% if button.tag -%}
-
-						<div class="primary card" onclick="buttonSearch('{{ button.tag }}')" id="{{button.tag}}">
-							<div class="content">
-								<div class="header">
+						<div class="four wide column">
 								{% if button.icon -%}
-									<i class="fa fa-{{button.icon}} mr"></i>
+									<button class="fluid ui big basic primary labeled icon button" 
+										data-tag="{{ button.tag }}" onclick="buttonSearch('{{ button.tag }}')"
+										title="Filter to datasets tagged with {{ button.tag }}">
+										<i class="fa fa-{{button.icon}} mr"></i>
+								{% else -%}
+									<button class="fluid ui big basic primary button"
+										data-tag="{{ button.tag }}" onclick="buttonSearch('{{ button.tag }}')"
+										title="Filter to datasets tagged with {{ button.tag }}">
 								{% endif -%}
 								{% if button.text -%}
 									{{ button.text }}
 								{% else -%}
 									{{ button.tag }}
-								{% endif -%}</div><!-- end header -->
-							</div><!-- end content -->
-						</div><!-- end card -->
+								{% endif -%}
+								</button>
+						</div><!-- end column -->
 					{% endif -%}
 				{% endfor %}
-				</div><!-- end cards -->
-		  </div><!-- end #buttons -->
-		  <div class="ui hidden divider"></div>
+			</div><!-- end #buttons -->
+			<div class="ui hidden divider"></div>
 		{% endif -%}
 
 		<div class="ui center aligned container">
@@ -382,7 +383,7 @@
 
 							{% assign keywords = ds_triples | where:"predicate", dcat.keyword -%}
 							{% if keywords.size > 0 -%}
-								<dt class="ds-tags">Tags:</dt>
+								<dt class="ds-tags" data-tags="|{{keywords | map: 'object' | join: '|'}}|">Tags:</dt>
 									<dd class="ds-tags">
 										<ul>
 										{% for keyword in keywords %}
