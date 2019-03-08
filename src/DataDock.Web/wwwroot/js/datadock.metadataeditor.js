@@ -345,11 +345,8 @@
                 $.dform.subscribe("updateDatasetId",
                     function(options, type) {
                         if (options !== "") {
-                            this.keyup(function() {
-                                var title = $("#datasetTitle").val();
-                                var slug = self._slugify(title, "", "", "camelCase");
-                                var datasetId = self._getPrefix() + "/id/dataset/" + slug;
-                                $("#datasetId").val(datasetId);
+                            this.keyup(function () {
+                                self._updateDatasetIdFromTitle();
                                 return false;
                             });
                         }
@@ -358,11 +355,18 @@
 
                 this._loadEditor();
                 this._hideAllTabContent();
+                this._updateDatasetIdFromTitle();
                 $("#datasetInfo").show();
                 $("#datasetInfoTab").addClass("active");
             },
 
-            
+
+            _updateDatasetIdFromTitle: function() {
+                var title = $("#datasetTitle").val();
+                var slug = this._slugify(title, "", "", "camelCase");
+                var datasetId = this._getPrefix() + "/id/dataset/" + slug;
+                $("#datasetId").val(datasetId);
+            },
 
             _hideAllTabContent: function() {
                 $("#datasetInfo").hide();
@@ -581,6 +585,8 @@
                     // set the column datatypes using the datatype sniffer
                     this._setDatatypesFromSniffer();
                 }
+
+                $('')
 
                 // inputosaurus
                 $("#keywords").inputosaurus({
