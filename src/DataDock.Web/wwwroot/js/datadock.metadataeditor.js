@@ -353,6 +353,15 @@
 
                     });
 
+                $.dform.subscribe("updateDatatype",
+                    function(colName, type) {
+                        if (colName !== "") {
+                            this.change(function () {
+                                self._updateDatatype(this, colName);
+                            });
+                        }
+                    });
+
                 this._loadEditor();
                 this._hideAllTabContent();
                 this._updateDatasetIdFromTitle();
@@ -366,6 +375,36 @@
                 var slug = this._slugify(title, "", "", "camelCase");
                 var datasetId = this._getPrefix() + "/id/dataset/" + slug;
                 $("#datasetId").val(datasetId);
+            },
+
+            _updateDatatype: function (selector, colName) {
+                $("#" + colName + "_advanced").children(".datatype-field").hide();
+                $("#" + colName + "_advanced").children(".datatype-field.datatype-" + selector.value).show();
+                var options = { "default": "Default" };
+                $(".datatype-selector").each(function(ix, selector) {
+                    if ($(selector).val() === "uri") {
+                        var colName = $(selector).data("colname");
+                        options[colName] = colName;
+                    }
+                });
+                $(".parent-selector").each(function(ix, s) {
+                    var selector = $(s);
+                    var oldValue = selector.val();
+                    $("option", selector).remove();
+                    $.each(options, function(optVal, optLabel) {
+                        selector.append("<option value='" + optVal + "'>" + optLabel + "</option>");
+                    });
+                    if (options.hasOwnProperty(oldValue)) {
+                        selector.val(oldValue);
+                    } else {
+                        selector.val('default');
+                    }
+                });
+                if (Object.keys(options).length > 1) {
+                    $(".parent-field").show();
+                } else {
+                    $(".parent-field").hide();
+                }
             },
 
             _hideAllTabContent: function() {
@@ -884,6 +923,8 @@
                         name: colName + "_datatype",
                         id: colName + "_datatype",
                         type: "select",
+                        class: "datatype-selector",
+                        "data-colName": colName,
                         placeholder: "",
                         options: {
                             "string": "Text",
@@ -893,7 +934,8 @@
                             "date": "Date",
                             "datetime": "Date & Time",
                             "boolean": "True/False"
-                        }
+                        },
+                        updateDatatype: colName
                     };
                     var tdDatatype = { "type": "td", "html": datatypeField };
                     trElements.push(tdDatatype);
@@ -935,7 +977,7 @@
                                     },
                                     {
                                         "type": "th",
-                                        "html": "Property (URL)"
+                                        "html": "Advanced Configuration"
                                     }
                                 ]
                             }
@@ -960,24 +1002,81 @@
                     var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                     var defaultValue = schemaHelper.getColumnPropertyUrl(colTemplate, predicate);
                     var predicateField = {
-                        name: colName + "_property_url",
-                        id: colName + "_property_url",
-                        type: "text",
-                        placeholder: "",
-                        "value": defaultValue,
-                        "class": "pred-field",
-                        "validate": {
-                            "required": true,
-                            "pattern": /^https?:\/\/\S+[^#\/]$/i,
-                            "messages": {
-                                "required": "Column '" + colName + "' is missing a property URL.",
-                                "pattern": "Column '" +
-                                    colName +
-                                    "' must have a property URL that is a URL that does not end with a hash or slash."
+                        type: "div",
+                        class: "field",
+                        html: [
+                            {
+                                type: "label",
+                                for: colName + "_property_url",
+                                html: "Property URL"
+                            },
+                            {
+                                name: colName + "_property_url",
+                                id: colName + "_property_url",
+                                type: "text",
+                                placeholder: "",
+                                "value": defaultValue,
+                                "class": "pred-field",
+                                "validate": {
+                                    "required": true,
+                                    "pattern": /^https?:\/\/\S+[^#\/]$/i,
+                                    "messages": {
+                                        "required": "Column '" + colName + "' is missing a property URL.",
+                                        "pattern": "Column '" +
+                                            colName +
+                                            "' must have a property URL that is a URL that does not end with a hash or slash."
+                                    }
+                                }
                             }
-                        }
+                        ]
                     };
-                    var predDiv = { "type": "div", "class": "field", "html": predicateField };
+                    var uriTemplateField = {
+                        type: "div",
+                        class: "field datatype-field datatype-uri",
+                        hidden: true,
+                        html: [
+                            {
+                                type: "label",
+                                html: "URI Template",
+                                for: colName + "_uriTemplate"
+                            },
+                            {
+                                name: colName + "_uriTemplate",
+                                id: colName + "_uriTemplate",
+                                type: "text",
+                                value: this._getIdentifierPrefix() + "/" + colName + "/{" + colName + "}",
+                            }
+                        ]
+                    };
+                    var parentField = {
+                        type: "div",
+                        class: "field parent-field",
+                        hidden: true,
+                        html: [
+                            {
+                                type: "label",
+                                html: "Parent Node",
+                                for: colName + "_parent"
+                            },
+                            {
+                                name: colName + "_parent",
+                                id: colName + "_parent",
+                                class: "parent-selector",
+                                type: "select",
+                                options: [
+                                    {
+                                        "default": "Default"
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+                    var predDiv = {
+                        "type": "div",
+                        "class": "field",
+                        id: colName + "_advanced",
+                        "html": [parentField, predicateField, uriTemplateField]
+                    };
                     var tdPredicate = { "type": "td", "html": predDiv };
                     trElements.push(tdPredicate);
 
@@ -1281,8 +1380,19 @@
                 } else {
                     var columnTitle = $(colId + "_title").val();
                     column["titles"] = [columnTitle];
+                    var parentSelector = $(colId + "_parent");
+                    var parent = parentSelector.val();
+                    if (parent !== "default") {
+                        var parentUriTemplate = $("#" + parent + "_uriTemplate").val();
+                        if (parentUriTemplate) {
+                            column["aboutUrl"] = parentUriTemplate;
+                        } else {
+                            column["aboutUrl"] = "{" + parent + "}";
+                        }
+                    }
                     if (datatype === "uri") {
-                        column["valueUrl"] = "{" + columnName + "}";
+                        var uriTemplate = $(colId + "_uriTemplate").val();
+                        column["valueUrl"] = uriTemplate;
                     } else {
                         column["datatype"] = $(colId + "_datatype").val();
                     }
