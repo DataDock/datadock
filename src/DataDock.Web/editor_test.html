@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Metadata Editor Test</title>
+    <link rel="stylesheet" href="wwwroot/semantic-ui/dist/semantic.css"/>
+    <link rel="stylesheet" href="wwwroot/css/site.css"/>
+    <link rel="stylesheet" href="wwwroot/css/inputosaurus.css"/>
+    <link rel="stylesheet" href="wwwroot/css/spinner.css"/>
+</head> 
+<body>
+    
+<div id="validation-container">
+<!-- Validation Messages -->
+<div class="ui negative message validation-messages" id="validation-messages" style="display: none;">
+</div>
+    
+</div>
+<div id="errors">
+    <div class="ui negative message" id="error-messages" style="display: none;">
+
+    </div>    
+</div>
+<div class="ui hidden divider"></div>
+<div class="ui container">
+    <div id="metadataEditor">
+        <form class="ui form" id="metadataEditorForm"></form>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.js"
+        integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+        crossorigin="anonymous"></script>
+<script
+    src="http://code.jquery.com/ui/1.12.1/jquery-ui.js"
+    integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" type="text/javascript"></script>
+<script>
+    $(document)
+        .ready(function () {
+
+            var csvData = [
+                ["Column A", "Column B", "Column C"],
+                ["A1", "B1", "C1"],
+                ["A2", "B2", "C2"]
+            ];
+            // create sidebar and attach to menu open
+            $('.ui.sidebar').sidebar('attach events', '.toc.item');
+            $('.ui.accordion').accordion();
+            $('#metadataEditor').metadataEditor({
+                baseUrl: "http://datadock.io",
+                publishUrl: "http://datadock.io",
+                ownerId: "owner",
+                repoId: "repo",
+                schemaId: null,
+                apiUrl: null,
+                csvData: csvData,
+                header: csvData[0],
+                filename: "test.csv",
+                schemaTitle: null,
+                templateMetadata: null
+            }).bind("metadataeditorsubmit",
+                function(ev, data) {
+                    console.log(data);
+                });
+        });
+
+</script>
+
+<environment names="Development">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/additional-methods.min.js" type="text/javascript"></script>
+    <script src="wwwroot/js/jquery.dform-1.1.0.js"></script>
+    <script src="wwwroot/js/datadock.portal.js"></script>
+    <script src="wwwroot/js/datadock.schemahelper.js"></script>
+    <script src="wwwroot/js/datadock.metadataeditor.js"></script>
+    <script src="wwwroot/js/datadock.datatypeSniffer.js"></script>
+    <script src="wwwroot/lib/momentjs/moment.js"></script>
+    <script src="wwwroot/js/inputosaurus.js"></script>
+</environment>
+</body>
+</html>
