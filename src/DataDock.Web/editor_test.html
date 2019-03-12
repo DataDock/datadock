@@ -40,10 +40,61 @@
         .ready(function () {
 
             var csvData = [
-                ["Column A", "Column B", "Column C"],
-                ["A1", "B1", "C1"],
-                ["A2", "B2", "C2"]
+                ["stop", "seeAlso", "at_station", "on_line"],
+                ["A1", "B1", "C1", "D1"],
+                ["A2", "B2", "C2", "D2"]
             ];
+
+            var metadata = {
+                "@context": "http://www.w3.org/ns/csvw",
+                "url": "http://datadock.io/kal/local_data/id/dataset/tokyoMetroStops",
+                "dc:title": "Tokyo Metro Stops",
+                "dc:description": "",
+                "dcat:keyword": [
+                    "tokyo",
+                    "metro",
+                    "transport"
+                ],
+                "dc:license": "https://creativecommons.org/publicdomain/zero/1.0/",
+                "aboutUrl": "id/resource/stop/{stop}",
+                "tableSchema": {
+                    "columns": [
+                        {
+                            "name": "stop",
+                            "titles": [
+                                "stop"
+                            ],
+                            "datatype": "string",
+                            "propertyUrl": "http://www.w3.org/2000/01/rdf-schema#label"
+                        },
+                        {
+                            "name": "seealso",
+                            "titles": [
+                                "﻿seeAlso"
+                            ],
+                            "valueUrl": "{seealso}",
+                            "propertyUrl": "http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso"
+                        },
+                        {
+                            "name": "at_station",
+                            "titles": [
+                                "at_station"
+                            ],
+                            "valueUrl": "id/resource/station/{at_station}",
+                            "propertyUrl": "id/definition/at_station"
+                        },
+                        {
+                            "name": "on_line",
+                            "titles": [
+                                "on_line"
+                            ],
+                            "valueUrl": "id/resource/line/{on_line}",
+                            "propertyUrl": "id/definition/on_line"
+                        }
+                    ]
+                }
+            };
+            schemaHelper.makeAbsolute(metadata, "http://datadock.io/owner/repo/");
             // create sidebar and attach to menu open
             $('.ui.sidebar').sidebar('attach events', '.toc.item');
             $('.ui.accordion').accordion();
@@ -57,8 +108,8 @@
                 csvData: csvData,
                 header: csvData[0],
                 filename: "test.csv",
-                schemaTitle: null,
-                templateMetadata: null
+                schemaTitle: "Test Schema",
+                templateMetadata: metadata
             }).bind("metadataeditorsubmit",
                 function(ev, data) {
                     console.log(data);

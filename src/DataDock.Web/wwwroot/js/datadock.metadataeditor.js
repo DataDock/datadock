@@ -357,7 +357,7 @@
                     function(colName, type) {
                         if (colName !== "") {
                             this.change(function () {
-                                self._updateDatatype(this, colName);
+                                self._updateDatatype(colName, this.value);
                             });
                         }
                     });
@@ -377,12 +377,12 @@
                 $("#datasetId").val(datasetId);
             },
 
-            _updateDatatype: function (selector, colName) {
+            _updateDatatype: function (colName, datatype) {
                 $("#" + colName + "_advanced").children(".datatype-field").hide();
-                $("#" + colName + "_advanced").children(".datatype-field.datatype-" + selector.value).show();
+                $("#" + colName + "_advanced").children(".datatype-field.datatype-" + datatype).show();
                 var options = { "default": "Default" };
                 $(".datatype-selector").each(function(ix, selector) {
-                    if ($(selector).val() === "uri") {
+                    if ($(selector).val() === "uri" || $(selector).val() === "uriTemplate") {
                         var colName = $(selector).data("colname");
                         options[colName] = colName;
                     }
@@ -933,7 +933,8 @@
                             "decimal": "Decimal Number",
                             "date": "Date",
                             "datetime": "Date & Time",
-                            "boolean": "True/False"
+                            "boolean": "True/False",
+                            "uriTemplate": "URI Template"
                         },
                         updateDatatype: colName
                     };
@@ -1032,7 +1033,7 @@
                     };
                     var uriTemplateField = {
                         type: "div",
-                        class: "field datatype-field datatype-uri",
+                        class: "field datatype-field datatype-uriTemplate",
                         hidden: true,
                         html: [
                             {
@@ -1253,12 +1254,18 @@
                 return this._getPrefix() + "/id/resource";
             },
 
-            _slugify: function(original, whitespaceReplacement, specCharReplacement, casing) {
+            _slugify: function (original, whitespaceReplacement, specCharReplacement, casing) {
+                var multiReplacementRegex = new RegExp("(" + whitespaceReplacement + "|" + specCharReplacement + ")+", "ig");
+                var replacementTrimStart = new RegExp("^(" + whitespaceReplacement + "|" + specCharReplacement + ")+");
+                var replacementTrimEnd = new RegExp("(" + whitespaceReplacement + "|" + specCharReplacement + ")+$");
                 switch (casing) {
                 case "lowercase":
                     var lowercase = original.replace(/\s+/g, whitespaceReplacement)
                         .replace(/[^A-Z0-9]+/ig, specCharReplacement)
-                        .replace("__", "_").toLowerCase();
+                        .replace(multiReplacementRegex, whitespaceReplacement)
+                        .replace(replacementTrimStart, "")
+                        .replace(replacementTrimEnd, "")
+                        .toLowerCase();
                     return lowercase;
 
                 case "camelCase":
@@ -1268,7 +1275,9 @@
                 default:
                     var slug = original.replace(/\s+/g, whitespaceReplacement)
                         .replace(/[^A-Z0-9]+/ig, specCharReplacement)
-                        .replace("__", "_");
+                        .replace(multiReplacementRegex, whitespaceReplacement)
+                        .replace(replacementTrimStart, "")
+                        .replace(replacementTrimEnd, "");
                     return slug;
                 }
             },
@@ -1298,12 +1307,30 @@
                         var colName = this.columnSet[i];
                         var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                         var colDatatype = schemaHelper.getColumnDatatype(colTemplate, "");
+                        var selector = $("#" + colName + "_datatype");
                         if (colDatatype) {
-                            var selector = $("#" + colName + "_datatype");
                             if (selector) {
                                 selector.val(colDatatype);
                             }
+                        } else {
+                            var valueUrl = schemaHelper.getColumnValueUrl(colTemplate, "");
+                            if (valueUrl) {
+                                if (/^\{[^\}]+\}$/.test(valueUrl)) {
+                                    selector.val("uri");
+                                } else {
+                                    selector.val("uriTemplate");
+                                    $('#' + colName + '_uriTemplate').val(valueUrl);
+                                }
+                            }
                         }
+                        var aboutUrl = schemaHelper.getColumnAboutUrl(colTemplate, "");
+                        if (aboutUrl) {
+                            var parentColumn = schemaHelper.getColumnWithValueUrl(this.options.templateMetadata, aboutUrl);
+                            if (parentColumn) {
+                                $('#' + colName + '_parent').val(parentColumn);
+                            }
+                        }
+                        this._updateDatatype(colName, selector.val());
                     }
                 }
             },
@@ -1383,16 +1410,23 @@
                     var parentSelector = $(colId + "_parent");
                     var parent = parentSelector.val();
                     if (parent !== "default") {
-                        var parentUriTemplate = $("#" + parent + "_uriTemplate").val();
-                        if (parentUriTemplate) {
-                            column["aboutUrl"] = parentUriTemplate;
-                        } else {
+                        var parentType = $("#" + parent + "_datatype").val();
+                        if (parentType === "uri") {
                             column["aboutUrl"] = "{" + parent + "}";
+                        } else if (parentType == "uriTemplate") {
+                            var parentUriTemplate = $("#" + parent + "_uriTemplate").val();
+                            if (parentUriTemplate) {
+                                column["aboutUrl"] = parentUriTemplate;
+                            } else {
+                                column["aboutUrl"] = "{" + parent + "}";
+                            }
                         }
                     }
-                    if (datatype === "uri") {
+                    if (datatype === "uriTemplate") {
                         var uriTemplate = $(colId + "_uriTemplate").val();
                         column["valueUrl"] = uriTemplate;
+                    } else if (datatype === "uri") {
+                        column["valueUrl"] = "{" + columnName + "}";
                     } else {
                         column["datatype"] = $(colId + "_datatype").val();
                     }
