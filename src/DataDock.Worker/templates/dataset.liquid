@@ -184,8 +184,8 @@
 									<div class="item">
 										<div class="content">
 											  
-											  {% if web -%}
-											  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
+											  {% if publisher_web -%}
+											  <a property="foaf:homepage" href="{{publisher_web.object}}">{{publisher_web.object|escape}}</a>
 											  {% else -%}
 											  Not specified.
 											  {% endif -%}
@@ -287,8 +287,8 @@
 								</div>
 								<div class="item">
 									<div class="content">
-										  {% if web -%}
-										  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
+										  {% if publisher_web -%}
+										  <a property="foaf:homepage" href="{{publisher_web.object}}">{{publisher_web.object|escape}}</a>
 										  {% else -%}
 										  Not specified.
 										  {% endif -%}

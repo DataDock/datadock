@@ -88,7 +88,7 @@ namespace DataDock.Worker.Tests
 
             result.Should()
                 .MatchRegex(
-                    @"<div class=""card"" property=""void:subset"" resource=""http://datadock.io/networkedplanet/sample/id/dataset/dataset1"">");
+                    @"<div class=""card"" property=""void:subset"" typeof=""dcat:Dataset"" resource=""http://datadock.io/networkedplanet/sample/id/dataset/dataset1"">");
             result.Should()
                 .MatchRegex(
                     @"<div class=""content"" about=""http://datadock.io/networkedplanet/sample/id/dataset/dataset1"">");
@@ -118,7 +118,7 @@ namespace DataDock.Worker.Tests
 
             result.Should()
                 .MatchRegex(
-                    @"<div class=""card"" property=""void:subset"" resource=""http://datadock.io/networkedplanet/sample/id/dataset/dataset2"">");
+                    @"<div class=""card"" property=""void:subset"" typeof=""dcat:Dataset"" resource=""http://datadock.io/networkedplanet/sample/id/dataset/dataset2"">");
             result.Should()
                 .MatchRegex(
                     @"<div class=""content"" about=""http://datadock.io/networkedplanet/sample/id/dataset/dataset2"">");
