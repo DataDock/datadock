@@ -875,18 +875,10 @@
                             {
                                 "type": "tr",
                                 "html": [
-                                    {
-                                        "type": "th",
-                                        "html": "Title"
-                                    },
-                                    {
-                                        "type": "th",
-                                        "html": "DataType"
-                                    },
-                                    {
-                                        "type": "th",
-                                        "html": "Suppress In Output"
-                                    }
+                                    { "type": "th", "html": "Column", "class": "collapsing" },
+                                    { "type": "th", "html": "Title" },
+                                    { "type": "th", "html": "DataType" },
+                                    { "type": "th", "html": "Suppress In Output", "class": "collapsing" }
                                 ]
                             }
                         ]
@@ -902,6 +894,7 @@
 
                     this.columnSet.push(colName);
 
+                    trElements.push({ "type": "td", "html": colName, "class": "collapsing" });
                     var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                     var defaultTitleValue = schemaHelper.getColumnTitle(colTemplate, colTitle);
                     var titleField = {
@@ -975,6 +968,7 @@
                                 "html": [
                                     {
                                         "type": "th",
+                                        "class": "collapsing",
                                         "html": "Column"
                                     },
                                     {
@@ -997,7 +991,11 @@
                         type: "div",
                         html: colTitle
                     };
-                    var tdTitle = { "type": "td", "html": titleDiv };
+                    var tdTitle = {
+                        "type": "td",
+                        "class": "collapsing",
+                        "html": titleDiv
+                    };
                     trElements.push(tdTitle);
 
                     var predicate = this._getPrefix() + "/id/definition/" + colName;
