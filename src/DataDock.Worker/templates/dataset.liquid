@@ -44,7 +44,7 @@
 {
   "@context":"https://schema.org/",
   "@type":"Dataset",
-   "url":" {{subject}}",
+   "url":"{{subject}}",
    "name":"{% if title -%}{{title.object}}{% elsif name -%}{{name.object}}{% elsif label -%}{{label.object}}{% else -%}{{subject}}{% endif -%}",
 	{% if description.object %}"description": "{{description.object}}",{% endif %}"
 	{% if modified.object %}"dateModified":"{{modified.object}}",{% endif %}
@@ -53,7 +53,8 @@
 	{% if keywords.size > 0 -%}"keywords":[
 		{% for keyword in keywords %}"{{keyword.object}}",{% endfor %}			
 	],{% endif -%}
-	{% if publisher.object %}"publisher":{
+	{% if publisher.object %}
+	"publisher":{
 	   "url": "{{publisher.object}}",
 		{% if publisher_type.object %}"@type":"{{publisher_type.object|split:"/"|last}}",{% endif %}
 		{% if publisher_name.object %}"name":"{{publisher_name.object}}",{% endif %}
