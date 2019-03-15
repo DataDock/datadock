@@ -1,10 +1,25 @@
 ﻿<html>
-	{% assign title = triples | where:"predicate", dcterms.title | first -%}
-	
 	<head>
 		<meta  http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		{% assign title = triples | where:"predicate", dcterms.title | first -%}
+		{% assign name = triples | where:"predicate", foaf.name | first -%}
+		{% assign label = triples | where:"predicate", rdfs.label | first -%}
+		{% assign description = triples | where:"predicate", dcterms.description | first %}
+		{% assign license = triples | where:"predicate", dcterms.license | first %}
+		{% assign modified = triples | where:"predicate", dcterms.modified | first -%}
+		{% assign keywords = triples | where:"predicate", dcat.keyword -%}
+		{% assign downloads = triples | where:"predicate", void.dataDump -%}
+		{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
+		{% assign publisher_triples = publisher.nested_triples -%}
+		{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+		{% assign publisher_name = publisher_triples | where:"predicate", foaf.name | first -%}
+		{% assign publisher_web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+		{% assign publisher_email = publisher_triples | where:"predicate", foaf.mbox | first -%}
+		{% assign exampleResources = triples | where:"predicate", void.exampleResource -%}
+		{% assign triple_count = triples | where:"predicate", void.triples | first %}
 
 		  <title>
 		    {% if title -%}
@@ -24,6 +39,41 @@
 	</head>
 
 	<body>
+
+	<script type="application/ld+json">
+{
+  "@context":"https://schema.org/",
+  "@type":"Dataset",
+   "url":" {{subject}}",
+   "name":"{% if title -%}{{title.object}}{% elsif name -%}{{name.object}}{% elsif label -%}{{label.object}}{% else -%}{{subject}}{% endif -%}",
+	{% if description.object %}"description": "{{description.object}}",{% endif %}"
+	{% if modified.object %}"dateModified":"{{modified.object}}",{% endif %}
+	"isAccessibleForFree": true,
+	{% if license.object %}"license" : {{license.object}},{% endif %}
+	{% if keywords.size > 0 -%}"keywords":[
+		{% for keyword in keywords %}"{{keyword.object}}",{% endfor %}			
+	],{% endif -%}
+	{% if publisher.object %}"publisher":{
+	   "url": "{{publisher.object}}",
+		{% if publisher_type.object %}"@type":"{{publisher_type.object|split:"/"|last}}",{% endif %}
+		{% if publisher_name.object %}"name":"{{publisher_name.object}}",{% endif %}
+		{% if publisher_email.object %}"contactPoint":{
+				"@type":"ContactPoint",
+				"email":"{{publisher_email.object}}"
+			 }{% endif %}
+	  },{% endif %}
+	"includedInDataCatalog":{
+		"@type":"DataCatalog",
+		"name":"{{datadock-publish-url}}/{{owner-id}}/{{repo-id}}"
+	},
+	{% if downloads.size > 0 -%}"distribution":[
+		{% for download in downloads %}{
+			"@type":"DataDownload",
+			"contentUrl":"{{download.object}}"
+		 },{% endfor %}
+	 ],{% endif -%}
+}
+</script>
 	  
 <!-- breadcrumb -->
   <div class="ui hidden divider"></div>
@@ -116,7 +166,7 @@
 		</div>
 
       <div class="seven wide column">
-	  	{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
+	  	
 			{% if publisher -%}
 				<div class="ui list">
 					<div class="item">
@@ -124,21 +174,17 @@
 						<div class="content">
 						<div class="header">Publisher</div>
 							<div>
-						
-								{% assign publisher_triples = publisher.nested_triples -%}
-								{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
 								<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
 									<div class="item">
 										<div class="content">
-											{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
-											  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+											  <span property="foaf:name">{{publisher_name.object|default: "Not specified."|escape}}</span>
 										</div>
 									</div>
 									<div class="item">
 										<div class="content">
-											  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+											  
 											  {% if web -%}
-											  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+											  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
 											  {% else -%}
 											  Not specified.
 											  {% endif -%}
@@ -146,8 +192,7 @@
 									</div>
 									<div class="item">
 										<div class="content">
-										  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
-										  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+										  <span property="foaf:mbox">{{publisher_email.object|default: "Not specified."|escape}}</span>
 										</div>
 									</div>
 								</div><!-- list -->
@@ -225,7 +270,6 @@
 				</div>
 			{% endif -%}
 
-			{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
 			{% if publisher -%}
 				<div class="item">
 					<i class="user icon"></i>
@@ -233,20 +277,17 @@
 					<div class="header">Publisher</div>
 						<div>
 						
-							{% assign publisher_triples = publisher.nested_triples -%}
-							{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+							
 							<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
 								<div class="item">
 									<div class="content">
-										{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
-										  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+										  <span property="foaf:name">{{publisher_name.object|default: "Not specified."|escape}}</span>
 									</div>
 								</div>
 								<div class="item">
 									<div class="content">
-										  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
 										  {% if web -%}
-										  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+										  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
 										  {% else -%}
 										  Not specified.
 										  {% endif -%}
@@ -254,8 +295,7 @@
 								</div>
 								<div class="item">
 									<div class="content">
-									  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
-									  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+									  <span property="foaf:mbox">{{publisher_email.object|default: "Not specified."|escape}}</span>
 									</div>
 								</div>
 							</div><!-- list -->
@@ -301,7 +341,6 @@
 
                     <dt class="ds-meta">Last Modified:</dt>
                     <dd class="ds-meta">
-					{%assign modified = triples | where:"predicate", dcterms.modified | first -%}
 						{% if modified.object %}
 							{{modified.object}}
 						{% else %}
@@ -311,7 +350,6 @@
 
                     <dt class="ds-meta">License:</dt>
                     <dd class="ds-meta">
-					{% assign license = triples | where:"predicate", dcterms.license | first %}
 						{% if license.object %}
 							{% case license.object %}
 								{% when "https://creativecommons.org/publicdomain/zero/1.0/" %}
@@ -331,7 +369,6 @@
 					</dd>
 
                     <dt>Description:</dt>
-                    <dd>{%assign description = triples | where:"predicate", dcterms.description | first %}
 						{% if description.object %}
 							{{description.object | newline_to_br }}
 						{% else %}
@@ -351,7 +388,6 @@
                             </div> -->
                             <div class="statistic">
                                 <div class="value">
-                                    {% assign triple_count = triples | where:"predicate", void.triples | first %}
 									{% if triple_count.object %}
 										{{triple_count.object}}
 									{% else %}
@@ -365,7 +401,6 @@
                         </div>
                     </dd>
 
-					{% assign keywords = triples | where:"predicate", dcat.keyword -%}
 					{% if keywords.size > 0 -%}
 						<dt class="ds-tags">Tags:</dt>
 							<dd class="ds-tags">
@@ -386,7 +421,6 @@
 
 			 <div class="ui bottom attached tab segment" data-tab="download">
 				
-					{% assign downloads = triples | where:"predicate", void.dataDump -%}
 					{% if downloads.size > 0 -%}
 						<h3>Download full source data:</h3>
 						
@@ -402,7 +436,6 @@
 			</div><!-- end segment -->
 
 			<div class="ui bottom attached tab segment" data-tab="explore">
-			{% assign exampleResources = triples | where:"predicate", void.exampleResource -%}
 				<table class="ui very basic collapsing celled table" resource="{{subject}}">
 					{% for example in exampleResources %}
 						<tr>
