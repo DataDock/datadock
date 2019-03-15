@@ -35,14 +35,17 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index(string ownerId, string repoId)
         {
-            this.DashboardViewModel.Area = "summary";
-            DashboardViewModel.Title = string.Format("{0} > {1} Summary", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
-            return View("Dashboard/Index", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "summary";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Summary";
+                return View("Dashboard/Index", DashboardViewModel);
+            });
         }
 
         /// <summary>
-        /// User or Org dataset uploads to a partcular repo
+        /// User or Org dataset uploads to a particular repo
         /// Viewable by public and other DataDock users as well as authorized users
         /// </summary>
         /// <param name="ownerId"></param>
@@ -50,14 +53,17 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Datasets(string ownerId, string repoId)
         {
-            this.DashboardViewModel.Area = "datasets";
-            DashboardViewModel.Title = string.Format("{0} > {1} Datasets", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
-            return View("Dashboard/Datasets", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "datasets";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Datasets";
+                return View("Dashboard/Datasets", DashboardViewModel);
+            });
         }
 
         /// <summary>
-        /// User or Org template library for a partcular repo
+        /// User or Org template library for a particular repo
         /// Viewable by authorized users only
         /// </summary>
         /// <param name="ownerId"></param>
@@ -68,14 +74,17 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Library(string ownerId, string repoId)
         {
-            this.DashboardViewModel.Area = "library";
-            DashboardViewModel.Title = string.Format("{0} > {1} Template Library", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
-            return View("Dashboard/Library", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "library";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Template Library";
+                return View("Dashboard/Library", DashboardViewModel);
+            });
         }
 
         /// <summary>
-        /// Add data to an org or user github to a partcular repo
+        /// Add data to an org or user github to a particular repo
         /// Viewable by authorized users only
         /// </summary>
         /// <param name="ownerId"></param>
@@ -88,18 +97,21 @@ namespace DataDock.Web.Controllers
         [GenerateAntiforgeryTokenCookieForAjax]
         public async Task<IActionResult> Import(string ownerId, string repoId, string schemaId = "")
         {
-            this.DashboardViewModel.Area = "import";
-            DashboardViewModel.Title = string.Format("{0} > {1} Add Data", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "import";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Add Data";
 
-            ViewData["OwnerId"] = DashboardViewModel.SelectedOwnerId;
-            ViewData["RepoId"] = DashboardViewModel.SelectedRepoId;
-            ViewData["SchemaId"] = schemaId;
-            ViewData["BaseUrl"] = _configuration["BaseUrl"];
-            ViewData["PublishUrl"] = _configuration["PublishUrl"];
+                ViewData["OwnerId"] = DashboardViewModel.SelectedOwnerId;
+                ViewData["RepoId"] = DashboardViewModel.SelectedRepoId;
+                ViewData["SchemaId"] = schemaId;
+                ViewData["BaseUrl"] = _configuration["BaseUrl"];
+                ViewData["PublishUrl"] = _configuration["PublishUrl"];
 
-            DashboardViewModel.SelectedSchemaId = schemaId;
-            return View("Import", this.DashboardViewModel);
+                DashboardViewModel.SelectedSchemaId = schemaId;
+                return View("Import", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -115,11 +127,14 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Jobs(string ownerId, string repoId, string jobId = "")
         {
-            this.DashboardViewModel.Area = "jobs";
-            DashboardViewModel.Title = string.Format("{0} > {1} Job History", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
-            ViewData["JobId"] = jobId;
-            return View("Dashboard/Jobs", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "jobs";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Job History";
+                ViewData["JobId"] = jobId;
+                return View("Dashboard/Jobs", DashboardViewModel);
+            });
         }
 
         [Authorize]
@@ -127,18 +142,21 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Job(string ownerId, string repoId, string jobId)
         {
-            this.DashboardViewModel.Area = "jobs";
-            DashboardViewModel.Title = string.Format("{0} > {1} Job Log", DashboardViewModel.SelectedOwnerId,
-                DashboardViewModel.SelectedRepoId);
-            ViewData["JobId"] = jobId;
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "jobs";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Job Log";
+                ViewData["JobId"] = jobId;
 
-            // get log ID, view job log
+                // get log ID, view job log
 
-            return View("Dashboard/Job", this.DashboardViewModel);
+                return View("Dashboard/Job", DashboardViewModel);
+            });
         }
 
         /// <summary>
-        /// org/user settings for a partcular repo
+        /// org/user settings for a particular repo
         /// Viewable by authorized users only
         /// </summary>
         /// <param name="ownerId"></param>
@@ -149,9 +167,13 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Settings(string ownerId, string repoId)
         {
-            this.DashboardViewModel.Area = "settings";
-            DashboardViewModel.Title = string.Format("{0} > {1} Settings", DashboardViewModel.SelectedOwnerId, DashboardViewModel.SelectedRepoId);
-            return View("Settings", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "settings";
+                DashboardViewModel.Title =
+                    $"{DashboardViewModel.SelectedOwnerId} > {DashboardViewModel.SelectedRepoId} Settings";
+                return View("Settings", DashboardViewModel);
+            });
         }
 
         [HttpPost]
@@ -187,9 +209,9 @@ namespace DataDock.Web.Controllers
                 TempData["ViewModel"] = settingsViewModel;
             }
             
-            this.DashboardViewModel.Area = "settings";
+            DashboardViewModel.Area = "settings";
             DashboardViewModel.Title = string.Format("{0} Settings", DashboardViewModel.SelectedOwnerId, DashboardViewModel.SelectedRepoId);
-            return View("Settings", this.DashboardViewModel);
+            return View("Settings", DashboardViewModel);
         }
 
         

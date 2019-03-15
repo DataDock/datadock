@@ -186,7 +186,7 @@ namespace DataDock.Web
             var userStore = context.HttpContext.RequestServices.GetService<IUserStore>();
             try
             {
-                var existingAccount = await userStore.GetUserAccountAsync(login.ToString());
+                var existingAccount = await userStore.GetUserAccountAsync(login);
                 if (existingAccount != null)
                 {
                     context.Identity.AddClaim(new Claim(DataDockClaimTypes.DataDockUserId, login));
@@ -194,7 +194,7 @@ namespace DataDock.Web
                     await userStore.UpdateUserAsync(existingAccount.UserId, context.Identity.Claims);
                 }
             }
-            catch (UserAccountNotFoundException notFound)
+            catch (UserAccountNotFoundException)
             {
                 // user not found. no action required
             }

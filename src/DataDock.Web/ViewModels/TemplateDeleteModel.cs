@@ -30,7 +30,7 @@ namespace DataDock.Web.ViewModels
                     return viewModel.Title;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Log.Error($"Error retrieving title from schema '{SchemaInfo?.Id}'");
             }

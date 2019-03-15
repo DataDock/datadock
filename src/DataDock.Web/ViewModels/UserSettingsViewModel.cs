@@ -7,7 +7,7 @@ namespace DataDock.Web.ViewModels
     public class UserSettingsViewModel : DashboardViewModel
     {
         [HiddenInput]
-        public string UserId { get; set; }
+        public new string UserId { get; set; }
         
         /*
         * Last Modified

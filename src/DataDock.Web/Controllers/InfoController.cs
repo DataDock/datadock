@@ -41,7 +41,7 @@ namespace DataDock.Web.Controllers
             return View("AccountDeleted");
         }
 
-        public async Task<IActionResult> SignUpCancelled()
+        public IActionResult SignUpCancelled()
         {
             return View("SignUpCancelled");
         }

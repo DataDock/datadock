@@ -42,7 +42,7 @@ namespace DataDock.Web.ViewComponents
                 var repoSettingsViewModels = repoSettings.Select(r => new RepoSettingsViewModel(r)).ToList();
                 return repoSettingsViewModels;
             }
-            catch (RepoSettingsNotFoundException rsnf)
+            catch (RepoSettingsNotFoundException)
             {
                 Log.Warning($"No repository settings found for '{selectedOwnerId}'");
                 return new List<RepoSettingsViewModel>();
