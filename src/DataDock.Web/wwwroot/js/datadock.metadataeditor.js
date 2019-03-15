@@ -170,6 +170,7 @@
                 formData.append("showOnHomePage", JSON.stringify(editorData.showOnHomePage));
                 formData.append("saveAsSchema", JSON.stringify(editorData.saveAsSchema));
                 formData.append("addToExisting", JSON.stringify(editorData.addToExisting));
+                formData.append("overwriteExisting", JSON.stringify(!editorData.addToExisting));
 
                 var apiOptions = {
                     url: "/api/data",
@@ -353,6 +354,15 @@
 
                     });
 
+                $.dform.subscribe("updateDatatype",
+                    function(colName, type) {
+                        if (colName !== "") {
+                            this.change(function () {
+                                self._updateDatatype(colName, this.value);
+                            });
+                        }
+                    });
+
                 this._loadEditor();
                 this._hideAllTabContent();
                 this._updateDatasetIdFromTitle();
@@ -366,6 +376,36 @@
                 var slug = this._slugify(title, "", "", "camelCase");
                 var datasetId = this._getPrefix() + "/id/dataset/" + slug;
                 $("#datasetId").val(datasetId);
+            },
+
+            _updateDatatype: function (colName, datatype) {
+                $("#" + colName + "_advanced").children(".datatype-field").hide();
+                $("#" + colName + "_advanced").children(".datatype-field.datatype-" + datatype).show();
+                var options = { "default": "Default" };
+                $(".datatype-selector").each(function(ix, selector) {
+                    if ($(selector).val() === "uri" || $(selector).val() === "uriTemplate") {
+                        var colName = $(selector).data("colname");
+                        options[colName] = colName;
+                    }
+                });
+                $(".parent-selector").each(function(ix, s) {
+                    var selector = $(s);
+                    var oldValue = selector.val();
+                    $("option", selector).remove();
+                    $.each(options, function(optVal, optLabel) {
+                        selector.append("<option value='" + optVal + "'>" + optLabel + "</option>");
+                    });
+                    if (options.hasOwnProperty(oldValue)) {
+                        selector.val(oldValue);
+                    } else {
+                        selector.val('default');
+                    }
+                });
+                if (Object.keys(options).length > 1) {
+                    $(".parent-field").show();
+                } else {
+                    $(".parent-field").hide();
+                }
             },
 
             _hideAllTabContent: function() {
@@ -884,6 +924,8 @@
                         name: colName + "_datatype",
                         id: colName + "_datatype",
                         type: "select",
+                        class: "datatype-selector",
+                        "data-colName": colName,
                         placeholder: "",
                         options: {
                             "string": "Text",
@@ -892,8 +934,10 @@
                             "decimal": "Decimal Number",
                             "date": "Date",
                             "datetime": "Date & Time",
-                            "boolean": "True/False"
-                        }
+                            "boolean": "True/False",
+                            "uriTemplate": "URI Template"
+                        },
+                        updateDatatype: colName
                     };
                     var tdDatatype = { "type": "td", "html": datatypeField };
                     trElements.push(tdDatatype);
@@ -935,7 +979,7 @@
                                     },
                                     {
                                         "type": "th",
-                                        "html": "Property (URL)"
+                                        "html": "Advanced Configuration"
                                     }
                                 ]
                             }
@@ -960,24 +1004,100 @@
                     var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                     var defaultValue = schemaHelper.getColumnPropertyUrl(colTemplate, predicate);
                     var predicateField = {
-                        name: colName + "_property_url",
-                        id: colName + "_property_url",
-                        type: "text",
-                        placeholder: "",
-                        "value": defaultValue,
-                        "class": "pred-field",
-                        "validate": {
-                            "required": true,
-                            "pattern": /^https?:\/\/\S+[^#\/]$/i,
-                            "messages": {
-                                "required": "Column '" + colName + "' is missing a property URL.",
-                                "pattern": "Column '" +
-                                    colName +
-                                    "' must have a property URL that is a URL that does not end with a hash or slash."
+                        type: "div",
+                        class: "field",
+                        html: [
+                            {
+                                type: "label",
+                                for: colName + "_property_url",
+                                html: "Property URL"
+                            },
+                            {
+                                name: colName + "_property_url",
+                                id: colName + "_property_url",
+                                type: "text",
+                                placeholder: "",
+                                "value": defaultValue,
+                                "class": "pred-field",
+                                "validate": {
+                                    "required": true,
+                                    "pattern": /^https?:\/\/\S+[^#\/]$/i,
+                                    "messages": {
+                                        "required": "Column '" + colName + "' is missing a property URL.",
+                                        "pattern": "Column '" +
+                                            colName +
+                                            "' must have a property URL that is a URL that does not end with a hash or slash."
+                                    }
+                                }
                             }
-                        }
+                        ]
                     };
-                    var predDiv = { "type": "div", "class": "field", "html": predicateField };
+                    var uriTemplateField = {
+                        type: "div",
+                        class: "field datatype-field datatype-uriTemplate",
+                        hidden: true,
+                        html: [
+                            {
+                                type: "label",
+                                html: "URI Template",
+                                for: colName + "_uriTemplate"
+                            },
+                            {
+                                name: colName + "_uriTemplate",
+                                id: colName + "_uriTemplate",
+                                type: "text",
+                                value: this._getIdentifierPrefix() + "/" + colName + "/{" + colName + "}",
+                            }
+                        ]
+                    };
+                    var parentField = {
+                        type: "div",
+                        class: "field parent-field",
+                        hidden: true,
+                        html: [
+                            {
+                                type: "label",
+                                html: "Parent Node",
+                                for: colName + "_parent"
+                            },
+                            {
+                                name: colName + "_parent",
+                                id: colName + "_parent",
+                                class: "parent-selector",
+                                type: "select",
+                                options: [
+                                    {
+                                        "default": "Default"
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+
+                    var languageField = {
+                        type: "div",
+                        class: "field datatype-field datatype-string",
+                        html: [
+                            {
+                                type: "label",
+                                html: "Language",
+                                for: colName + "_lang"
+                            },
+                            {
+                                name: colName + "_lang",
+                                id: colName + "_lang",
+                                type: "text",
+                                placeholder: "e.g. en, fr, de-AT"
+                            }
+                        ]
+                    };
+
+                    var predDiv = {
+                        "type": "div",
+                        "class": "field",
+                        id: colName + "_advanced",
+                        "html": [parentField, predicateField, uriTemplateField, languageField]
+                    };
                     var tdPredicate = { "type": "td", "html": predDiv };
                     trElements.push(tdPredicate);
 
@@ -1154,12 +1274,18 @@
                 return this._getPrefix() + "/id/resource";
             },
 
-            _slugify: function(original, whitespaceReplacement, specCharReplacement, casing) {
+            _slugify: function (original, whitespaceReplacement, specCharReplacement, casing) {
+                var multiReplacementRegex = new RegExp("(" + whitespaceReplacement + "|" + specCharReplacement + ")+", "ig");
+                var replacementTrimStart = new RegExp("^(" + whitespaceReplacement + "|" + specCharReplacement + ")+");
+                var replacementTrimEnd = new RegExp("(" + whitespaceReplacement + "|" + specCharReplacement + ")+$");
                 switch (casing) {
                 case "lowercase":
                     var lowercase = original.replace(/\s+/g, whitespaceReplacement)
                         .replace(/[^A-Z0-9]+/ig, specCharReplacement)
-                        .replace("__", "_").toLowerCase();
+                        .replace(multiReplacementRegex, whitespaceReplacement)
+                        .replace(replacementTrimStart, "")
+                        .replace(replacementTrimEnd, "")
+                        .toLowerCase();
                     return lowercase;
 
                 case "camelCase":
@@ -1169,7 +1295,9 @@
                 default:
                     var slug = original.replace(/\s+/g, whitespaceReplacement)
                         .replace(/[^A-Z0-9]+/ig, specCharReplacement)
-                        .replace("__", "_");
+                        .replace(multiReplacementRegex, whitespaceReplacement)
+                        .replace(replacementTrimStart, "")
+                        .replace(replacementTrimEnd, "");
                     return slug;
                 }
             },
@@ -1199,12 +1327,34 @@
                         var colName = this.columnSet[i];
                         var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                         var colDatatype = schemaHelper.getColumnDatatype(colTemplate, "");
+                        var colLang = schemaHelper.getColumnLang(colTemplate, "");
+                        var selector = $("#" + colName + "_datatype");
                         if (colDatatype) {
-                            var selector = $("#" + colName + "_datatype");
                             if (selector) {
                                 selector.val(colDatatype);
                             }
+                        } else {
+                            var valueUrl = schemaHelper.getColumnValueUrl(colTemplate, "");
+                            if (valueUrl) {
+                                if (/^\{[^\}]+\}$/.test(valueUrl)) {
+                                    selector.val("uri");
+                                } else {
+                                    selector.val("uriTemplate");
+                                    $('#' + colName + '_uriTemplate').val(valueUrl);
+                                }
+                            }
                         }
+                        var aboutUrl = schemaHelper.getColumnAboutUrl(colTemplate, "");
+                        if (aboutUrl) {
+                            var parentColumn = schemaHelper.getColumnWithValueUrl(this.options.templateMetadata, aboutUrl);
+                            if (parentColumn) {
+                                $('#' + colName + '_parent').val(parentColumn);
+                            }
+                        }
+                        if (colLang) {
+                            $('#' + colName + '_lang').val(colLang);
+                        }
+                        this._updateDatatype(colName, selector.val());
                     }
                 }
             },
@@ -1281,10 +1431,34 @@
                 } else {
                     var columnTitle = $(colId + "_title").val();
                     column["titles"] = [columnTitle];
-                    if (datatype === "uri") {
+                    var parentSelector = $(colId + "_parent");
+                    var parent = parentSelector.val();
+                    if (parent !== "default") {
+                        var parentType = $("#" + parent + "_datatype").val();
+                        if (parentType === "uri") {
+                            column["aboutUrl"] = "{" + parent + "}";
+                        } else if (parentType == "uriTemplate") {
+                            var parentUriTemplate = $("#" + parent + "_uriTemplate").val();
+                            if (parentUriTemplate) {
+                                column["aboutUrl"] = parentUriTemplate;
+                            } else {
+                                column["aboutUrl"] = "{" + parent + "}";
+                            }
+                        }
+                    }
+                    if (datatype === "uriTemplate") {
+                        var uriTemplate = $(colId + "_uriTemplate").val();
+                        column["valueUrl"] = uriTemplate;
+                    } else if (datatype === "uri") {
                         column["valueUrl"] = "{" + columnName + "}";
                     } else {
                         column["datatype"] = $(colId + "_datatype").val();
+                    }
+                    if (datatype === "string") {
+                        var lang = $(colId + "_lang").val();
+                        if (lang) {
+                            column["lang"] = lang;
+                        }
                     }
                     column["propertyUrl"] = $(colId + "_property_url").val();
                 }
