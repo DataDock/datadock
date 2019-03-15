@@ -54,3 +54,7 @@ This will most likely be of interest to the data publishing nerds... but some hi
 * The data portal pages have JSON-LD and RDFA mark-up enhancements to [boost discoverability](https://developers.google.com/search/docs/data-types/dataset)
 * All your content resides in your GitHub account, we don't hold your data - we merely process it for you
 
+## Where do I start?
+
+Simply head over to the [DataDock homepage](https://datadock.io) and hit Sign Up. Read the [Getting Started Guide](https://github.com/DataDock/datadock/wiki) for help along the way
+
