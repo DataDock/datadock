@@ -11,9 +11,7 @@ using DataDock.CsvWeb;
 using DataDock.CsvWeb.Metadata;
 using DataDock.CsvWeb.Parsing;
 using DataDock.CsvWeb.Rdf;
-using DataDock.Worker.Liquid;
 using Newtonsoft.Json.Linq;
-using Octokit;
 using Serilog;
 using VDS.RDF;
 using VDS.RDF.Parsing.Handlers;
@@ -335,12 +333,15 @@ namespace DataDock.Worker.Processors
 
         public async Task<Stream> ResolveAsync(Uri tableUri)
         {
-            if (_lookup.TryGetValue(tableUri, out string filePath))
+            return await Task.Run(() =>
             {
-                return File.OpenRead(filePath);
-            }
+                if (_lookup.TryGetValue(tableUri, out var filePath))
+                {
+                    return File.OpenRead(filePath);
+                }
 
-            throw new FileNotFoundException("Could not resolve URI " + tableUri);
+                throw new FileNotFoundException("Could not resolve URI " + tableUri);
+            });
         }
 
         public Task<JObject> ResolveJsonAsync(Uri jsonUri)

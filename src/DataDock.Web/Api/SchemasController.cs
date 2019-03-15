@@ -32,7 +32,7 @@ namespace DataDock.Web.Api
                     var schema = await _schemaStore.GetSchemaInfoAsync(ownerId, schemaId);
                     return new ObjectResult(schema);
                 }
-                catch (DatasetNotFoundException dnf)
+                catch (DatasetNotFoundException)
                 {
                     return new ObjectResult(null);
                 }

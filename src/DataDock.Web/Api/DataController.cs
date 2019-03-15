@@ -22,8 +22,7 @@ namespace DataDock.Web.Api
         private readonly IImportFormParser _parser;
         private readonly IImportService _importService;
 
-        public DataController(IUserStore userStore, 
-            IRepoSettingsStore repoSettingsStore,
+        public DataController(IUserStore userStore,
             IJobStore jobStore,
             IImportFormParser parser,
             IImportService importService)
@@ -89,15 +88,16 @@ namespace DataDock.Web.Api
                 }
 
                 var jobRequest = parserResult.ImportJobRequest;
+
+                // Create a settings record for the repository if one does not already exist
                 try
                 {
-                    var repoSettings =
                         await _importService.CheckRepoSettingsAsync(User, jobRequest.OwnerId, jobRequest.RepositoryId);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Log.Error(
-                        $"api/data: unable to retrive repoSettings for the supplied owner '{jobRequest.OwnerId}' and repo '{jobRequest.RepositoryId}'");
+                        $"api/data: unable to retrieve repoSettings for the supplied owner '{jobRequest.OwnerId}' and repo '{jobRequest.RepositoryId}'");
                     return BadRequest(
                         "Repository does not exist or you do not have the required authorization to publish to it.");
                 }
@@ -105,12 +105,12 @@ namespace DataDock.Web.Api
                 // create a settings record for the owner if one does not already exist
                 try
                 {
-                    var ownerSettings = await _importService.CheckOwnerSettingsAsync(User, jobRequest.OwnerId);
+                    await _importService.CheckOwnerSettingsAsync(User, jobRequest.OwnerId);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Log.Error(
-                        $"api/data: unable to retrive ownerSettings for the supplied owner '{jobRequest.OwnerId}'");
+                        $"api/data: unable to retrieve ownerSettings for the supplied owner '{jobRequest.OwnerId}'");
                     return BadRequest(
                         "The user or organization does not exist or you do not have the required authorization to publish to it.");
                 }

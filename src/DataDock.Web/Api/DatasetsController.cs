@@ -39,7 +39,7 @@ namespace DataDock.Web.Api
                     var repoDatasets = await _datasetStore.GetDatasetsForRepositoryAsync(ownerId, repoId, 0, 20);
                     return new ObjectResult(repoDatasets);
                 }
-                catch (DatasetNotFoundException dnf)
+                catch (DatasetNotFoundException)
                 {
                     return new ObjectResult(null);
                 }
