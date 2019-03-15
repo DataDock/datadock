@@ -44,7 +44,6 @@ namespace DataDock.Worker.Processors
                 Log.Error("No authentication token found for user {userId}", userInfo.UserId);
                 ProgressLog.Error("Could not find a valid GitHub access token for this user account. Please check your account settings.");
                 throw new WorkerException("Could not find a valid GitHub access token for this user account. Please check your account settings.");
-                return;
             }
             await RunJob(jobInfo, userInfo);
         }
@@ -131,7 +130,7 @@ namespace DataDock.Worker.Processors
                 ProgressLog.Info("No owner settings found");
                 return null;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ProgressLog.Error("Error when attempting to retrieve portal information from owner settings");
                 return null;

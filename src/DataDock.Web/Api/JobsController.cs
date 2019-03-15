@@ -42,7 +42,7 @@ namespace DataDock.Web.Api
                     var repoJobs = await _jobStore.GetJobsForRepository(ownerId, repoId);
                     return new ObjectResult(repoJobs);
                 }
-                catch (JobNotFoundException jnf)
+                catch (JobNotFoundException)
                 {
                     var empty = new List<JobInfo>();
                     return new ObjectResult(empty);

@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using DataDock.Common.Models;
 using DataDock.Web.Auth;
 using DataDock.Web.ViewModels;
@@ -13,7 +9,7 @@ namespace DataDock.Web.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated && !User.ClaimExists(DataDockClaimTypes.DataDockUserId))
             {

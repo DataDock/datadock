@@ -60,7 +60,7 @@ namespace DataDock.Web.Controllers
 
                 return View("Index", portalViewModel);
             }
-            catch (OwnerSettingsNotFoundException osnf)
+            catch (OwnerSettingsNotFoundException)
             {
                 //redirect to a friendly warning page
                 return View("OwnerNotFound");

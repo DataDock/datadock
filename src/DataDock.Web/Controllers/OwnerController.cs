@@ -34,9 +34,12 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index(string ownerId = "")
         {
-            this.DashboardViewModel.Area = "summary";
-             DashboardViewModel.Title = string.Format("{0} Summary", DashboardViewModel.SelectedOwnerId);
-            return View("Dashboard/Index", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "summary";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Summary";
+                return View("Dashboard/Index", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -47,9 +50,12 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Repositories(string ownerId = "")
         {
-            this.DashboardViewModel.Area = "repositories";
-            DashboardViewModel.Title = string.Format("{0} Repos", DashboardViewModel.SelectedOwnerId);
-            return View("Dashboard/Repositories", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "repositories";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Repos";
+                return View("Dashboard/Repositories", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -60,9 +66,12 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Datasets(string ownerId = "")
         {
-            this.DashboardViewModel.Area = "datasets";
-            DashboardViewModel.Title = string.Format("{0} Datasets", DashboardViewModel.SelectedOwnerId);
-            return View("Dashboard/Datasets", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "datasets";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Datasets";
+                return View("Dashboard/Datasets", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -76,9 +85,12 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Library(string ownerId = "")
         {
-            this.DashboardViewModel.Area = "library";
-            DashboardViewModel.Title = string.Format("{0} Template Library", DashboardViewModel.SelectedOwnerId);
-            return View("Dashboard/Library", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "library";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Template Library";
+                return View("Dashboard/Library", DashboardViewModel);
+            });
         }
 
         [Authorize]
@@ -86,7 +98,7 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> UseSchema(string ownerId, string schemaId)
         {
-            return RedirectToAction("Import", new {ownerId = ownerId, schemaId = schemaId});
+            return await Task.Run(() => RedirectToAction("Import", new {ownerId, schemaId}));
         }
 
         public async Task<ActionResult> DeleteSchema(string ownerId, string schemaId)
@@ -192,10 +204,13 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Import(string ownerId = "", string schemaId = "")
         {
-            this.DashboardViewModel.Area = "import";
-            DashboardViewModel.Title = string.Format("{0} Add Data", DashboardViewModel.SelectedOwnerId);
-            DashboardViewModel.SelectedSchemaId = schemaId;
-            return View("Dashboard/Import", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "import";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Add Data";
+                DashboardViewModel.SelectedSchemaId = schemaId;
+                return View("Dashboard/Import", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -209,9 +224,12 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Jobs(string ownerId = "")
         {
-            this.DashboardViewModel.Area = "jobs";
-            DashboardViewModel.Title = string.Format("{0} Job History", DashboardViewModel.SelectedOwnerId);
-            return View("Dashboard/Jobs", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                DashboardViewModel.Area = "jobs";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Job History";
+                return View("Dashboard/Jobs", DashboardViewModel);
+            });
         }
 
         /// <summary>
@@ -225,10 +243,13 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         public async Task<IActionResult> Settings(string ownerId = "")
         {
-            ViewBag.StatusMessage = GetSettingsStatusMessage();
-            this.DashboardViewModel.Area = "settings";
-            DashboardViewModel.Title = string.Format("{0} Settings", DashboardViewModel.SelectedOwnerId);
-            return View("Settings", this.DashboardViewModel);
+            return await Task.Run(() =>
+            {
+                ViewBag.StatusMessage = GetSettingsStatusMessage();
+                DashboardViewModel.Area = "settings";
+                DashboardViewModel.Title = $"{DashboardViewModel.SelectedOwnerId} Settings";
+                return View("Settings", DashboardViewModel);
+            });
         }
 
         [HttpPost]

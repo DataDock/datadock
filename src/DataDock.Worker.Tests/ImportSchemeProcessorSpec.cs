@@ -37,7 +37,9 @@ namespace DataDock.Worker.Tests
             var config = new WorkerConfiguration { PublishUrl = "http://datadock.io/" };
             var proc = new ImportSchemaProcessor(config, _mockSchemeStore.Object, _mockFileStore.Object);
             WithJsonSchema(@"{ '@context': 'http://www.w3.org/ns/csvw' }");
+#pragma warning disable 618
             var job = new JobInfo
+#pragma warning restore 618
             {
                 JobType = JobType.SchemaCreate,
                 UserId = "kal",
@@ -74,7 +76,9 @@ namespace DataDock.Worker.Tests
                     ]
                 }
             }");
+#pragma warning disable 618
             var job = new JobInfo
+#pragma warning restore 618
             {
                 JobType = JobType.SchemaCreate, UserId = "kal", OwnerId = "datadock", RepositoryId = "test",
                 SchemaFileId = "schemaFileId"

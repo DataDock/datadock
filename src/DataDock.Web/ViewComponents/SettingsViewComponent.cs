@@ -61,7 +61,7 @@ namespace DataDock.Web.ViewComponents
                 var osvm = new OwnerSettingsViewModel(os);
                 return osvm;
             }
-            catch (OwnerSettingsNotFoundException notFound)
+            catch (OwnerSettingsNotFoundException)
             {
                 Log.Debug("No owner settings found for owner '{0}'", ownerId);
                 return new OwnerSettingsViewModel {OwnerId = ownerId};
@@ -84,7 +84,7 @@ namespace DataDock.Web.ViewComponents
                 var rsvm = new RepoSettingsViewModel(rs);
                 return rsvm;
             }
-            catch (RepoSettingsNotFoundException notFound)
+            catch (RepoSettingsNotFoundException)
             {
                 Log.Debug("No repo settings found for repo '{0}/{1}'", ownerId, repoId);
                 return new RepoSettingsViewModel { OwnerId = ownerId, RepoId = repoId };

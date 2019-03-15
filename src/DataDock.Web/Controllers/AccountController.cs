@@ -98,7 +98,7 @@ namespace DataDock.Web.Controllers
                 }
 
             }
-            catch (UserAccountNotFoundException noUserException)
+            catch (UserAccountNotFoundException)
             {
                 var viewModel = new SignUpViewModel
                 {
@@ -171,7 +171,7 @@ namespace DataDock.Web.Controllers
                     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     return Challenge(new AuthenticationProperties() { RedirectUri = "account/welcome" });
                 }
-                catch (UserAccountExistsException existsEx)
+                catch (UserAccountExistsException)
                 {
                     Log.Warning("User account {0} already exists. Identities: {1}. Claims Total: {2}", User.Identity.Name, User.Identities.Count(), User.Claims.Count());
                     var datadockUser = await _userStore.GetUserAccountAsync(User.Identity.Name);
@@ -214,7 +214,7 @@ namespace DataDock.Web.Controllers
                 var usvm = new UserSettingsViewModel(userSettings) {Title = "User Account"};
                 return View(usvm);
             }
-            catch (UserAccountNotFoundException notFoundEx)
+            catch (UserAccountNotFoundException)
             {
                 var newSettings = new UserSettingsViewModel {UserId = User.Identity.Name};
                 return View(newSettings);
@@ -279,7 +279,7 @@ namespace DataDock.Web.Controllers
                 var davm = new DeleteAccountViewModel();
                 return View(davm);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Log.Warning($"User account not found: '{User.Identity.Name}'");
                 var davm = new DeleteAccountViewModel();
@@ -309,7 +309,7 @@ namespace DataDock.Web.Controllers
                         var us = await _userStore.GetUserSettingsAsync(User.Identity.Name);
                         await _userStore.DeleteUserSettingsAsync(User.Identity.Name);
                     }
-                    catch (UserSettingsNotFoundException e)
+                    catch (UserSettingsNotFoundException)
                     {
                         // no action needed 
                     }
@@ -327,7 +327,7 @@ namespace DataDock.Web.Controllers
                             await _repoSettingsStore.DeleteRepoSettingsAsync(r.OwnerId, r.RepositoryId);
                         }
                     }
-                    catch (RepoSettingsNotFoundException e)
+                    catch (RepoSettingsNotFoundException)
                     {
                         // no action needed
                     }
@@ -342,7 +342,7 @@ namespace DataDock.Web.Controllers
                         var owner = await _ownerSettingsStore.GetOwnerSettingsAsync(User.Identity.Name);
                         await _ownerSettingsStore.DeleteOwnerSettingsAsync(owner.OwnerId);
                     }
-                    catch (OwnerSettingsNotFoundException e)
+                    catch (OwnerSettingsNotFoundException)
                     {
                         // no action needed
                     }
@@ -389,8 +389,6 @@ namespace DataDock.Web.Controllers
                 // error
                 ViewBag.Message =
                     "Unable to delete account at this time, if the problem persists please open a ticket with support.";
-                return View("Delete");
-
                 return View("Delete");
 
             }

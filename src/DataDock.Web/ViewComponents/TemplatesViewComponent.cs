@@ -42,28 +42,34 @@ namespace DataDock.Web.ViewComponents
 
         private async Task<List<TemplateViewModel>> GetTemplatesForOwner(string ownerId)
         {
-            try
+            return await Task.Run(() =>
             {
-                var schemas = _schemaStore.GetSchemasByOwner(ownerId, 0, 20);
-                return schemas?.Select(s => new TemplateViewModel(s)).ToList();
-            }
-            catch (SchemaNotFoundException snf)
-            {
-                return new List<TemplateViewModel>();
-            }
+                try
+                {
+                    var schemas = _schemaStore.GetSchemasByOwner(ownerId, 0, 20);
+                    return schemas?.Select(s => new TemplateViewModel(s)).ToList();
+                }
+                catch (SchemaNotFoundException)
+                {
+                    return new List<TemplateViewModel>();
+                }
+            });
         }
 
         private async Task<List<TemplateViewModel>> GetTemplatesForRepository(string ownerId, string repositoryId)
         {
-            try
+            return await Task.Run(() =>
             {
-                var schemas = _schemaStore.GetSchemasByRepositoryList(ownerId, new string[]{repositoryId}, 0, 20);
-                return schemas?.Select(s => new TemplateViewModel(s)).ToList();
-            }
-            catch (SchemaNotFoundException snf)
-            {
-                return new List<TemplateViewModel>();
-            }
+                try
+                {
+                    var schemas = _schemaStore.GetSchemasByRepositoryList(ownerId, new string[] {repositoryId}, 0, 20);
+                    return schemas?.Select(s => new TemplateViewModel(s)).ToList();
+                }
+                catch (SchemaNotFoundException)
+                {
+                    return new List<TemplateViewModel>();
+                }
+            });
         }
     }
 }

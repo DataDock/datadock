@@ -51,7 +51,7 @@ namespace DataDock.Web.Tests.Api
         {
             // No user added to request context - simulating anonymous access
             var formParserMock = new Mock<IImportFormParser>();
-            var controller = new DataController(_mockUserStore.Object, _mockRepoSettingsStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object);
+            var controller = new DataController(_mockUserStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object);
             var result = controller.Post().Result;
             Assert.NotNull(result);
             var unauthorizedResult = result as UnauthorizedResult;
@@ -66,7 +66,7 @@ namespace DataDock.Web.Tests.Api
             _mockHttpContext.Setup(m => m.User).Returns(testPrincipal);
             _mockUserStore.Setup(sr => sr.GetUserSettingsAsync(It.IsAny<string>())).ReturnsAsync(new UserSettings());
             var formParserMock = new Mock<IImportFormParser>();
-            var controller = new DataController(_mockUserStore.Object, _mockRepoSettingsStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object);
+            var controller = new DataController(_mockUserStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object);
             var result = controller.Post().Result;
             Assert.NotNull(result);
             var unauthorizedResult = result as UnauthorizedResult;
@@ -79,7 +79,7 @@ namespace DataDock.Web.Tests.Api
             WithAuthorizedUser();
             _mockUserStore.Setup(x => x.GetUserSettingsAsync("test_id")).ReturnsAsync((UserSettings)null);
             var formParserMock = new Mock<IImportFormParser>();
-            var controller = new DataController(_mockUserStore.Object, _mockRepoSettingsStore.Object,
+            var controller = new DataController(_mockUserStore.Object, 
                 _mockJobStore.Object, formParserMock.Object, _mockImportService.Object)
             {
                 ControllerContext = new ControllerContext(new ActionContext(_mockHttpContext.Object, new RouteData(),
@@ -101,7 +101,7 @@ namespace DataDock.Web.Tests.Api
                 .Setup(x => x.ParseImportFormAsync(It.IsAny<HttpRequest>(), "test_id",
                     It.IsAny<Func<ImportFormData, IFormCollection, Task<bool>>>()))
                 .ReturnsAsync(new ImportFormParserResult("There was some error in your form"));
-            var controller = new DataController(_mockUserStore.Object, _mockRepoSettingsStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object)
+            var controller = new DataController(_mockUserStore.Object, _mockJobStore.Object, formParserMock.Object, _mockImportService.Object)
             {
                 ControllerContext = new ControllerContext(new ActionContext(_mockHttpContext.Object, new RouteData(),
                     new ControllerActionDescriptor()))
@@ -126,10 +126,11 @@ namespace DataDock.Web.Tests.Api
             formParserMock.Setup(x => x.ParseImportFormAsync(It.IsAny<HttpRequest>(), "test_id",
                 It.IsAny<Func<ImportFormData, IFormCollection, Task<bool>>>())).ReturnsAsync(parsedForm);
             _mockJobStore.Setup(x => x.SubmitImportJobAsync(It.IsAny<ImportJobRequestInfo>()))
+#pragma warning disable 618 // KA: Using an "obsolete" method that is provide for the JSON serializer
                 .ReturnsAsync(new JobInfo() {JobId = "test_job"});
+#pragma warning restore 618
             var controller = new DataController(
                 _mockUserStore.Object,
-                _mockRepoSettingsStore.Object,
                 _mockJobStore.Object,
                 formParserMock.Object, _mockImportService.Object)
             {
