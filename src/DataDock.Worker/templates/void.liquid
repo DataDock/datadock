@@ -1,10 +1,18 @@
 ﻿<html>
-	{% assign title = triples | where:"predicate", dcterms.title | first -%}
-	{% assign description = triples | where:"predicate", dcterms.description | first -%}
 	<head>
 		<meta  http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		{% assign title = triples | where:"predicate", dcterms.title | first -%}
+		{% assign description = triples | where:"predicate", dcterms.description | first -%}
+		{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
+		{% assign publisher_triples = publisher.nested_triples -%}
+		{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+		{% assign publisher_name = publisher_triples | where:"predicate", foaf.name | first -%}
+		{% assign publisher_web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+		{% assign publisher_email = publisher_triples | where:"predicate", foaf.mbox | first -%}
+		{% assign datasets = triples | where:"predicate", void.subset %}
 
 		<title>
 			{% if repo-id -%}
@@ -27,6 +35,41 @@
 
 	</head>
 <body prefix="dc: http://purl.org/dc/terms/ void: http://rdfs.org/ns/void# dcat: http://www.w3.org/ns/dcat#" resource="{{subject}}">
+
+
+	<script type="application/ld+json">
+{
+  "@context":"https://schema.org/",
+  "@type":"DataCatalog",
+   "url":"{{subject}}",
+   "name":"{% if repo-id -%}Repository: {{repo-id}}{% elsif portal-info.repo-name -%}Repository: {{portal-info.repo-name}}{% elsif title -%}Repository:{{title.object}}{% else -%}Repository: {{subject}}{% endif -%}",
+	
+	{% if publisher.object %}
+	"publisher":{
+	   "url": "{{publisher.object}}",
+		{% if publisher_type.object %}"@type":"{{publisher_type.object|split:"/"|last}}",{% endif %}
+		{% if publisher_name.object %}"name":"{{publisher_name.object}}",{% endif %}
+		{% if publisher_email.object %}"contactPoint":{
+				"@type":"ContactPoint",
+				"email":"{{publisher_email.object}}"
+			 }{% endif %}
+	  },{% endif %}
+
+	{% if datasets.size > 0 %}
+	"dataset":[{% for dataset in datasets %}
+	{% assign ds_triples = dataset.nested_triples %}
+	{% assign title = ds_triples | where:"predicate", dcterms.title | first %}
+		{
+			"@type":"Dataset",
+			"name":"{{title.object}}",
+			"url":"{{dataset.object}}",
+			"sameAs":"{{dataset.object}}",
+		},
+	{% endfor %}]
+	{% endif %}
+	
+}
+</script>
 
 <!-- breadcrumb -->
   <div class="ui hidden divider"></div>
@@ -121,7 +164,6 @@
 		</div>
 
       <div class="seven wide column">
-	  	{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
 			{% if publisher -%}
 				<div class="ui list">
 					<div class="item">
@@ -130,20 +172,17 @@
 						<div class="header">Publisher</div>
 							<div>
 						
-								{% assign publisher_triples = publisher.nested_triples -%}
-								{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
+								
 								<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
 									<div class="item">
 										<div class="content">
-											{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
-											  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+											  <span property="foaf:name">{{publisher_name.object|default: "Not specified."|escape}}</span>
 										</div>
 									</div>
 									<div class="item">
-										<div class="content">
-											  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
+										<div class="content">											  
 											  {% if web -%}
-											  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+											  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
 											  {% else -%}
 											  Not specified.
 											  {% endif -%}
@@ -151,8 +190,7 @@
 									</div>
 									<div class="item">
 										<div class="content">
-										  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
-										  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+										  <span property="foaf:mbox">{{publisher_email.object|default: "Not specified."|escape}}</span>
 										</div>
 									</div>
 								</div><!-- list -->
@@ -231,7 +269,6 @@
 				</div>
 			{% endif -%}
 
-			{% assign publisher = triples | where:"predicate", dcterms.publisher | first -%}
 			{% if publisher -%}
 				<div class="item">
 					<i class="user icon"></i>
@@ -239,20 +276,16 @@
 					<div class="header">Publisher</div>
 						<div>
 						
-							{% assign publisher_triples = publisher.nested_triples -%}
-							{% assign publisher_type = publisher_triples | where:"predicate", rdf:type | first -%}
 							<div class="list" property="dc:publisher" resource="{{publisher.object}}" typeof="{{publisher_type.object}}">
 								<div class="item">
 									<div class="content">
-										{% assign name = publisher_triples | where:"predicate", foaf.name | first -%}
-										  <span property="foaf:name">{{name.object|default: "Not specified."|escape}}</span>
+										  <span property="foaf:name">{{publisher_name.object|default: "Not specified."|escape}}</span>
 									</div>
 								</div>
 								<div class="item">
 									<div class="content">
-										  {% assign web = publisher_triples | where:"predicate", foaf.homepage | first -%}
 										  {% if web -%}
-										  <a property="foaf:homepage" href="{{web.object}}">{{web.object|escape}}</a>
+										  <a property="foaf:homepage" href="{{publisher_web.object}}">{{web.object|escape}}</a>
 										  {% else -%}
 										  Not specified.
 										  {% endif -%}
@@ -260,8 +293,7 @@
 								</div>
 								<div class="item">
 									<div class="content">
-									  {% assign email = publisher_triples | where:"predicate", foaf.mbox | first -%}
-									  <span property="foaf:mbox">{{email.object|default: "Not specified."|escape}}</span>
+									  <span property="foaf:mbox">{{publisher_email.object|default: "Not specified."|escape}}</span>
 									</div>
 								</div>
 							</div><!-- list -->
@@ -322,7 +354,6 @@
           </div>
 
 		  <div class="" id="toc">
-		    {% assign datasets = triples | where:"predicate", void.subset %}
 		{% if datasets.size > 0 %}
 			<div class="page-header">
 				<h2>Datasets</h2>
@@ -331,7 +362,7 @@
 			 <div class="ui two cards">
 			{% for dataset in datasets %}
 				{% assign ds_triples = dataset.nested_triples %}
-				<div class="card" property="void:subset" resource="{{dataset.object}}">
+				<div class="card" property="void:subset" typeof="dcat:Dataset" resource="{{dataset.object}}">
 					<div class="content" about="{{dataset.object}}">
 						{% assign title = ds_triples | where:"predicate", dcterms.title | first %}
 						<div class="header">
