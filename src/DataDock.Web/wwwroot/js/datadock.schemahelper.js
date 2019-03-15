@@ -91,6 +91,10 @@
     this.getColumnSuppressed = function(colTemplate) {
         return getPropertyValue(colTemplate, "suppressOutput", false);
     }
+
+    this.getColumnLang = function(colTemplate, defaultValue) {
+        return getPropertyValue(colTemplate, "lang", defaultValue);
+    }
     
     this.makeAbsolute = function (tok, baseUri) {
         if (Array.isArray(tok)) {

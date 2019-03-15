@@ -170,6 +170,7 @@
                 formData.append("showOnHomePage", JSON.stringify(editorData.showOnHomePage));
                 formData.append("saveAsSchema", JSON.stringify(editorData.saveAsSchema));
                 formData.append("addToExisting", JSON.stringify(editorData.addToExisting));
+                formData.append("overwriteExisting", JSON.stringify(!editorData.addToExisting));
 
                 var apiOptions = {
                     url: "/api/data",
@@ -1072,11 +1073,30 @@
                             }
                         ]
                     };
+
+                    var languageField = {
+                        type: "div",
+                        class: "field datatype-field datatype-string",
+                        html: [
+                            {
+                                type: "label",
+                                html: "Language",
+                                for: colName + "_lang"
+                            },
+                            {
+                                name: colName + "_lang",
+                                id: colName + "_lang",
+                                type: "text",
+                                placeholder: "e.g. en, fr, de-AT"
+                            }
+                        ]
+                    };
+
                     var predDiv = {
                         "type": "div",
                         "class": "field",
                         id: colName + "_advanced",
-                        "html": [parentField, predicateField, uriTemplateField]
+                        "html": [parentField, predicateField, uriTemplateField, languageField]
                     };
                     var tdPredicate = { "type": "td", "html": predDiv };
                     trElements.push(tdPredicate);
@@ -1307,6 +1327,7 @@
                         var colName = this.columnSet[i];
                         var colTemplate = schemaHelper.getColumnTemplate(this.options.templateMetadata, colName);
                         var colDatatype = schemaHelper.getColumnDatatype(colTemplate, "");
+                        var colLang = schemaHelper.getColumnLang(colTemplate, "");
                         var selector = $("#" + colName + "_datatype");
                         if (colDatatype) {
                             if (selector) {
@@ -1329,6 +1350,9 @@
                             if (parentColumn) {
                                 $('#' + colName + '_parent').val(parentColumn);
                             }
+                        }
+                        if (colLang) {
+                            $('#' + colName + '_lang').val(colLang);
                         }
                         this._updateDatatype(colName, selector.val());
                     }
@@ -1429,6 +1453,12 @@
                         column["valueUrl"] = "{" + columnName + "}";
                     } else {
                         column["datatype"] = $(colId + "_datatype").val();
+                    }
+                    if (datatype === "string") {
+                        var lang = $(colId + "_lang").val();
+                        if (lang) {
+                            column["lang"] = lang;
+                        }
                     }
                     column["propertyUrl"] = $(colId + "_property_url").val();
                 }
