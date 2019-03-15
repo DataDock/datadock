@@ -14,7 +14,7 @@ namespace DataDock.Web.Controllers
     {
         private readonly IDatasetStore _datasetStore;
         private readonly ISchemaStore _schemaStore;
-        private IHubContext<ProgressHub> _progresseHubContext;
+        private readonly IHubContext<ProgressHub> _progresseHubContext;
 
 
         public ManageController(IDatasetStore datasetStore, 

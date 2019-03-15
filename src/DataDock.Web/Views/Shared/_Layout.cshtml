@@ -48,7 +48,7 @@
         <a class="item" href="@Url.RouteUrl("Info", new{action="features"})" title="DataDock Features">Features</a>
         <a href="https://github.com/DataDock/datadock/wiki" class="item">Help</a>
         <a class="item" href="/search" title="Search Data Dock">Search</a>
-        @Html.Partial("_LoginSubMenuPartial")
+        <partial name="_LoginSubMenuPartial"/>
     </div>
 
     <!-- Contents -->
@@ -59,13 +59,13 @@
                 <a class="toc item">
                     <i class="sidebar icon"></i>
                 </a>
-                <a class="header item" href="/" title="DataDock homepage"><img src="@Url.Content("~/images/DataDock_Colour_400.png")" class="ui image logo" data-pin-nopin="true" /></a>
+                <a class="header item" href="/" title="DataDock homepage"><img src="@Url.Content("~/images/DataDock_Colour_400.png")" class="ui image logo" data-pin-nopin="true" alt="DataDock Logo" /></a>
                 <a class="item" href="/info/about" title="About DataDock">About</a>
                 <a class="item" href="/info/features" title="DataDock Features">Features</a>
                 <a href="https://github.com/DataDock/datadock/wiki" class="item">Help</a>
                 <a class="item" href="/search" title="Search Data Dock">Search</a>
                 <div class="right menu">
-                    @Html.Partial("_LoginPartial")
+                    <partial name="_LoginPartial"/>
                 </div>
             </nav>
         </header>
