@@ -36,6 +36,7 @@ namespace DataDock.Web.ViewModels
         public string OwnerId => _jobInfo.OwnerId;
         public string RepositoryId => _jobInfo.RepositoryId;
         public string DatasetIri => _jobInfo.DatasetIri;
+        public new string UserId => _jobInfo.UserId;
         public string CurrentStatus => _jobInfo.CurrentStatus.ToString();
         public DateTime CompletedAt => _jobInfo.CompletedAt;
         public DateTime StartedAt => _jobInfo.StartedAt;
