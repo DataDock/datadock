@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1-runtime AS base
+FROM microsoft/dotnet:2.2-runtime AS base
 WORKDIR /app
 # Install Git command-line for DD repository operations
 RUN apt-get update && apt-get install -y git-core
