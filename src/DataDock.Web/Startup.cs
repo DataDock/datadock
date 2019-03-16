@@ -82,6 +82,9 @@ namespace DataDock.Web
                 new ConnectionSettings(
                     new SingleNodeConnectionPool(new Uri(config.ElasticsearchUrl)),
                     JsonNetSerializer.Default));
+            Log.Information("Waiting for Elasticsearch cluster");
+            client.WaitForInitialization();
+            Log.Information("Elasticsearch cluster is available");
 
             services.AddScoped<AccountExistsFilter>();
             services.AddScoped<OwnerAdminAuthFilter>();
