@@ -626,8 +626,6 @@
                     this._setDatatypesFromSniffer();
                 }
 
-                $('')
-
                 // inputosaurus
                 $("#keywords").inputosaurus({
                     inputDelimiters: [",", ";"],
@@ -1368,6 +1366,7 @@
                             var selector = $("#" + colName + "_datatype");
                             if (selector) {
                                 selector.val(colDatatype);
+                                this._updateDatatype(colName, colDatatype);
                             }
                         }
                     }

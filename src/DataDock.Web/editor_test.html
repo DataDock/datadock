@@ -41,8 +41,8 @@
 
             var csvData = [
                 ["stop", "seeAlso", "at_station", "on_line"],
-                ["A1", "B1", "C1", "D1"],
-                ["A2", "B2", "C2", "D2"]
+                ["http://example.org/A1", "B1", "C1", "True"],
+                ["http://example.org/A2", "B2", "C2", "False"]
             ];
 
             var metadata = {
@@ -111,7 +111,7 @@
                 header: csvData[0],
                 filename: "test.csv",
                 schemaTitle: "Test Schema",
-                templateMetadata: metadata
+                templateMetadata: null
             }).bind("metadataeditorsubmit",
                 function(ev, data) {
                     console.log(data);
