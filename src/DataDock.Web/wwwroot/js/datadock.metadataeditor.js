@@ -1313,10 +1313,7 @@
                 return value && typeof value === 'object' && value.constructor === Array;
             },
 
-            _sniffDatatype: function() {
-
-            },
-
+            
             _setDatatypesFromTemplate: function() {
                 if (this.columnSet && this.options.templateMetadata) {
                     for (var i = 0; i < this.columnSet.length; i++) {
@@ -1362,6 +1359,10 @@
                         var colName = this.columnSet[i];
                         var colDatatype = sniffedDatatypes[i].type;
                         if (colDatatype === "float") colDatatype = "string"; // Float types are not handled in the UI yet
+                        if (sniffedDatatypes[i].allEmptyValues) {
+                            colDatatype = "string";
+                            $("#" + colName + "_suppress").prop("checked", true);
+                        }
                         if (colDatatype) {
                             var selector = $("#" + colName + "_datatype");
                             if (selector) {
