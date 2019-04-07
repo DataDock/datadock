@@ -620,7 +620,11 @@
                     // set the column datatypes from the template
                     this._setDatatypesFromTemplate();
                     // set the aboutUrl from the template
-                    $("#aboutUrlSuffix").val(this.options.templateMetadata["aboutUrl"]);
+                    var templateAboutUrl = this.options.templateMetadata["aboutUrl"];
+                    if (!templateAboutUrl.endsWith("/row_{_row}")) {
+                        $("#aboutUrlSuffix").val(this.options.templateMetadata["aboutUrl"]);
+                    }
+                   
                 } else {
                     // set the column datatypes using the datatype sniffer
                     this._setDatatypesFromSniffer();
@@ -1399,7 +1403,7 @@
                 csvw["aboutUrl"] = $('#aboutUrlSuffix').val();
                 csvw["tableSchema"] = this._constructCsvwTableSchema();
 
-                console.log(csvw);
+                //console.log(csvw);
                 return csvw;
             },
 
