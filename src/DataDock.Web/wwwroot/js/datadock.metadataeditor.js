@@ -354,6 +354,17 @@
 
                     });
 
+                $.dform.subscribe("updateAboutUrls",
+                    function (options, type) {
+                        if (options !== "") {
+                            this.keyup(function () {
+                                self._updateAboutUrlsFromTitle();
+                                return false;
+                            });
+                        }
+
+                    });
+
                 $.dform.subscribe("updateDatatype",
                     function(colName, type) {
                         if (colName !== "") {
@@ -366,6 +377,7 @@
                 this._loadEditor();
                 this._hideAllTabContent();
                 this._updateDatasetIdFromTitle();
+                this._updateAboutUrlsFromTitle();
                 $("#datasetInfo").show();
                 $("#datasetInfoTab").addClass("active");
             },
@@ -376,6 +388,23 @@
                 var slug = this._slugify(title, "", "", "camelCase");
                 var datasetId = this._getPrefix() + "/id/dataset/" + slug;
                 $("#datasetId").val(datasetId);
+            },
+
+            _updateAboutUrlsFromTitle: function () {
+                var title = $("#datasetTitle").val();
+                var slug = this._slugify(title, "", "", "camelCase");
+                $("#aboutUrlSuffix > option").each(function () {
+                    if (!this.text.startsWith("Template pattern: ")) {
+                        var split = this.value.split("/");
+                        if (split !== null && split.length > 1) {
+                            var datasetSegment = split[split.length - 2];
+                            split[split.length - 2] = slug;
+                            var newAboutUrl = split.join("/");
+                            //console.log("Replacing " + datasetSegment + " with " + slug + " in aboutUrl " + this.value);
+                            this.value = newAboutUrl;
+                        }
+                    }
+                });
             },
 
             _updateDatatype: function (colName, datatype) {
@@ -619,7 +648,7 @@
                     }
                     // set the column datatypes from the template
                     this._setDatatypesFromTemplate();
-                    // set the aboutUrl from the template
+                    // set the aboutUrl from the template (if it is not using row number)
                     var templateAboutUrl = this.options.templateMetadata["aboutUrl"];
                     if (!templateAboutUrl.endsWith("/row_{_row}")) {
                         $("#aboutUrlSuffix").val(this.options.templateMetadata["aboutUrl"]);
@@ -662,6 +691,7 @@
                             "caption": "Title",
                             "type": "text",
                             "updateDatasetId": "this",
+                            "updateAboutUrls": "this",
                             "value": schemaHelper.getTitle(this.options.templateMetadata, this.options.filename),
                             "validate": {
                                 "required": true,
@@ -806,9 +836,9 @@
                 var rowIdentifier = this._getIdentifierPrefix() + "/" + datasetId + "/row_{_row}";
                 var identifierOptions = {};
                 var columnCount = this.options.header.length;
-                var aboutUrl = schemaHelper.getAboutUrl(this.options.templateMetadata);
+                var schemaAboutUrl = schemaHelper.getAboutUrl(this.options.templateMetadata);
                 identifierOptions[rowIdentifier] = "Row Number";
-
+                //console.log("schema about url: " + schemaAboutUrl);
                 for (var colIdx = 0; colIdx < columnCount; colIdx++) {
                     var colTitle = this.options.header[colIdx];
                     var colName = this._slugify(colTitle, "_", "_", "lowercase");
@@ -816,8 +846,8 @@
                     identifierOptions[colIdentifier] = colTitle;
                 }
 
-                if (aboutUrl && !identifierOptions.hasOwnProperty(aboutUrl)) {
-                    identifierOptions[aboutUrl] = "Template pattern: " + aboutUrl;
+                if (schemaAboutUrl && !identifierOptions.hasOwnProperty(schemaAboutUrl)) {
+                    identifierOptions[schemaAboutUrl] = "Template pattern: " + schemaAboutUrl;
                 }
                 identifierTableElements.push(
                     {
