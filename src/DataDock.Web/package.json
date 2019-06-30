@@ -9,18 +9,19 @@
     "gulp": "^4.0.0",
     "gulp-concat": "2.6.1",
     "gulp-cssmin": "0.2.0",
+    "clean-css": ">=4.1.11",
     "gulp-jasmine-browser": "4.1.0",
     "gulp-rename": "1.4.0",
     "gulp-uglify-es": "1.0.4",
     "jasmine": "3.3.1",
     "jasmine-core": "^3.3.0",
-    "jquery": "^3.2.1",
+    "jquery": "^3.4.1",
     "jquery-ui": "1.12.1",
     "karma": "^4.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-jasmine": "^2.0.1",
     "merge-stream": "1.0.1",
-    "puppeteer": "1.11.0",
+    "puppeteer": "1.18.1",
     "rimraf": "2.6.2"
   }
 }
