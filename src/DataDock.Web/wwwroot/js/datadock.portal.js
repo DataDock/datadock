@@ -10,7 +10,7 @@ function formatResults(results, searchInput) {
     $resultsHtml.append($hiddenDivider);
 
     if (results && Array.isArray(results) && results.length > 0) {
-        var $cards = $("<div/>", { 'class': "ui two cards" }).appendTo($resultsHtml);
+        var $cards = $("<div/>", { 'class': "ui two stackable cards" }).appendTo($resultsHtml);
 
         $.each(results,
             function(key, ds) {
@@ -177,7 +177,7 @@ function find() {
 }
 
 
-function buttonSearch(tags) {
+function tagSearch(tags) {
     $('#tags').val(''); // clear search input
     var buttonId = "#" + tags;
     $(buttonId).toggleClass("loading");
