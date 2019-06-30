@@ -16,9 +16,8 @@
     @await Component.InvokeAsync("Settings", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId })
 
     <div class="ui center aligned container">
-      <input type="submit" class="ui primary button large" value="Save" />
+      <input type="submit" class="ui primary button large" value="Save" id="saveSettings" />
       <div class="ui hidden divider"></div>
-
     </div>
 
   </form>

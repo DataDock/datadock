@@ -43,12 +43,10 @@
 
     <div class="field">
 
-      @Html.LabelFor(m => m.SearchButtons, new { @class = "" })
-      <div class="">
-        @Html.TextBoxFor(m => m.SearchButtons, new { @class = "" })
-        @Html.ValidationMessageFor(m => m.SearchButtons)
-      </div>
-      <p><i class="info icon"></i>To add search buttons to the data portal home page, add the tags as a comma separated list here. If you want the button text to be different from the tag then enter the tag as "tag;title". <br /><em>e.g. education,environment;Local Environment,housing,traffic will create four buttons on the home page that load the datasets that have matching tags.</em></p>
+        @Html.LabelFor(m => m.SearchButtons, new { @class = "" })
+        @Html.HiddenFor(m=>m.SearchButtons)
+        <p><i class="info icon"></i>Use this table to add search buttons to the data portal home page. The <strong>Button Label</strong> is optional, if it is left out then the tag will be displayed as the label on the portal search button.</p>
+        <div id="portalSearchButtons"></div>
     </div>
 
 
