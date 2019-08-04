@@ -14,7 +14,7 @@ var gulp = require("gulp"),
     cssmin = require("gulp-cssmin"),
     uglify = require("gulp-uglify-es").default,
     rename = require("gulp-rename"),
-    jasmineBrowser = require("gulp-jasmine-browser");
+    Server = require("karma").Server;
 
 
 var paths = {
@@ -85,6 +85,14 @@ gulp.task("nm_copy", function () {
     return merge(streams);
 
 });
+
+gulp.task("test",
+    function(done) {
+        new Server({
+            configFile: __dirname + "/karma.conf.js",
+            singleRun: true
+        }, done).start();
+    });
 
 gulp.task('default', function () {
     // place code for your default task here
