@@ -70,7 +70,11 @@ namespace DataDock.Web
             // Angular's default header name for sending the XSRF token.
             services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
 
-            services.AddMvc();
+            services.AddMvc(
+                options =>
+                {
+                    options.OutputFormatters.Insert(0, new RdfDatasetOutputFormatter());
+                });
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -103,6 +107,7 @@ namespace DataDock.Web
             services.AddSingleton<IFileStore, DirectoryFileStore>();
             services.AddSingleton<ILogStore, DirectoryLogStore>();
             services.AddSingleton<IDataDockUriService>(new DataDockUriService(config.PublishUrl));
+            services.AddSingleton<DirectoryMapCache>();
 
             var gitHubClientHeader = config.GitHubClientHeader;
             services.AddSingleton<IGitHubClientFactory>(new GitHubClientFactory(gitHubClientHeader));
