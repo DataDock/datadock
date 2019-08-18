@@ -1,0 +1,26 @@
+﻿@model DataDock.Web.ViewModels.LinkedDataFragmentsViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "LinkedDataFragments";
+}
+
+<h1>Linked Data Fragments</h1>
+
+
+<h3>Matches in @Model.Owner/@Model.Repo for <em class="pattern">{ @Model.Pattern }</em></h3>
+<p>Filter matches @Model.ResultsGraph.Triples.Count 
+    @if (Model.ResultsGraph.Triples.Count == 1) { 
+        @:triple.
+    }
+    else
+    {
+        @:triples.
+    }
+</p>
+<ul class="triples">
+    @foreach (var t in Model.ResultsGraph.Triples)
+    {
+        <li><span>@t.Subject.ToString()</span> <span>@t.Predicate.ToString()</span> <span>@t.Object.ToString()</span></li>
+    }
+</ul>
+

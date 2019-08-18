@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataDock.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using VDS.RDF;
@@ -32,19 +33,22 @@ namespace DataDock.Web.Services
 
         protected override bool CanWriteType(Type type)
         {
-            if (typeof(ITripleStore).IsAssignableFrom(type)) return true;
-            return false;
+            return typeof(LinkedDataFragmentsViewModel).IsAssignableFrom(type);
         }
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             await Task.Run(() =>
             {
-                var mediaType = context.ContentType;
-                var definition = MimeTypesHelper.GetDefinitions("application/n-quads").FirstOrDefault();
+                var contentType = MediaTypeHeaderValue.Parse(context.ContentType);
+                var definition = MimeTypesHelper.GetDefinitions(contentType.MediaType.Value).FirstOrDefault();
                 var writer = definition.GetRdfDatasetWriter();
                 var response = context.HttpContext.Response;
-                var store = context.Object as ITripleStore;
+                var model = context.Object as LinkedDataFragmentsViewModel;
+                var store = new TripleStore();
+                
+                store.Add(model.ResultsGraph);
+                store.Add(model.MetadataGraph);
                 using (var responseWriter = new StreamWriter(response.Body, selectedEncoding, 1024, true))
                 {
                     writer.Save(store, responseWriter, true);

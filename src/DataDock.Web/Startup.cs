@@ -73,7 +73,8 @@ namespace DataDock.Web
             services.AddMvc(
                 options =>
                 {
-                    options.OutputFormatters.Insert(0, new RdfDatasetOutputFormatter());
+                    options.OutputFormatters.Add(new LinkedDataFragmentsViewOutputFormatter());
+                    options.OutputFormatters.Add(new RdfDatasetOutputFormatter());
                 });
             services.Configure<ForwardedHeadersOptions>(options =>
             {
