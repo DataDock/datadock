@@ -7,8 +7,9 @@
 <h1>Linked Data Fragments</h1>
 
 
-<h3>Matches in @Model.Owner/@Model.Repo for <em class="pattern">{ @Model.Pattern }</em></h3>
-<p>Filter matches @Model.ResultsGraph.Triples.Count 
+@if (Model.ResultsGraph != null) { 
+    <h3>Matches in <span class="source">@Model.Source</span> for <span class="pattern">{ @Model.Pattern }</span></h3>
+    <p>Filter matches @Model.ResultsGraph.Triples.Count 
     @if (Model.ResultsGraph.Triples.Count == 1) { 
         @:triple.
     }
@@ -16,11 +17,16 @@
     {
         @:triples.
     }
-</p>
+    </p>
 <ul class="triples">
     @foreach (var t in Model.ResultsGraph.Triples)
     {
         <li><span>@t.Subject.ToString()</span> <span>@t.Predicate.ToString()</span> <span>@t.Object.ToString()</span></li>
     }
 </ul>
-
+}
+else
+{
+    <h3>Linked Data Fragments for <span class="dataset">@Model.Source</span></h3>
+    <p>No filter specified.</p>
+}

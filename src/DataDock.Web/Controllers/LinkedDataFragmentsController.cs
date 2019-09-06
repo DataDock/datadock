@@ -4,15 +4,13 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using DataDock.Common;
 using DataDock.Web.Services;
 using DataDock.Web.ViewModels;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using NetworkedPlanet.Quince;
@@ -21,49 +19,50 @@ using VDS.RDF;
 using VDS.RDF.Parsing;
 using VDS.RDF.Parsing.Handlers;
 using VDS.RDF.Parsing.Tokens;
-using VDS.RDF.Query.Algebra;
-using VDS.RDF.Query.Datasets;
-using VDS.RDF.Writing;
-using VDS.RDF.Writing.Formatting;
 using Graph = VDS.RDF.Graph;
 using NQuadsParser = VDS.RDF.Parsing.NQuadsParser;
 
 namespace DataDock.Web.Controllers
 {
-    [Route("query/{owner}/{repo}")]
+    [Route("ldf/{owner}/{repo}/{dataset?}")]
     [Produces("application/n-quads", "text/html")]
     [ApiController]
-    public class QueryController : ControllerBase
+    public class LinkedDataFragmentsController : ControllerBase
     {
         private readonly IMemoryCache _cache;
         private readonly MD5 _hasher;
+        private readonly IDataDockUriService _uriService;
 
-        public QueryController(DirectoryMapCache dirMapCache)
+        public LinkedDataFragmentsController(DirectoryMapCache dirMapCache, IDataDockUriService uriService)
         {
             _cache = dirMapCache.Cache;
             _hasher = MD5.Create();
+            _uriService = uriService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetLinkedDataFragmentAsync(
             [FromRoute] string owner,
             [FromRoute] string repo,
+            [FromRoute] string dataset,
             [FromQuery] string s = null,
             [FromQuery] string p = null,
             [FromQuery] string o = null)
         {
             var requestBaseUri = new Uri(Request.GetUri(), Request.Path);
-            var resultGraph = new Graph();
+            IGraph resultGraph = null;
 
             var gitHubIri = $"https://{owner}.github.io/{repo}/quince/dirmap.txt";
             if (s != null || p != null || o != null)
             {
+                resultGraph = new Graph();
                 var directoryMap = await GetDirectoryMapAsync(gitHubIri);
                 string ixPath = null;
                 if (s != null)
                 {
                     ixPath = "_s" + HashString(s);
-                } else if (o != null)
+                }
+                else if (o != null)
                 {
                     ixPath = "_o" + HashString(o);
                 }
@@ -72,6 +71,12 @@ namespace DataDock.Web.Controllers
                     ixPath = "_p" + HashString(p);
                 }
 
+                Uri graphUri = null;
+
+                if (!string.IsNullOrEmpty(dataset))
+                {
+                    graphUri = new Uri(_uriService.GetDatasetIdentifier(owner, repo, dataset));
+                }
                 var key = PathToKey(ixPath);
                 var trieNode = directoryMap.FindPredecessor(key);
                 string filePath;
@@ -85,13 +90,11 @@ namespace DataDock.Web.Controllers
                     filePath = dirPath + key.Substring(dirPath.Length, 2) + ".nq";
                 }
 
-                await GetMatchingTriples(owner, repo, filePath, MakeFilter(resultGraph, s, p , o));
-                var metadataGraph = GetControlTriples(Request.GetUri(), requestBaseUri, resultGraph);
-                var resultModel = new LinkedDataFragmentsViewModel(owner, repo, s, p, o, resultGraph, metadataGraph);
-                return new OkObjectResult(resultModel);
+                await GetMatchingTriples(owner, repo, filePath, MakeFilter(resultGraph, s, p, o, graphUri));
             }
-
-            return BadRequest();
+            var metadataGraph = GetControlTriples(Request.GetUri(), requestBaseUri, resultGraph);
+            var resultModel = new LinkedDataFragmentsViewModel(owner, repo, dataset, s, p, o, resultGraph, metadataGraph);
+            return new OkObjectResult(resultModel);
         }
 
         private async Task GetMatchingTriples(string owner, string repo, string filePath, IRdfHandler rdfHandler)
@@ -112,7 +115,6 @@ namespace DataDock.Web.Controllers
         {
             var metadataGraphUri = UriFactory.Create(requestUri + "#metadata");
             var g = new Graph {BaseUri = metadataGraphUri};
-            var resultTripleCount = resultGraph.Triples.Count();
             g.NamespaceMap.AddNamespace("foaf", UriFactory.Create("http://xmlns.com/foaf/0.1/"));
             g.NamespaceMap.AddNamespace("hydra", UriFactory.Create("http://www.w3.org/ns/hydra/core#"));
             g.NamespaceMap.AddNamespace("void", UriFactory.Create("http://rdfs.org/ns/void#"));
@@ -120,11 +122,18 @@ namespace DataDock.Web.Controllers
             var metadataGraphNode = g.CreateUriNode(metadataGraphUri);
             var datasetNode = g.CreateUriNode(UriFactory.Create(requestBaseUri + "#dataset"));
             var requestNode = g.CreateUriNode(requestUri);
-            var tripleCountNode = g.CreateLiteralNode(resultTripleCount.ToString(CultureInfo.InvariantCulture),
-                UriFactory.Create("http://www.w3.org/2001/XMLSchema#integer"));
-            g.Assert(new Triple(metadataGraphNode, g.CreateUriNode("foaf:primaryTopic"), g.CreateUriNode(requestUri), metadataGraphUri));
-            g.Assert(new Triple(requestNode, g.CreateUriNode("void:triples"),tripleCountNode, metadataGraphUri));
-            g.Assert(new Triple(requestNode, g.CreateUriNode("hydra:totalItems"), tripleCountNode, metadataGraphUri));
+            if (resultGraph != null)
+            {
+                var resultTripleCount = resultGraph.Triples.Count();
+                var tripleCountNode = g.CreateLiteralNode(resultTripleCount.ToString(CultureInfo.InvariantCulture),
+                    UriFactory.Create("http://www.w3.org/2001/XMLSchema#integer"));
+                g.Assert(new Triple(requestNode, g.CreateUriNode("void:triples"), tripleCountNode, metadataGraphUri));
+                g.Assert(
+                    new Triple(requestNode, g.CreateUriNode("hydra:totalItems"), tripleCountNode, metadataGraphUri));
+            }
+
+            g.Assert(new Triple(metadataGraphNode, g.CreateUriNode("foaf:primaryTopic"), g.CreateUriNode(requestUri),
+                metadataGraphUri));
             g.Assert(new Triple(datasetNode, g.CreateUriNode("void:subset"), requestNode, metadataGraphUri));
             var searchNode = g.CreateBlankNode("search");
             var subjectMappingNode = g.CreateBlankNode("smap");
@@ -227,12 +236,13 @@ namespace DataDock.Web.Controllers
             return _hasher.ComputeHash(Encoding.UTF8.GetBytes(str)).ToHexString();
         }
 
-        private FilterHandler MakeFilter(IGraph g, string s, string p, string o)
+        private FilterHandler MakeFilter(IGraph g, string s, string p, string o, Uri graphUri)
         {
             var subjectFilter = ParseToken(s, g);
             var predicateFilter = ParseToken(p, g);
             var objectFilter = ParseToken(o, g);
-            return new FilterHandler(new GraphHandler(g), subjectFilter, predicateFilter, objectFilter, null);
+            var graphFilter = graphUri != null ? g.CreateUriNode(graphUri) : null;
+            return new FilterHandler(new GraphHandler(g), subjectFilter, predicateFilter, objectFilter, graphFilter);
         }
 
         private static INode ParseToken(string tokenString, IGraph g)
@@ -278,12 +288,12 @@ namespace DataDock.Web.Controllers
 
     public class FilterHandler : BaseRdfHandler, IWrappingRdfHandler
     {
-        private IRdfHandler _handler;
-        private INode _subjectFilter;
-        private INode _predicateFilter;
-        private INode _objectFilter;
-        private INode _graphFilter;
-        private Dictionary<string, INode> _variableMap;
+        private readonly IRdfHandler _handler;
+        private readonly INode _subjectFilter;
+        private readonly INode _predicateFilter;
+        private readonly INode _objectFilter;
+        private readonly INode _graphFilter;
+        private readonly Dictionary<string, INode> _variableMap;
 
 
         public FilterHandler(IRdfHandler baseHandler, INode subjectFilter, INode predicateFilter, INode objectFilter,
@@ -347,14 +357,14 @@ namespace DataDock.Web.Controllers
             }
         }
 
-        protected bool IsMatch(Uri uri, INode filter, Dictionary<string, INode> varibleMap)
+        protected bool IsMatch(Uri uri, INode filter, Dictionary<string, INode> variableMap)
         {
             switch (filter)
             {
                 case null:
                     return true;
                 case IVariableNode varNode when _variableMap.ContainsKey(varNode.VariableName):
-                    return IsMatch(uri, varibleMap[varNode.VariableName], varibleMap);
+                    return IsMatch(uri, variableMap[varNode.VariableName], variableMap);
                 case IVariableNode varNode:
                     return true;
                 case IUriNode uriNode:
