@@ -47,7 +47,10 @@ namespace DataDock.Web.Services
                 var model = context.Object as LinkedDataFragmentsViewModel;
                 var store = new TripleStore();
                 
-                store.Add(model.ResultsGraph);
+                if (model.ResultsGraph != null)
+                {
+                    store.Add(model.ResultsGraph);
+                }
                 store.Add(model.MetadataGraph);
                 using (var responseWriter = new StreamWriter(response.Body, selectedEncoding, 1024, true))
                 {

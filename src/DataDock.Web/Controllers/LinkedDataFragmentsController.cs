@@ -25,7 +25,7 @@ using NQuadsParser = VDS.RDF.Parsing.NQuadsParser;
 namespace DataDock.Web.Controllers
 {
     [Route("ldf/{owner}/{repo}/{dataset?}")]
-    [Produces("application/n-quads", "text/html")]
+    [Produces("application/n-quads", "text/html", "application/x-trig", "application/ld+json", "application/trix")]
     [ApiController]
     public class LinkedDataFragmentsController : ControllerBase
     {
@@ -90,7 +90,8 @@ namespace DataDock.Web.Controllers
                     filePath = dirPath + key.Substring(dirPath.Length, 2) + ".nq";
                 }
 
-                await GetMatchingTriples(owner, repo, filePath, MakeFilter(resultGraph, s, p, o, graphUri));
+                var resultGraphUri = new Uri(requestBaseUri + "#dataset");
+                await GetMatchingTriples(owner, repo, filePath, MakeFilter(resultGraph, s, p, o, graphUri, resultGraphUri));
             }
             var metadataGraph = GetControlTriples(Request.GetUri(), requestBaseUri, resultGraph);
             var resultModel = new LinkedDataFragmentsViewModel(owner, repo, dataset, s, p, o, resultGraph, metadataGraph);
@@ -118,10 +119,11 @@ namespace DataDock.Web.Controllers
             g.NamespaceMap.AddNamespace("foaf", UriFactory.Create("http://xmlns.com/foaf/0.1/"));
             g.NamespaceMap.AddNamespace("hydra", UriFactory.Create("http://www.w3.org/ns/hydra/core#"));
             g.NamespaceMap.AddNamespace("void", UriFactory.Create("http://rdfs.org/ns/void#"));
-            g.NamespaceMap.AddNamespace("rdf", UriFactory.Create("http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"));
+            g.NamespaceMap.AddNamespace("rdf", UriFactory.Create("http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
             var metadataGraphNode = g.CreateUriNode(metadataGraphUri);
             var datasetNode = g.CreateUriNode(UriFactory.Create(requestBaseUri + "#dataset"));
             var requestNode = g.CreateUriNode(requestUri);
+            var rdfType = g.CreateUriNode("rdf:type");
             if (resultGraph != null)
             {
                 var resultTripleCount = resultGraph.Triples.Count();
@@ -134,6 +136,8 @@ namespace DataDock.Web.Controllers
 
             g.Assert(new Triple(metadataGraphNode, g.CreateUriNode("foaf:primaryTopic"), g.CreateUriNode(requestUri),
                 metadataGraphUri));
+            g.Assert(new Triple(datasetNode, rdfType, g.CreateUriNode("hydra:Collection"), metadataGraphUri));
+            g.Assert(new Triple(datasetNode, rdfType, g.CreateUriNode("void:Dataset"), metadataGraphUri));
             g.Assert(new Triple(datasetNode, g.CreateUriNode("void:subset"), requestNode, metadataGraphUri));
             var searchNode = g.CreateBlankNode("search");
             var subjectMappingNode = g.CreateBlankNode("smap");
@@ -146,14 +150,16 @@ namespace DataDock.Web.Controllers
 
             g.Assert(new Triple(datasetNode, g.CreateUriNode("hydra:search"), searchNode, metadataGraphUri));
             g.Assert(new Triple(searchNode, g.CreateUriNode("hydra:template"), g.CreateLiteralNode(searchTemplate), metadataGraphUri));
+            g.Assert(new Triple(searchNode, g.CreateUriNode("hydra:variableRepresentation"),
+                g.CreateUriNode("hydra:ExplicitRepresentation"), metadataGraphUri));
             g.Assert(new Triple(searchNode, hydraMapping, subjectMappingNode, metadataGraphUri));
             g.Assert(new Triple(searchNode, hydraMapping, predicateMappingNode, metadataGraphUri));
             g.Assert(new Triple(searchNode, hydraMapping, objectMappingNode, metadataGraphUri));
             g.Assert(new Triple(subjectMappingNode, hydraVariable, g.CreateLiteralNode("s"), metadataGraphUri));
             g.Assert(new Triple(subjectMappingNode, hydraProperty, g.CreateUriNode("rdf:subject"), metadataGraphUri));
-            g.Assert(new Triple(predicateMappingNode, hydraVariable, g.CreateLiteralNode("o"), metadataGraphUri));
+            g.Assert(new Triple(predicateMappingNode, hydraVariable, g.CreateLiteralNode("p"), metadataGraphUri));
             g.Assert(new Triple(predicateMappingNode, hydraProperty, g.CreateUriNode("rdf:predicate"), metadataGraphUri));
-            g.Assert(new Triple(objectMappingNode, hydraVariable, g.CreateLiteralNode("p"), metadataGraphUri));
+            g.Assert(new Triple(objectMappingNode, hydraVariable, g.CreateLiteralNode("o"), metadataGraphUri));
             g.Assert(new Triple(objectMappingNode, hydraProperty, g.CreateUriNode("rdf:object"), metadataGraphUri));
             return g;
         }
@@ -236,13 +242,13 @@ namespace DataDock.Web.Controllers
             return _hasher.ComputeHash(Encoding.UTF8.GetBytes(str)).ToHexString();
         }
 
-        private FilterHandler MakeFilter(IGraph g, string s, string p, string o, Uri graphUri)
+        private FilterHandler MakeFilter(IGraph g, string s, string p, string o, Uri graphUri, Uri resultGraphUri)
         {
             var subjectFilter = ParseToken(s, g);
             var predicateFilter = ParseToken(p, g);
             var objectFilter = ParseToken(o, g);
             var graphFilter = graphUri != null ? g.CreateUriNode(graphUri) : null;
-            return new FilterHandler(new GraphHandler(g), subjectFilter, predicateFilter, objectFilter, graphFilter);
+            return new FilterHandler(new GraphHandler(g), subjectFilter, predicateFilter, objectFilter, graphFilter, resultGraphUri);
         }
 
         private static INode ParseToken(string tokenString, IGraph g)
@@ -293,17 +299,19 @@ namespace DataDock.Web.Controllers
         private readonly INode _predicateFilter;
         private readonly INode _objectFilter;
         private readonly INode _graphFilter;
+        private readonly Uri _targetGraph;
         private readonly Dictionary<string, INode> _variableMap;
 
 
         public FilterHandler(IRdfHandler baseHandler, INode subjectFilter, INode predicateFilter, INode objectFilter,
-            INode graphFilter)
+            INode graphFilter, Uri targetGraph)
         {
             _handler = baseHandler;
             _subjectFilter = subjectFilter;
             _predicateFilter = predicateFilter;
             _objectFilter = objectFilter;
             _graphFilter = graphFilter;
+            _targetGraph = targetGraph;
             _variableMap = new Dictionary<string, INode>();
         }
 

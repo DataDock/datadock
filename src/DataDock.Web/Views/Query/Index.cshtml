@@ -1,0 +1,132 @@
+﻿
+@{
+    ViewData["Title"] = "SPARQL Query";
+}
+
+<h1>SPARQL Query</h1>
+
+<div id="ui"></div>
+
+<button id="queryButton" class="ui button">Execute</button>
+
+<div id="results">
+    <table id="resultsTable">
+        <tr>
+            <td>There are no results to show yet</td>
+        </tr>
+    </table>
+</div>
+@section scripts
+{
+    <script src="http://rdf.js.org/comunica-browser/versions/1/packages/actor-init-sparql/comunica-browser.js"></script>
+    <script language="JavaScript">
+        /*
+const myEngine = Comunica.newEngine();
+myEngine.query('SELECT * { <http://datadock.io/kal/data/id/resource/library/Blakelaw> ?p ?o } LIMIT 100',
+{
+   sources: [
+       'http://localhost:5000/ldf/kal/data'
+   ]
+})
+.then(function(result) {
+result.bindingsStream.on('data',
+   function(data) {
+       console.log(data.toObject());
+   });
+});
+*/
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/yasgui-yasqe@2.11.22/dist/yasqe.min.css" rel='stylesheet' type='text/css'/>
+    <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/yasgui-yasqe@2.11.22/dist/yasqe.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+    <script language="javascript">
+
+        function makeLink(uri) {
+            let hashIx = uri.lastIndexOf('#');
+            let href = uri;
+            let text = uri;
+            if (hashIx >= 0 && hashIx < uri.length-1) {
+                text = uri.substr(hashIx + 1);
+            } else {
+                let slashIx = uri.lastIndexOf('/');
+                if (slashIx >= 0 && slashIx < uri.length-1) {
+                    text = uri.substr(slashIx + 1);
+                }
+            }
+            return `<a href='${encodeURI(href)}'>${text}</a>`;
+        }
+        function renderData(data, type, row, meta) {
+            console.log(data);
+            if (data.termType === "Literal") {
+                switch (data.datatypeString) {
+                    case "http://www.w3.org/2001/XMLSchema#string":
+                        if (data.language) {
+                            return data.value + " (" + data.language + ")";
+                        } else {
+                            return data.value;
+                        }
+                    case "http://www.w3.org/2001/XMLSchema#decimal":
+                        var val = parseFloat(data.value);
+                        if (val !== NaN) return val;
+                        return data.value;
+                    case "http://www.w3.org/2001/XMLSchema#integer":
+                        var intVal = parseInt(data.value);
+                        if (intVal !== NaN) return intVal;
+                        return data.value;
+                }
+            } else if (data.termType === "NamedNode") {
+                return makeLink(data.id);
+            }
+            return 'rendered';
+        }
+
+        function resetTable(vars) {
+            console.log("reset");
+            resultsTable.clear();
+            resultsTable.destroy();
+            columnDefinitions = [];
+            $('#resultsTable').empty();
+            let $row = $('#resultsTable').append('<tr></tr>');
+            vars.forEach((varName => {
+                columnDefinitions.push({ 'title': varName, 'data':varName });
+                $row.append('<td></td>');
+            }));
+
+            resultsTable = $('#resultsTable').DataTable({
+                columns: columnDefinitions,
+                columnDefs: [
+                    {targets: '_all', render: renderData }
+                ]
+            });
+            return resultsTable;
+        }
+
+        function executeQuery(sparqlQuery, querySources) {
+            const myEngine = Comunica.newEngine();
+            myEngine.query(sparqlQuery, { sources: querySources }).then(function(result) {
+                if (result.type === 'bindings') {
+                    resultsTable = resetTable(result.variables);
+                }
+                result.bindingsStream.on('data',
+                    function (data) {
+                        d = data.toObject();
+                        console.log(d);
+                        resultsTable.row.add(d);
+                        resultsTable.draw();
+                    });
+            });
+        }
+
+        var yasqe = YASQE(document.getElementById("ui"));
+        $('#queryButton').click(() => {
+            executeQuery(yasqe.getValue(),
+                [
+                    'http://localhost:5000/ldf/kal/data'
+                ]);
+        });
+        var resultsTable = $('#resultsTable').DataTable({ columns: [null] });
+    </script>
+}
