@@ -11,23 +11,21 @@ services:
   - docker
 
 install:
-  - wget https://github.com/GitTools/GitVersion/releases/download/v4.0.0/GitVersion-bin-net40-v4.0.0.zip
-  - unzip -d gitversion GitVersion-bin-net40-v4.0.0.zip
+  - wget https://github.com/GitTools/GitVersion/releases/download/5.1.1/gitversion-linux-5.1.1.tar.gz
+  - tar -zxf gitversion-linux-5.1.1.tar.gz
   - sh: nvm install $nodejs_version
 
 before_build:
   - sh: |
       dotnet restore src/DataDock.sln
-      mono gitversion/GitVersion.exe /l console /output buildserver /updateassemblyinfo
-      export DockerImageVersion=$(mono gitversion/GitVersion.exe /output json /showVariable FullSemVer | tr '+' '-')
-      echo $DockerImageVersion
+      GitVersion/GitVersion /l console /output buildserver /updateassemblyinfo
       npm install --global gulp-cli karma-cli
 
 configuration: Release
 
 build_script:
   - sh: dotnet build -c Release src/DataDock.sln
-  - sh: msbuild /t:BuildImages /p:Tag=$DockerImageVersion build.proj 
+  - sh: msbuild /t:BuildImages /p:Tag=$GitVersion_FullSemVer build.proj 
 
 test_script:
   - dotnet test -c Release src/DataDock.Common.Tests
@@ -41,14 +39,14 @@ deploy_script:
   - sh: |
       if [ "$APPVEYOR_REPO_TAG" == "true" ]; then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
-        docker push datadock/web:$DockerImageVersion
+        docker push datadock/web:$GitVersion_FullSemVer
         docker push datadock/web:latest
-        docker push datadock/worker:$DockerImageVersion
+        docker push datadock/worker:$GitVersion_FullSemVer
         docker push datadock/worker:latest
       elif [ "$APPVEYOR_REPO_BRANCH" == "develop" ]; then
         docker login -u=$DOCKER_USER -p=$DOCKER_PASS
-        docker push datadock/web:$DockerImageVersion
-        docker push datadock/worker:$DockerImageVersion
+        docker push datadock/web:$GitVersion_FullSemVer
+        docker push datadock/worker:$GitVersion_FullSemVer
       else
         echo "Deployment will only run on a tag or commit to master"
       fi
