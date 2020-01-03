@@ -81,7 +81,7 @@ namespace DataDock.Common.Tests
             timeProvider.SetupSequence(t => t.UtcNow)
                 .Returns(now.Subtract(TimeSpan.FromDays(89)))
                 .Returns(now.Subtract(TimeSpan.FromDays(90)))
-                .Returns(now.Subtract(TimeSpan.FromDays(91)))
+                .Returns(now.Subtract(TimeSpan.FromDays(92))) // KA: Note that using 91 as a test case will fail intermittently depending on the time when the test is run
                 .Returns(now);
 
             var job1Id = Guid.NewGuid().ToString("N");
