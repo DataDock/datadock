@@ -18,7 +18,7 @@ install:
 before_build:
   - sh: |
       dotnet restore src/DataDock.sln
-      GitVersion/GitVersion /l console /output buildserver
+      GitVersion /l console /output buildserver
       echo GitVersion Full: $GitVersion_FullSemVer
       echo GitVersion NuGet: $GitVersion_NuGetVersion
       npm install --global gulp-cli karma-cli
