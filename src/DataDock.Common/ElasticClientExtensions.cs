@@ -12,7 +12,7 @@ namespace DataDock.Common
     {
         public static void WaitForInitialization(this IElasticClient client)
         {
-            var retry = Policy.HandleResult(false)
+            var retry = Polly.Policy.HandleResult(false)
                 .WaitAndRetryForever(retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (result, timespan) =>
                     {
