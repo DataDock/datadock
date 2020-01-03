@@ -26,7 +26,7 @@ namespace DataDock.Worker.Tests
 
             quad.Should()
                 .Be(
-                    "<http://example.org/foo\\u0020bar> <http://example.org/p> \"some string\" <http://example.org/g>.");
+                    "<http://example.org/foo%20bar> <http://example.org/p> \"some string\" <http://example.org/g>.");
         }
     }
 }
