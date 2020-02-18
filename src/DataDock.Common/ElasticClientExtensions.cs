@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Elasticsearch.Net;
 using Nest;
 using Polly;
@@ -26,10 +24,23 @@ namespace DataDock.Common
             var pingResponse = client.Ping();
             if (pingResponse.IsValid)
             {
+                Log.Information("Elasticsearch cluster responded to PING. Checking cluster health...");
                 var clusterHealthResponse = client.ClusterHealth();
                 if (clusterHealthResponse.IsValid)
                 {
-                    return clusterHealthResponse.Status != Health.Red;
+                    switch (clusterHealthResponse.Status) {
+                        case Health.Red:
+                        Log.Warning("Elasticsearch cluster health is RED. Will back off and wait for cluster to recover");
+                        return false;
+                        case Health.Yellow:
+                            Log.Warning("Elasticsearch cluster health is YELLOW.");
+                            return true;
+                        case Health.Green:
+                            Log.Information("Elasticsearch cluster health is GREEN");
+                            return true;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
 
