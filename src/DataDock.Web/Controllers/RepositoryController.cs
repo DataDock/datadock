@@ -7,7 +7,6 @@ using DataDock.Common.Stores;
 using DataDock.Web.Filters;
 using DataDock.Web.Models;
 using DataDock.Web.ViewModels;
-using Microsoft.IdentityModel.Protocols;
 using Serilog;
 using Microsoft.Extensions.Configuration;
 
@@ -27,7 +26,7 @@ namespace DataDock.Web.Controllers
         }
 
         /// <summary>
-        /// User or Org summary of data uploads to a partcular repo
+        /// User or Org summary of data uploads to a particular repo
         /// Viewable by public and other DataDock users as well as authorized users
         /// </summary>
         /// <param name="ownerId"></param>

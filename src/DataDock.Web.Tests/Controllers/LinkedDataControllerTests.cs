@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using DataDock.Common.Stores;
 using DataDock.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using WireMock.RequestBuilders;
@@ -37,7 +30,7 @@ namespace DataDock.Web.Tests.Controllers
             var mockOwnerSettings = new Mock<IOwnerSettingsStore>();
             var mockRepoSettings = new Mock<IRepoSettingsStore>();
             var mockHttpContext = new Mock<HttpContext>();
-            var mockRequestHeaders = new HttpRequestHeaders {HeaderAccept = new StringValues("application/n-quads")};
+            var mockRequestHeaders = new HeaderDictionary {{"Accept", new StringValues("application/n-quads")}};
             var mockResponseHeaders = new HeaderDictionary();
             var mockResponseStream = new MemoryStream();
             mockHttpContext.Setup(c => c.Request.Headers).Returns(mockRequestHeaders);
