@@ -166,6 +166,9 @@ export class DatatypeSniffer {
         continue;
       }
 
+      // Non-empty value encountered
+      allEmptyValues = false;
+
       if (datatype & DatatypeEnum.Uri && !this.options.isUri(val)) {
         datatype = datatype & ~DatatypeEnum.Uri;
       }
@@ -188,6 +191,22 @@ export class DatatypeSniffer {
         datatype = datatype & ~DatatypeEnum.Boolean;
       }
     }
+
+    // Prefer Decimal over Float
+    if (datatype & DatatypeEnum.Decimal && datatype & DatatypeEnum.Float) {
+      datatype = datatype & ~DatatypeEnum.Float;
+    }
+
+    // Prefer Integer over Decimal
+    if (datatype & DatatypeEnum.Integer && datatype & DatatypeEnum.Decimal) {
+      datatype = datatype & ~DatatypeEnum.Decimal;
+    }
+
+    // Prefer Boolean over Integer
+    if (datatype & DatatypeEnum.Boolean && datatype & DatatypeEnum.Integer) {
+      datatype = datatype & ~DatatypeEnum.Integer;
+    }
+
     return new ColumnInfo(hasEmptyValues, allEmptyValues, datatype);
   }
 
