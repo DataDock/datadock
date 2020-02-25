@@ -302,3 +302,8 @@ docker/worker/app
 docker/docker-compose.*.yml
 src/DataDock.Worker/appsettings.development.json
 src/DataDock.Import/data/*.json
+src/DataDock.Web/wwwroot/js/app.js
+src/DataDock.Web/wwwroot/js/app.js.map
+src/DataDock.Web/wwwroot/js/chunk-vendors.js
+src/DataDock.Web/wwwroot/js/chunk-vendors.js.map
+src/DataDock.Web/wwwroot/index.html

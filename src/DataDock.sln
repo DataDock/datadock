@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web", "DataDock.Web\DataDock.Web.csproj", "{79D93F37-7DDF-4D98-BA25-1C50859483B5}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web.Tests", "DataDock.Web.Tests\DataDock.Web.Tests.csproj", "{DED25EC1-781D-4C03-A80A-EBF54EBC802A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Import", "DataDock.Import\DataDock.Import.csproj", "{F7387540-90AA-42A2-89C5-171EC8E3AA0B}"
+EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "DataDock.ImportUI", "DataDock.ImportUI\DataDock.ImportUI.njsproj", "{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,10 @@ Global
 		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7387540-90AA-42A2-89C5-171EC8E3AA0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

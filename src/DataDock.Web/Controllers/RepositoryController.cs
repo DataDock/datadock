@@ -94,7 +94,7 @@ namespace DataDock.Web.Controllers
         [ServiceFilter(typeof(AccountExistsFilter))]
         [ServiceFilter(typeof(OwnerAdminAuthFilter))]
         [GenerateAntiforgeryTokenCookieForAjax]
-        public async Task<IActionResult> Import(string ownerId, string repoId, string schemaId = "")
+        public async Task<IActionResult> Import(string ownerId, string repoId, string schemaId = null)
         {
             return await Task.Run(() =>
             {

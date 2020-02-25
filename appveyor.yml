@@ -21,6 +21,9 @@ before_build:
       export DockerImageVersion=$(GitVersion /output json /showVariable FullSemVer | tr '+' '-')
       echo GitVersion : $DockerImageVersion
       npm install --global gulp-cli karma-cli
+      pushd src/DataDock.ImportUI
+      npm install
+      popd
 
 configuration: Release
 
