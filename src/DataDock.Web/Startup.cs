@@ -486,6 +486,12 @@ namespace DataDock.Web
                     pattern: "{ownerId}/{repoId}/csv/{datasetId}/{filename}.json",
                     defaults: new {controller = "LinkedData", action = "CsvMetadata"});
 
+                // api
+                endpoints.MapControllerRoute(
+                    name: "Api",
+                    pattern: "api/{action}/{id?}",
+                    defaults: new {controller = "Api"});
+
                 // default
                 endpoints.MapControllerRoute(
                     name: "default",
