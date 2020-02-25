@@ -360,7 +360,7 @@ namespace DataDock.Web
 
                 endpoints.MapControllerRoute(
                     name: "RepoSummary",
-                    pattern: "dashboard/repo/{ownerId}/{repoId}",
+                    pattern: "dashboard/repositories/{ownerId}/{repoId}",
                     defaults: new {controller = "Repository", action = "Index"},
                     constraints: new {ownerId = new OwnerIdConstraint()}
                 );
