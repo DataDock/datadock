@@ -21,15 +21,14 @@ before_build:
       export DockerImageVersion=$(GitVersion /output json /showVariable FullSemVer | tr '+' '-')
       echo GitVersion : $DockerImageVersion
       npm install --global gulp-cli karma-cli
-      pushd src/DataDock.ImportUI
-      npm install
-      popd
 
 configuration: Release
 
 build_script:
-  - sh: dotnet build -c Release src/DataDock.sln
-  - sh: msbuild /t:BuildImages /p:Tag=$DockerImageVersion build.proj 
+  - sh: |
+      dotnet build -c Release src/DataDock.Worker/DataDock.Worker.csproj
+      dotnet build -c Release src/DataDock.Web/DataDock.Web.csproj
+      msbuild /t:BuildImages /p:Tag=$DockerImageVersion build.proj 
 
 test_script:
   - dotnet test -c Release src/DataDock.Common.Tests
