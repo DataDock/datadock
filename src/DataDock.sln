@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web", "DataDock.Web\DataDock.Web.csproj", "{79D93F37-7DDF-4D98-BA25-1C50859483B5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE} = {E66DD2C4-7A79-4A18-95BC-0E08B37147BE}
+	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{EC63AA2D-D84B-4B08-8A3B-BA4CE82065CA}"
 EndProject
