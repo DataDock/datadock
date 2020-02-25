@@ -43,6 +43,8 @@ namespace DataDock.Web
             Configuration = configuration;
         }
 
+        private readonly string ApiCorsPolicy = "_apiOrigins";
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -69,8 +71,15 @@ namespace DataDock.Web
 
             // Angular's default header name for sending the XSRF token.
             services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
+            services.AddCors(options =>
+            {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("Development"))
+                {
+                    options.AddPolicy(ApiCorsPolicy, builder => { builder.WithOrigins("*"); });
+                }
+            });
 
-            services.AddRazorPages();
+            services.AddRazorPages().AddNewtonsoftJson();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -268,6 +277,7 @@ namespace DataDock.Web
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();

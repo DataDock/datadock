@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 
 namespace DataDock.Web.Api
 {
     [Produces("application/json")]
     [Route("api/schemas")]
+    [EnableCors("_apiOrigins")]
     public class SchemasController : Controller
     {
         private readonly ISchemaStore _schemaStore;
