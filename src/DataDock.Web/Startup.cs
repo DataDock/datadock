@@ -86,7 +86,12 @@ namespace DataDock.Web
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
 
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.StreamBufferCapacity = 100;
+            }).AddNewtonsoftJsonProtocol();
+
             var client = new ElasticClient(
                 new ConnectionSettings(
                     new SingleNodeConnectionPool(new Uri(config.ElasticsearchUrl)),
