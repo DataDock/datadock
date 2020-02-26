@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataDock.Common.Stores;
 using DataDock.Web.Filters;
 using DataDock.Web.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -15,6 +16,7 @@ namespace DataDock.Web.Api
 {
     [Produces("application/json")]
     [Route("api/data")]
+    [EnableCors("_apiOrigins")]
     public class DataController : Controller
     {
         private readonly IUserStore _userStore;
