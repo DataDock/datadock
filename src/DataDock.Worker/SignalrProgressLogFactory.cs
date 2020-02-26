@@ -5,6 +5,7 @@ using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace DataDock.Worker
@@ -32,6 +33,7 @@ namespace DataDock.Worker
             if (_hubConnection != null) return _hubConnection;
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(_hubConnectionUrl, HttpTransportType.WebSockets)
+                .AddNewtonsoftJsonProtocol()
                 .Build();
             _hubConnection.Closed += OnHubConnectionLost;
             var connectionStarted = false;
