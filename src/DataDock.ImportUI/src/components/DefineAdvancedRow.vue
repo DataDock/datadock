@@ -121,7 +121,6 @@ export default class DefineAdvancedRow extends Vue {
       }
     }
     if (oldState !== this.hasErrors) {
-      console.log(oldState, this.hasErrors);
       this.$emit("error", this.hasErrors, this.errors);
     }
   }
