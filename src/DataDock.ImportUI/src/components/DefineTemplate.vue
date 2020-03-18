@@ -6,12 +6,17 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
+import { Helper } from "@/DataDock";
 
 @Component
 export default class DefineTempalte extends Vue {
   @Prop() private value: any;
   public get templateJson(): string {
-    let json = JSON.stringify(this.value, undefined, 2);
+    let json = JSON.stringify(
+      Helper.makeCleanTemplate(this.value),
+      undefined,
+      2
+    );
     json = json
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")

@@ -54,6 +54,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import Axios from "axios";
+import { Helper } from "@/DataDock";
 
 @Component
 export default class Upload extends Vue {
@@ -74,11 +75,14 @@ export default class Upload extends Vue {
       return;
     }
     let formData = new FormData();
+    let sanitizedTemplate = Helper.makeCleanTemplate(
+      this.$props.templateMetadata
+    );
     formData.append("ownerId", this.ownerId);
     formData.append("repoId", this.repoId);
     formData.append("file", this.csvFile, this.csvFileName);
     formData.append("filename", this.csvFileName);
-    formData.append("metadata", JSON.stringify(this.$props.templateMetadata));
+    formData.append("metadata", JSON.stringify(sanitizedTemplate));
     formData.append(
       "showOnHomePage",
       JSON.stringify(this.importOptions.showOnHomePage)

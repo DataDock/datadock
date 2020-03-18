@@ -5,6 +5,45 @@ export class Helper {
   public static slugify(original: string) {
     return _.camelCase(_.deburr(_.trim(original)));
   }
+
+  public static addSchemaDatatype(columnSchema: any): any {
+    if ("valueUrl" in columnSchema) {
+      if (
+        columnSchema.valueUrl.startsWith("{") &&
+        columnSchema.valueUrl.endsWith("}")
+      ) {
+        return Object.assign({}, columnSchema, { valueUrl: "uri" });
+      } else {
+        return Object.assign({}, columnSchema, { valueUrl: "uriTemplate" });
+      }
+    }
+    return columnSchema;
+  }
+
+  public static removeSchemaDatatype(columnSchema: any): any {
+    if ("datatype" in columnSchema) {
+      switch (columnSchema.datatype) {
+        case "uriTemplate":
+          delete columnSchema.datatype;
+          break;
+        case "uri":
+          columnSchema.valueUrl = "{" + columnSchema.name + "}";
+          delete columnSchema.datatype;
+          break;
+      }
+    }
+    return columnSchema;
+  }
+
+  public static makeCleanTemplate(template: any): any {
+    let copy = _.cloneDeep(template);
+    for (let i = 0; i < copy.tableSchema.columns.length; i++) {
+      copy.tableSchema.columns[i] = this.removeSchemaDatatype(
+        copy.tableSchema.columns[i]
+      );
+    }
+    return copy;
+  }
 }
 
 const DATE_FORMATS = [

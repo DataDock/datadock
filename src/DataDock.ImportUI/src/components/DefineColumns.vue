@@ -10,11 +10,12 @@
     </thead>
     <tbody>
       <define-columns-row
-        v-for="col in templateMetadata.tableSchema.columns"
-        v-bind:col="col"
+        v-for="(col, ix) in value.tableSchema.columns"
+        v-bind:value="value.tableSchema.columns[ix]"
         v-bind:resourceIdentifierBase="resourceIdentifierBase"
-        v-bind:key="col.name"
+        v-bind:key="'col_' + col.name"
         @error="onError(col.name, $event)"
+        @input="$emit('input', value)"
       ></define-columns-row>
     </tbody>
   </table>
@@ -32,7 +33,7 @@ import { ColumnInfo } from "@/DataDock";
   }
 })
 export default class DefineColumns extends Vue {
-  @Prop() private templateMetadata: any;
+  @Prop() private value: any;
   @Prop() private identifierBase!: string;
   @Prop() private resourceIdentifierBase!: string;
   private errorColumns: string[] = [];

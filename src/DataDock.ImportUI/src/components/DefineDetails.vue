@@ -99,7 +99,7 @@ export default class DefineDetails extends Vue {
 
   private validateTitle() {
     delete this.errors["title"];
-    if (this.title.length == 0) {
+    if (this.title === undefined || this.title.length == 0) {
       this.errors["title"] = "A non-empty title is required";
       this.titleValid = false;
     } else {

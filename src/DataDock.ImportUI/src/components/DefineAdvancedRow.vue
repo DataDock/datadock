@@ -32,7 +32,7 @@
       ></prefixed-uri-input>
       <div class="field">
         <label :for="value.name + '_datatype'">Datatype</label>
-        <select :id="value.name + '_datatype'" v-model="datatype">
+        <select :id="value.name + '_datatype'" v-model="value.datatype">
           <option value="string">Text</option>
           <option value="uri">URI</option>
           <option value="integer">Whole Number</option>
@@ -43,7 +43,7 @@
           <option value="uriTemplate">URI Template</option>
         </select>
       </div>
-      <div class="field" v-if="datatype == 'string'">
+      <div class="field" v-if="value.datatype == 'string'">
         <label :for="value.name + '_lang'">Language</label>
         <input
           :id="value.name + '_lang'"
@@ -56,7 +56,7 @@
       <div
         class="required field"
         :class="{ error: !uriTemplateValid }"
-        v-if="datatype == 'uriTemplate'"
+        v-if="value.datatype == 'uriTemplate'"
       >
         <label :for="value.name + '_uriTemplate'">URI Template String</label>
         <input
@@ -88,25 +88,11 @@ export default class DefineAdvancedRow extends Vue {
   @Prop() private colIx!: number;
   @Prop() private resourceIdentifierBase!: string;
   @Prop() private templateMetadata: any;
-  private datatype: string = this.getDatatypeId();
   private uriTemplate: string =
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
   private errors: any = {};
   private hasErrors: boolean = false;
   private uriTemplateValid: boolean = true;
-
-  private getDatatypeId(): string {
-    if ("valueUrl" in this.value) {
-      if (
-        this.value.valueUrl.startsWith("{") &&
-        this.value.valueUrl.endsWith("}")
-      ) {
-        return "uri";
-      }
-      return "uriTemplate";
-    }
-    return this.value.datatype;
-  }
 
   private notifyChange() {
     this.$emit("input", this.value);
@@ -115,30 +101,6 @@ export default class DefineAdvancedRow extends Vue {
   @Watch("uriTemplate") onUriTemplateChanged() {
     this.validateUriTemplate();
     this.value.valueUrl = this.uriTemplate;
-    this.notifyChange();
-  }
-
-  @Watch("datatype")
-  private onDatatypeChanged() {
-    switch (this.datatype) {
-      case "uri":
-        this.value.valueUrl = "{" + this.value.name + "}";
-        delete this.value.datatype;
-        break;
-      case "uriTemplate":
-        this.uriTemplate =
-          this.resourceIdentifierBase +
-          "/" +
-          this.value.name +
-          "/{" +
-          this.value.name +
-          "}";
-        delete this.value.datatype;
-        break;
-      default:
-        this.value.datatype = this.datatype;
-        delete this.value.valueUrl;
-    }
     this.notifyChange();
   }
 
