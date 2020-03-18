@@ -92,10 +92,17 @@ export default class DefineAdvancedRow extends Vue {
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
   private errors: any = {};
   private hasErrors: boolean = false;
-  private uriTemplateValid: boolean = true;
+  private _uriTemplateValid: boolean = true;
 
   private notifyChange() {
     this.$emit("input", this.value);
+  }
+
+  @Watch("value") onValueChanged() {
+    if (this.value.datatype === "uriTemplate") {
+      console.log("Validating URI Template for ", this.value.name);
+      this.validateUriTemplate();
+    }
   }
 
   @Watch("uriTemplate") onUriTemplateChanged() {
@@ -131,6 +138,14 @@ export default class DefineAdvancedRow extends Vue {
     return !this.errors.title;
   }
 
+  private get uriTemplateValid(): boolean {
+    if (this.value.datatype === "uriTemplate") {
+      this.validateUriTemplate();
+      return this._uriTemplateValid;
+    }
+    return this._uriTemplateValid;
+  }
+
   private onUriInputError(isValid: boolean, errors: any) {
     if (isValid) {
       delete this.errors.propertyUrl;
@@ -154,19 +169,19 @@ export default class DefineAdvancedRow extends Vue {
     if (this.uriTemplate.length == 0) {
       this.errors.uriTemplate = "A non-empty URI template string is required";
     }
-    this.uriTemplateValid = !("uriTemplate" in this.errors);
+    this._uriTemplateValid = !("uriTemplate" in this.errors);
     var results = this.uriTemplate.match(this.templateRegex);
     if (!results) {
       this.errors.uriTemplate =
         "URI Template must reference one or more columns using {columnName} syntax";
-      this.uriTemplateValid = false;
+      this._uriTemplateValid = false;
     } else {
       for (let match of results) {
         let columnRef = match.substring(1, match.length - 1);
         if (!this.hasColumn(columnRef)) {
           this.errors.uriTemplate =
             "Template references a non-existant column with name " + match;
-          this.uriTemplateValid = false;
+          this._uriTemplateValid = false;
         }
       }
     }
