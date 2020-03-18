@@ -91,20 +91,20 @@ export default class DefineAdvancedRow extends Vue {
   private uriTemplate: string =
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
   private errors: any = {};
-  private hasErrors: boolean = false;
+  private hasErrors: boolean | undefined;
   private _uriTemplateValid: boolean = true;
 
   private notifyChange() {
     this.$emit("input", this.value);
   }
 
+/*
   @Watch("value") onValueChanged() {
     if (this.value.datatype === "uriTemplate") {
-      console.log("Validating URI Template for ", this.value.name);
       this.validateUriTemplate();
     }
   }
-
+*/
   @Watch("uriTemplate") onUriTemplateChanged() {
     this.validateUriTemplate();
     this.value.valueUrl = this.uriTemplate;
@@ -121,6 +121,7 @@ export default class DefineAdvancedRow extends Vue {
       }
     }
     if (oldState !== this.hasErrors) {
+      console.log(oldState, this.hasErrors);
       this.$emit("error", this.hasErrors, this.errors);
     }
   }
