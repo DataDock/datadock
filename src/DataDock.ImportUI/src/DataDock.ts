@@ -14,9 +14,7 @@ export class Helper {
       ) {
         return Object.assign({}, columnSchema, { datatype: "uri" });
       } else {
-        console.log("Change ", columnSchema.name, "to uriTemplate");
         var ret = Object.assign({}, columnSchema, { datatype: "uriTemplate" });
-        console.log(ret);
         return ret;
       }
     }
