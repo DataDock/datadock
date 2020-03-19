@@ -55,7 +55,8 @@ namespace DataDock.Worker
 
         public bool HandleResource(INode resourceNode, IList<Triple> subjectStatements, IList<Triple> objectStatements)
         {
-            if (subjectStatements == null || subjectStatements.Count == 0) return true;
+            if (!(resourceNode is IUriNode)) return true;
+            if ((subjectStatements == null || subjectStatements.Count == 0) && (objectStatements == null || objectStatements.Count == 0)) return true;
             var subject = (resourceNode as IUriNode)?.Uri;
             var nquads = subject == null ? null : _uriService.GetSubjectDataUrl(subject.ToString(), "nq");
             try
@@ -104,11 +105,6 @@ namespace DataDock.Worker
                         _progressLog.Info("Generating static HTML files - {0} files created/updated.", _numFilesGenerated);
                     }
                 }
-                else
-                {
-                    _progressLog.Warn("No target path for {0}, skipping static HTML file generation.", subject);
-                }
-                
             }
             catch (Exception ex)
             {
