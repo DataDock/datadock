@@ -39,7 +39,25 @@ export default class DefineIdentifiers extends Vue {
   @Prop() private value: any;
   @Prop() private identifierBase!: string;
   @Prop() private datasetId!: string;
-  private identifierColumn: string = "row_{_row}";
+  private _identifierColumn: string = "";
+
+  private get identifierColumn(): string {
+    if (this._identifierColumn) return this._identifierColumn;
+    if ("aboutUrl" in this.value) {
+      if (this.value.aboutUrl.endsWith("row_{_row}")){
+        return "row_{_row}";
+      }
+      if (this.value.aboutUrl.startsWith(this.identifierBase + "/resource/")) {
+        return this.value.aboutUrl.substring(this.identifierBase.length + 10);
+      }
+    }
+    return "row_{_row}";
+  }
+
+  private set identifierColumn(newValue: string) {
+    this._identifierColumn = newValue;
+    this.recalculateAboutUrl();
+  }
 
   private get aboutUrl(): string {
     return this.identifierColumn === "row_{_row}"

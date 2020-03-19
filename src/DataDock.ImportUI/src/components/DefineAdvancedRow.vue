@@ -32,7 +32,7 @@
       ></prefixed-uri-input>
       <div class="field">
         <label :for="value.name + '_datatype'">Datatype</label>
-        <select :id="value.name + '_datatype'" v-model="datatype">
+        <select :id="value.name + '_datatype'" v-model="value.datatype">
           <option value="string">Text</option>
           <option value="uri">URI</option>
           <option value="integer">Whole Number</option>
@@ -43,7 +43,7 @@
           <option value="uriTemplate">URI Template</option>
         </select>
       </div>
-      <div class="field" v-if="datatype == 'string'">
+      <div class="field" v-if="value.datatype == 'string'">
         <label :for="value.name + '_lang'">Language</label>
         <input
           :id="value.name + '_lang'"
@@ -56,7 +56,7 @@
       <div
         class="required field"
         :class="{ error: !uriTemplateValid }"
-        v-if="datatype == 'uriTemplate'"
+        v-if="value.datatype == 'uriTemplate'"
       >
         <label :for="value.name + '_uriTemplate'">URI Template String</label>
         <input
@@ -68,6 +68,20 @@
           {{ errors.uriTemplate }}
         </div>
       </div>
+      <div class="field" :class="{ error: !parentColumnValid }">
+        <label :for="value.name + '_parent'">Parent Column</label>
+        <select :id="value.name + '_parent'" v-model="parentColumn">
+          <option value="_row"> [Row] </option>
+          <option
+            v-for="col in templateMetadata.tableSchema.columns"
+            :key="'parent_' + col.name"
+            :value="col.name"
+            :disabled="col.datatype != 'uri' && col.datatype != 'uriTemplate'"
+          >
+            {{ col.name }}
+          </option>
+        </select>
+      </div>
     </td>
   </tr>
 </template>
@@ -77,6 +91,7 @@ import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import DefineColumnsRow from "@/components/DefineColumnsRow.vue";
 import PrefixedUriInput from "@/components/PrefixedUriInput.vue";
+import * as _ from "lodash";
 
 @Component({
   components: {
@@ -88,57 +103,70 @@ export default class DefineAdvancedRow extends Vue {
   @Prop() private colIx!: number;
   @Prop() private resourceIdentifierBase!: string;
   @Prop() private templateMetadata: any;
-  private datatype: string = this.getDatatypeId();
   private uriTemplate: string =
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
   private errors: any = {};
-  private hasErrors: boolean = false;
-  private uriTemplateValid: boolean = true;
-
-  private getDatatypeId(): string {
-    if ("valueUrl" in this.value) {
-      if (
-        this.value.valueUrl.startsWith("{") &&
-        this.value.valueUrl.endsWith("}")
-      ) {
-        return "uri";
-      }
-      return "uriTemplate";
-    }
-    return this.value.datatype;
-  }
+  private hasErrors: boolean | undefined;
+  private _uriTemplateValid: boolean = true;
 
   private notifyChange() {
     this.$emit("input", this.value);
   }
 
+  private get parentColumn(): string {
+    if ("aboutUrl" in this.value) {
+      var parentColumns = _.filter(
+        this.templateMetadata.tableSchema.columns,
+        c => {
+          return "valueUrl" in c && c.valueUrl == this.value.aboutUrl;
+        }
+      );
+      if (parentColumns.length == 0) {
+        return "_row";
+      }
+      return parentColumns[0].name;
+    } else {
+      return "_row";
+    }
+  }
+
+  private set parentColumn(newValue: string) {
+    var parentColumns = _.filter(
+      this.templateMetadata.tableSchema.columns,
+      c => {
+        return c.name === newValue && "valueUrl" in c;
+      }
+    );
+    if (parentColumns.length == 0) {
+      delete this.value.aboutUrl;
+    } else {
+      this.value.aboutUrl = parentColumns[0].valueUrl;
+    }
+  }
+
+  private get parentColumnValid(): boolean {
+    if ("aboutUrl" in this.value) {
+      return _.some(this.templateMetadata.tableSchema.columns, c => {
+        return (
+          "valueUrl" in c &&
+          (c.datatype == "uri" || c.datatype == "uriTemplate") &&
+          c.valueUrl === this.value.aboutUrl
+        );
+      });
+    } else {
+      return true;
+    }
+  }
+/*
+  @Watch("value") onValueChanged() {
+    if (this.value.datatype === "uriTemplate") {
+      this.validateUriTemplate();
+    }
+  }
+*/
   @Watch("uriTemplate") onUriTemplateChanged() {
     this.validateUriTemplate();
     this.value.valueUrl = this.uriTemplate;
-    this.notifyChange();
-  }
-
-  @Watch("datatype")
-  private onDatatypeChanged() {
-    switch (this.datatype) {
-      case "uri":
-        this.value.valueUrl = "{" + this.value.name + "}";
-        delete this.value.datatype;
-        break;
-      case "uriTemplate":
-        this.uriTemplate =
-          this.resourceIdentifierBase +
-          "/" +
-          this.value.name +
-          "/{" +
-          this.value.name +
-          "}";
-        delete this.value.datatype;
-        break;
-      default:
-        this.value.datatype = this.datatype;
-        delete this.value.valueUrl;
-    }
     this.notifyChange();
   }
 
@@ -169,6 +197,14 @@ export default class DefineAdvancedRow extends Vue {
     return !this.errors.title;
   }
 
+  private get uriTemplateValid(): boolean {
+    if (this.value.datatype === "uriTemplate") {
+      this.validateUriTemplate();
+      return this._uriTemplateValid;
+    }
+    return this._uriTemplateValid;
+  }
+
   private onUriInputError(isValid: boolean, errors: any) {
     if (isValid) {
       delete this.errors.propertyUrl;
@@ -192,19 +228,19 @@ export default class DefineAdvancedRow extends Vue {
     if (this.uriTemplate.length == 0) {
       this.errors.uriTemplate = "A non-empty URI template string is required";
     }
-    this.uriTemplateValid = !("uriTemplate" in this.errors);
+    this._uriTemplateValid = !("uriTemplate" in this.errors);
     var results = this.uriTemplate.match(this.templateRegex);
     if (!results) {
       this.errors.uriTemplate =
         "URI Template must reference one or more columns using {columnName} syntax";
-      this.uriTemplateValid = false;
+      this._uriTemplateValid = false;
     } else {
       for (let match of results) {
         let columnRef = match.substring(1, match.length - 1);
         if (!this.hasColumn(columnRef)) {
           this.errors.uriTemplate =
             "Template references a non-existant column with name " + match;
-          this.uriTemplateValid = false;
+          this._uriTemplateValid = false;
         }
       }
     }

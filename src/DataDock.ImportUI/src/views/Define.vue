@@ -98,7 +98,7 @@
         </div>
         <div v-show="isActive('definitions')">
           <define-columns
-            :templateMetadata="templateMetadata"
+            v-model="templateMetadata"
             :identifierBase="identifierBase"
             :resourceIdentifierBase="resourceIdentifierBase"
             @error="onError('definitions', $event)"

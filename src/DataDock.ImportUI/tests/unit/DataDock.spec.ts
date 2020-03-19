@@ -1,4 +1,9 @@
-import { DatatypeSniffer, SnifferOptions, DatatypeEnum } from "@/DataDock";
+import {
+  DatatypeSniffer,
+  SnifferOptions,
+  DatatypeEnum,
+  Helper
+} from "@/DataDock";
 
 describe("DatatypeSniffer", () => {
   let datatypeSniffer = new DatatypeSniffer(new SnifferOptions());
@@ -156,6 +161,87 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.None);
+    });
+  });
+});
+
+describe("Helper", () => {
+  describe("makeCleanTemplate", () => {
+    it("removes the datatype property from a uriTemplate column", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              propertyUrl: "http://example.org/p",
+              datatype: "uriTemplate",
+              valueUrl: "http://example.org/id/{colA}"
+            }
+          ]
+        }
+      };
+      var sanitizedTemplate = Helper.makeCleanTemplate(template);
+      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      expect(sanitizedColA).not.toHaveProperty("datatype");
+      expect(sanitizedColA).toHaveProperty("valueUrl");
+    });
+    it("replaces the datatype property for a uri column with a valueUrl property", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              propertyUrl: "http://example.org/p",
+              datatype: "uri"
+            }
+          ]
+        }
+      };
+      var sanitizedTemplate = Helper.makeCleanTemplate(template);
+      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      expect(sanitizedColA).not.toHaveProperty("datatype");
+      expect(sanitizedColA).toHaveProperty("valueUrl");
+      expect(sanitizedColA.valueUrl).toBe("{colA}");
+    });
+    it("does not modify a string column", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              propertyUrl: "http://example.org/p",
+              datatype: "string"
+            }
+          ]
+        }
+      };
+      var sanitizedTemplate = Helper.makeCleanTemplate(template);
+      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      expect(sanitizedColA).toHaveProperty("datatype");
+      expect(sanitizedColA.datatype).toBe("string");
+      expect(sanitizedColA).not.toHaveProperty("valueUrl");
+    });
+    it("Adds a uri datatype when the valueUrl is only a column reference", () => {
+      var col = {
+        name: "colA",
+        propertyUrl: "http://example.org/p",
+        valueUrl: "{colA}"
+      };
+      var annotatedTemplate = Helper.addSchemaDatatype(col);
+      expect(annotatedTemplate).toHaveProperty("datatype");
+      expect(annotatedTemplate.datatype).toBe("uri");
+      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
+    });
+    it("Adds a uriTemplate datatype when the valueUrl is not only a column reference", () => {
+      var col = {
+        name: "colA",
+        propertyUrl: "http://example.org/p",
+        valueUrl: "http://example.org/id/{colA}"
+      };
+      var annotatedTemplate = Helper.addSchemaDatatype(col);
+      expect(annotatedTemplate).toHaveProperty("datatype");
+      expect(annotatedTemplate.datatype).toBe("uriTemplate");
+      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
     });
   });
 });

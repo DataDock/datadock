@@ -91,7 +91,6 @@ namespace DataDock.Worker.Processors
             var csvDownloadLink =
                 new Uri(repositoryUri + $"csv/{job.DatasetId}/{job.CsvFileName}");
 
-            IGraph datasetGraph;
             using (var tmpReader = File.OpenText(csvPath))
             {
                 var header = tmpReader.ReadLine();
@@ -99,7 +98,7 @@ namespace DataDock.Worker.Processors
             }
 
             var metadataBaseUri = new Uri(datasetUri + "/csv/" + job.CsvFileName + "-metadata.json");
-            datasetGraph = await GenerateDatasetGraphAsync(csvPath, metadataJson, metadataBaseUri);
+            IGraph datasetGraph = await GenerateDatasetGraphAsync(csvPath, metadataJson, metadataBaseUri);
             IGraph metadataGraph = GenerateMetadataGraph(datasetUri, publisherIri, metadataJson,
                 new[] { ntriplesDownloadLink, csvDownloadLink }, datasetGraph);
 
@@ -162,7 +161,7 @@ namespace DataDock.Worker.Processors
                 if (!Directory.Exists(datasetCsvDirPath)) Directory.CreateDirectory(datasetCsvDirPath);
                 var csvFilePath = Path.Combine(datasetCsvDirPath, csvFileName);
                 var csvFileStream = await _jobFileStore.GetFileAsync(csvFileId);
-                using (var csvOutStream = File.Open(csvFilePath, FileMode.Create, FileAccess.Write))
+                await using (var csvOutStream = File.Open(csvFilePath, FileMode.Create, FileAccess.Write))
                 {
                     csvFileStream.CopyTo(csvOutStream);
                 }
@@ -170,10 +169,8 @@ namespace DataDock.Worker.Processors
                 {
                     var csvmFilePath = csvFilePath + "-metadata.json";
                     var csvmFileStream = await _jobFileStore.GetFileAsync(csvmFileId);
-                    using (var csvmOutStream = File.Open(csvmFilePath, FileMode.Create, FileAccess.Write))
-                    {
-                        csvmFileStream.CopyTo(csvmOutStream);
-                    }
+                    await using var csvmOutStream = File.Open(csvmFilePath, FileMode.Create, FileAccess.Write);
+                    csvmFileStream.CopyTo(csvmOutStream);
                 }
             }
             catch (Exception ex)
