@@ -68,6 +68,20 @@
           {{ errors.uriTemplate }}
         </div>
       </div>
+      <div class="field" :class="{ error: !parentColumnValid }">
+        <label :for="value.name + '_parent'">Parent Column</label>
+        <select :id="value.name + '_parent'" v-model="parentColumn">
+          <option value="_row"> [Row] </option>
+          <option
+            v-for="col in templateMetadata.tableSchema.columns"
+            :key="'parent_' + col.name"
+            :value="col.name"
+            :disabled="col.datatype != 'uri' && col.datatype != 'uriTemplate'"
+          >
+            {{ col.name }}
+          </option>
+        </select>
+      </div>
     </td>
   </tr>
 </template>
@@ -77,6 +91,7 @@ import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import DefineColumnsRow from "@/components/DefineColumnsRow.vue";
 import PrefixedUriInput from "@/components/PrefixedUriInput.vue";
+import * as _ from "lodash";
 
 @Component({
   components: {
@@ -98,6 +113,50 @@ export default class DefineAdvancedRow extends Vue {
     this.$emit("input", this.value);
   }
 
+  private get parentColumn(): string {
+    if ("aboutUrl" in this.value) {
+      var parentColumns = _.filter(
+        this.templateMetadata.tableSchema.columns,
+        c => {
+          return "valueUrl" in c && c.valueUrl == this.value.aboutUrl;
+        }
+      );
+      if (parentColumns.length == 0) {
+        return "_row";
+      }
+      return parentColumns[0].name;
+    } else {
+      return "_row";
+    }
+  }
+
+  private set parentColumn(newValue: string) {
+    var parentColumns = _.filter(
+      this.templateMetadata.tableSchema.columns,
+      c => {
+        return c.name === newValue && "valueUrl" in c;
+      }
+    );
+    if (parentColumns.length == 0) {
+      delete this.value.aboutUrl;
+    } else {
+      this.value.aboutUrl = parentColumns[0].valueUrl;
+    }
+  }
+
+  private get parentColumnValid(): boolean {
+    if ("aboutUrl" in this.value) {
+      return _.some(this.templateMetadata.tableSchema.columns, c => {
+        return (
+          "valueUrl" in c &&
+          (c.datatype == "uri" || c.datatype == "uriTemplate") &&
+          c.valueUrl === this.value.aboutUrl
+        );
+      });
+    } else {
+      return true;
+    }
+  }
 /*
   @Watch("value") onValueChanged() {
     if (this.value.datatype === "uriTemplate") {
