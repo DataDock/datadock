@@ -12,9 +12,12 @@ export class Helper {
         columnSchema.valueUrl.startsWith("{") &&
         columnSchema.valueUrl.endsWith("}")
       ) {
-        return Object.assign({}, columnSchema, { valueUrl: "uri" });
+        return Object.assign({}, columnSchema, { datatype: "uri" });
       } else {
-        return Object.assign({}, columnSchema, { valueUrl: "uriTemplate" });
+        console.log("Change ", columnSchema.name, "to uriTemplate");
+        var ret = Object.assign({}, columnSchema, { datatype: "uriTemplate" });
+        console.log(ret);
+        return ret;
       }
     }
     return columnSchema;

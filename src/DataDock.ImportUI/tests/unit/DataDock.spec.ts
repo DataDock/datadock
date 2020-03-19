@@ -221,5 +221,27 @@ describe("Helper", () => {
       expect(sanitizedColA.datatype).toBe("string");
       expect(sanitizedColA).not.toHaveProperty("valueUrl");
     });
+    it("Adds a uri datatype when the valueUrl is only a column reference", () => {
+      var col = {
+        name: "colA",
+        propertyUrl: "http://example.org/p",
+        valueUrl: "{colA}"
+      };
+      var annotatedTemplate = Helper.addSchemaDatatype(col);
+      expect(annotatedTemplate).toHaveProperty("datatype");
+      expect(annotatedTemplate.datatype).toBe("uri");
+      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
+    });
+    it("Adds a uriTemplate datatype when the valueUrl is not only a column reference", () => {
+      var col = {
+        name: "colA",
+        propertyUrl: "http://example.org/p",
+        valueUrl: "http://example.org/id/{colA}"
+      };
+      var annotatedTemplate = Helper.addSchemaDatatype(col);
+      expect(annotatedTemplate).toHaveProperty("datatype");
+      expect(annotatedTemplate.datatype).toBe("uriTemplate");
+      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
+    });
   });
 });

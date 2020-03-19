@@ -186,6 +186,7 @@ export default class App extends Vue {
       "/";
     this.makeAbsolute(templateMetadata, baseUri);
     this.ensureColumnDatatype(templateMetadata);
+    console.log(templateMetadata);
     return templateMetadata;
   }
 
