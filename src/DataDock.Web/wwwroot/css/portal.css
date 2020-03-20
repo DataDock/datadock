@@ -20,6 +20,10 @@ CSS for public facing data portals produced by DataDock.io
     font-weight: bold;
     margin-bottom: 0.3em;
 }
+.dataset-content dl dt {
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
 
 .dataset-content dl dt.hide {
     display: none;

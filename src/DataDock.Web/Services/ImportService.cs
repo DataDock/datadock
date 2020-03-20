@@ -31,7 +31,7 @@ namespace DataDock.Web.Services
                 var ownerSettings = await _ownerSettingsStore.GetOwnerSettingsAsync(ownerId);
                 return ownerSettings;
             }
-            catch (OwnerSettingsNotFoundException osnf)
+            catch (OwnerSettingsNotFoundException)
             {
                 var newOwnerSettings = new OwnerSettings
                 {
@@ -71,7 +71,7 @@ namespace DataDock.Web.Services
                 }
                 return repoSettings;
             }
-            catch (RepoSettingsNotFoundException rsnf)
+            catch (RepoSettingsNotFoundException)
             {
                 var newRepoSettings = new RepoSettings
                 {

@@ -286,6 +286,7 @@ namespace DataDock.Worker
                 var generator = _fileGeneratorFactory.MakeHtmlFileGenerator(_uriService, _htmlResourceFileMapper, templateEngine, _progressLog, HtmlFileGenerationReportInterval, templateVariables);
 
                 _quinceStore.EnumerateSubjects(generator);
+                _quinceStore.EnumerateObjects(generator);
             }
             catch (Exception ex)
             {

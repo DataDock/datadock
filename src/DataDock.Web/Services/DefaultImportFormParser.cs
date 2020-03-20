@@ -160,6 +160,7 @@ namespace DataDock.Web.Services
             var metadataStream = new MemoryStream(byteArray);
             var csvwFileId = await _fileStore.AddFileAsync(metadataStream);
             jobInfo.CsvmFileId = csvwFileId;
+            jobInfo.OverwriteExistingData = formData.OverwriteExisting;
 
             if (formData.SaveAsSchema)
             {

@@ -5,30 +5,39 @@
 }
 
 
-  <div class="ui header">
-    @await Component.InvokeAsync("DashboardMenu", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId, area = Model.Area })
-  
+<div class="ui header">
+  @await Component.InvokeAsync("DashboardMenu", new { selectedOwnerId = Model.SelectedOwnerId, selectedRepoId = Model.SelectedRepoId, area = Model.Area })
 
-    <div class="ui dividing header">
-      <span>@Model.Heading</span>
-    </div>  
 
+  <a href="/@Model.SelectedOwnerId" target="_blank" class="ui small basic right floated primary button" title="Explore"><i class="external icon"></i>View Portal</a>
+  <div class="ui dividing header">
+    <span>@Model.Heading</span>
   </div>
+
+</div>
 @RenderBody()
 
 @section Scripts {
 
   <script type="text/javascript">
-    /*
+      /*
     Dashboard javascript
     */
 
-    // Repository selector to redirect to settings page
-    $("#repoSettings").click(function () {
-      var ownerId = $('#ownerId').val();
-      var repoId = $('#repoId').val();
-      window.location.href = '/dashboard/settings/' + ownerId + '/' + repoId;
-    });
+      // Repository selector to redirect to settings page
+      $("#repoSettings").click(function () {
+          var ownerId = $('#ownerId').val();
+          var repoId = $('#repoId').val();
+          window.location.href = '/dashboard/settings/' + ownerId + '/' + repoId;
+      });
+
+      $("#portalSearchButtons").searchButtonsEditor({ "value": $('#SearchButtons').val() });
+      $('#saveSettings').click(() => {
+          var searchButtons = $('#portalSearchButtons').searchButtonsEditor('export');
+          console.log(searchButtons);
+          $('#SearchButtons').val(searchButtons);
+      });
+
   </script>
   
   @RenderSection("Scripts", false)

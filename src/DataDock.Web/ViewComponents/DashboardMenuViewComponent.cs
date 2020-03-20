@@ -69,7 +69,7 @@ namespace DataDock.Web.ViewComponents
                     DashboardMenuViewModel.Owners.FirstOrDefault(o => o.OwnerId.Equals(this.DashboardMenuViewModel.SelectedOwnerId))?.Repositories.Add(ri);
                 }
             }
-            catch (RepoSettingsNotFoundException rnf)
+            catch (RepoSettingsNotFoundException)
             {
                 // do nothing
                 return;

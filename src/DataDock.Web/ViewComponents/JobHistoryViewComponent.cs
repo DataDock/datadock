@@ -47,7 +47,7 @@ namespace DataDock.Web.ViewComponents
                 var jobHistoriesHistoryViewModels = jobs.Select(j => new JobHistoryViewModel(j)).ToList();
                 return jobHistoriesHistoryViewModels;
             }
-            catch (JobNotFoundException jnf)
+            catch (JobNotFoundException)
             {
                 return new List<JobHistoryViewModel>();
             }
@@ -74,7 +74,7 @@ namespace DataDock.Web.ViewComponents
                                 var cjvm = new JobHistoryViewModel(currentJob);
                                 jobHistoriesHistoryViewModels.Add(cjvm);
                             }
-                            catch (JobNotFoundException jnf)
+                            catch (JobNotFoundException)
                             {
                                 // do nothing except log
                                 Log.Warning($"Unable to load specific job ID '{cjid}' as it could not be found in the database.");
@@ -85,7 +85,7 @@ namespace DataDock.Web.ViewComponents
                 }
                 return jobHistoriesHistoryViewModels.OrderByDescending(j => j.QueuedAt).ToList();
             }
-            catch (JobNotFoundException jnf)
+            catch (JobNotFoundException)
             {
                 return new List<JobHistoryViewModel>();
             }

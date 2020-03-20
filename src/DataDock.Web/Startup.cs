@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,10 +25,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using DataDock.Web.Config;
 using Elasticsearch.Net;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Hosting;
 using Nest.JsonNetSerializer;
 using HttpMethod = System.Net.Http.HttpMethod;
 
@@ -42,6 +42,8 @@ namespace DataDock.Web
         {
             Configuration = configuration;
         }
+
+        private readonly string ApiCorsPolicy = "_apiOrigins";
 
         public IConfiguration Configuration { get; }
 
@@ -69,19 +71,34 @@ namespace DataDock.Web
 
             // Angular's default header name for sending the XSRF token.
             services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
+            services.AddCors(options =>
+            {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("Development"))
+                {
+                    options.AddPolicy(ApiCorsPolicy, builder => { builder.WithOrigins("*"); });
+                }
+            });
 
-            services.AddMvc();
+            services.AddRazorPages().AddNewtonsoftJson();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
 
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.StreamBufferCapacity = 100;
+            }).AddNewtonsoftJsonProtocol();
+
             var client = new ElasticClient(
                 new ConnectionSettings(
                     new SingleNodeConnectionPool(new Uri(config.ElasticsearchUrl)),
                     JsonNetSerializer.Default));
+            Log.Information("Waiting for Elasticsearch cluster");
+            client.WaitForInitialization();
+            Log.Information("Elasticsearch cluster is available");
 
             services.AddScoped<AccountExistsFilter>();
             services.AddScoped<OwnerAdminAuthFilter>();
@@ -105,7 +122,25 @@ namespace DataDock.Web
             services.AddSingleton<IGitHubClientFactory>(new GitHubClientFactory(gitHubClientHeader));
             services.AddTransient<IGitHubApiService, GitHubApiService>();
 
-            services.AddAuthentication(options =>
+            // Enable 
+            if (string.Equals(
+                Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"),
+                "true", StringComparison.OrdinalIgnoreCase))
+            {
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                               ForwardedHeaders.XForwardedProto;
+                    // Only loopback proxies are allowed by default.
+                    // Clear that restriction because forwarders are enabled by explicit 
+                    // configuration.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
+            }
+
+            services
+                .AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -116,7 +151,7 @@ namespace DataDock.Web
                     options.LogoutPath = new PathString("/account/logoff/");
                     options.AccessDeniedPath = "/account/forbidden/";
                 })
-                .AddReverseProxyOAuth("GitHub", options =>
+                .AddOAuth("GitHub", options =>
                 {
                     options.ClientId = config.OAuthClientId;
                     options.ClientSecret = config.OAuthClientSecret;
@@ -155,15 +190,15 @@ namespace DataDock.Web
                                 HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
                             response.EnsureSuccessStatusCode();
 
-                            var user = JObject.Parse(await response.Content.ReadAsStringAsync());
+                            var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
-                            context.RunClaimActions(user);
+                            context.RunClaimActions(user.RootElement);
                             context.Identity.AddClaim(new Claim(DataDockClaimTypes.GitHubAccessToken, context.AccessToken));
                             
 
                             // check if authorized user exists in DataDock
-                            await AddOrganizationClaims(context, user);
-                            await EnsureUser(context, user);
+                            await AddOrganizationClaims(context, user.RootElement);
+                            await EnsureUser(context, user.RootElement);
                         }
                     };
                 });
@@ -179,14 +214,20 @@ namespace DataDock.Web
             });
         }
 
-        private async Task EnsureUser(OAuthCreatingTicketContext context, JObject user)
+        private static string GetOAuthLoginClaim(JsonElement claims)
         {
-            var login = user?["login"]?.ToString();
+            return !claims.TryGetProperty("login", out var loginElement) ? null : loginElement.GetString();
+        }
+
+        private async Task EnsureUser(OAuthCreatingTicketContext context, JsonElement user)
+        {
+            var login = GetOAuthLoginClaim(user);
             if (string.IsNullOrEmpty(login)) return;
+
             var userStore = context.HttpContext.RequestServices.GetService<IUserStore>();
             try
             {
-                var existingAccount = await userStore.GetUserAccountAsync(login.ToString());
+                var existingAccount = await userStore.GetUserAccountAsync(login);
                 if (existingAccount != null)
                 {
                     context.Identity.AddClaim(new Claim(DataDockClaimTypes.DataDockUserId, login));
@@ -194,18 +235,18 @@ namespace DataDock.Web
                     await userStore.UpdateUserAsync(existingAccount.UserId, context.Identity.Claims);
                 }
             }
-            catch (UserAccountNotFoundException notFound)
+            catch (UserAccountNotFoundException)
             {
                 // user not found. no action required
             }
         }
 
         
-
-        private async Task AddOrganizationClaims(OAuthCreatingTicketContext context, JObject user)
+        private async Task AddOrganizationClaims(OAuthCreatingTicketContext context, JsonElement user)
         {
-            var login = user?["login"]?.ToString();
+            var login = GetOAuthLoginClaim(user);
             if (string.IsNullOrEmpty(login)) return;
+
             var gitHubApiService = context.HttpContext.RequestServices.GetService<IGitHubApiService>();
             if (gitHubApiService == null)
             {
@@ -216,18 +257,19 @@ namespace DataDock.Web
             var orgs = await gitHubApiService.GetOrganizationsForUserAsync(context.Identity);
             if (orgs != null)
             {
-                foreach (Organization org in orgs)
+                foreach (var org in orgs)
                 {
-                    var json = JObject.FromObject(new {ownerId = org.Login, avatarUrl = org.AvatarUrl});
-                    context.Identity.AddClaim(new Claim(DataDockClaimTypes.GitHubUserOrganization, json.ToString()));
+                    var jsonString = JsonSerializer.Serialize(new {ownerId = org.Login, avatarUrl = org.AvatarUrl});
+                    context.Identity.AddClaim(new Claim(DataDockClaimTypes.GitHubUserOrganization, jsonString));
                 }
             }
         }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddSerilog();
+            app.UseForwardedHeaders();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -239,230 +281,236 @@ namespace DataDock.Web
 
             app.UseStaticFiles();
 
+            app.UseRouting();
+            app.UseCors();
+
             app.UseAuthentication();
-            
-            app.UseSignalR(routes => routes.MapHub<ProgressHub>("/progress"));
-            
-            app.UseMvc(routes =>
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapHub<ProgressHub>("/progress");
+
+                endpoints.MapControllerRoute(
                     name: "Error",
-                    template: "error",
+                    pattern: "error",
                     defaults: new {controller = "Home", action = "Error"}
                 );
-                // {ownerId}
-                routes.MapRoute(
-                name: "OwnerProfile",
-                template: "dashboard/profile/{ownerId}",
-                defaults: new { controller = "Owner", action = "Index" },
-                constraints: new { ownerId = new OwnerIdConstraint() });
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
+                    name: "OwnerProfile",
+                    pattern: "dashboard/profile/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Index"},
+                    constraints: new {ownerId = new OwnerIdConstraint()});
+
+                endpoints.MapControllerRoute(
                     name: "OwnerRepos",
-                    template: "dashboard/repositories/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Repositories" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/repositories/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Repositories"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerDatasets",
-                    template: "dashboard/datasets/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Datasets" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/datasets/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Datasets"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerJobs",
-                    template: "dashboard/jobs/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Jobs" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/jobs/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Jobs"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerLibrary",
-                    template: "dashboard/library/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Library" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/library/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Library"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerDeleteSchema",
-                    template: "dashboard/library/{ownerId}/{schemaId}/delete",
-                    defaults: new { controller = "Owner", action = "DeleteSchema" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/library/{ownerId}/{schemaId}/delete",
+                    defaults: new {controller = "Owner", action = "DeleteSchema"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerUseSchema",
-                    template: "dashboard/library/{ownerId}/{schemaId}/import",
-                    defaults: new { controller = "Owner", action = "UseSchema" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/library/{ownerId}/{schemaId}/import",
+                    defaults: new {controller = "Owner", action = "UseSchema"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerImport",
-                    template: "dashboard/import/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Import"},
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/import/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Import"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerSettings",
-                    template: "dashboard/settings/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Settings" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/settings/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Settings"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerAccount",
-                    template: "dashboard/account/{ownerId}",
-                    defaults: new { controller = "Owner", action = "Account" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/account/{ownerId}",
+                    defaults: new {controller = "Owner", action = "Account"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerAccountReset",
-                    template: "dashboard/account/{ownerId}/reset",
-                    defaults: new { controller = "Owner", action = "ResetToken" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/account/{ownerId}/reset",
+                    defaults: new {controller = "Owner", action = "ResetToken"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "OwnerAccountDelete",
-                    template: "dashboard/account/{ownerId}/delete",
-                    defaults: new { controller = "Owner", action = "DeleteAccount" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/account/{ownerId}/delete",
+                    defaults: new {controller = "Owner", action = "DeleteAccount"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
 
 
                 // {ownerId}/{repoId}
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoSummary",
-                    template: "dashboard/repo/{ownerId}/{repoId}",
-                    defaults: new { controller = "Repository", action = "Index" },
-                    constraints: new { ownerId = new OwnerIdConstraint() }
+                    pattern: "dashboard/repositories/{ownerId}/{repoId}",
+                    defaults: new {controller = "Repository", action = "Index"},
+                    constraints: new {ownerId = new OwnerIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoDatasets",
-                    template: "dashboard/datasets/{ownerId}/{repoId}",
-                    defaults: new { controller = "Repository", action = "Datasets" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/datasets/{ownerId}/{repoId}",
+                    defaults: new {controller = "Repository", action = "Datasets"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoJobs",
-                    template: "dashboard/jobs/{ownerId}/{repoId}/{jobId?}",
-                    defaults: new { controller = "Repository", action = "Jobs" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/jobs/{ownerId}/{repoId}/{jobId?}",
+                    defaults: new {controller = "Repository", action = "Jobs"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "JobLog",
-                    template: "dashboard/logs/{ownerId}/{repoId}/{jobId}",
-                    defaults: new { controller = "Repository", action = "Job" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/logs/{ownerId}/{repoId}/{jobId}",
+                    defaults: new {controller = "Repository", action = "Job"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoLibrary",
-                    template: "dashboard/library/{ownerId}/{repoId}",
-                    defaults: new { controller = "Repository", action = "Library" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/library/{ownerId}/{repoId}",
+                    defaults: new {controller = "Repository", action = "Library"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoImport",
-                    template: "dashboard/import/{ownerId}/{repoId}/{schemaId?}",
-                    defaults: new { controller = "Repository", action = "Import"},
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/import/{ownerId}/{repoId}/{schemaId?}",
+                    defaults: new {controller = "Repository", action = "Import"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "RepoSettings",
-                    template: "dashboard/settings/{ownerId}/{repoId}",
-                    defaults: new { controller = "Repository", action = "Settings" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/settings/{ownerId}/{repoId}",
+                    defaults: new {controller = "Repository", action = "Settings"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "Dataset",
-                    template: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}",
-                    defaults: new { controller = "Repository", action = "Dataset" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}",
+                    defaults: new {controller = "Dataset", action = "Index"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "DatasetVisibility",
-                    template: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/visibilty/{showOrHide}",
-                    defaults: new { controller = "Dataset", action = "DatasetVisibility" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/visibilty/{showOrHide}",
+                    defaults: new {controller = "Dataset", action = "DatasetVisibility"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "DeleteDataset",
-                    template: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/delete",
-                    defaults: new { controller = "Dataset", action = "DeleteDataset" },
-                    constraints: new { ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint() }
+                    pattern: "dashboard/datasets/{ownerId}/{repoId}/{datasetId}/delete",
+                    defaults: new {controller = "Dataset", action = "DeleteDataset"},
+                    constraints: new {ownerId = new OwnerIdConstraint(), repoId = new RepoIdConstraint()}
                 );
 
                 // Loader
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     "JobsLoader",
                     "dashboard/loader/jobs",
                     new {controller = "Loader", action = "Jobs"}
                 );
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     "DatasetsLoader",
                     "dashboard/loader/datasets",
-                    new { controller = "Loader", action = "Datasets" }
+                    new {controller = "Loader", action = "Datasets"}
                 );
 
                 // account
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "SignUp",
-                    template: "account/signup",
-                    defaults: new { controller = "Account", action = "SignUp" });
+                    pattern: "account/signup",
+                    defaults: new {controller = "Account", action = "SignUp"});
 
                 // Search
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     "Search",
                     "search",
                     new {controller = "Search", action = "Index"});
 
                 // Info
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "Info",
-                    template: "info/{action}",
+                    pattern: "info/{action}",
                     defaults: new {controller = "Info"});
 
                 // Linked Data routing
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataPortal",
-                    template: "{ownerId}",
-                    defaults: new { controller = "LinkedData", action = "Owner" });
+                    pattern: "{ownerId}",
+                    defaults: new {controller = "LinkedData", action = "Owner"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataRepo",
-                    template: "{ownerId}/{repoId}",
+                    pattern: "{ownerId}/{repoId}",
                     defaults: new {controller = "LinkedData", action = "Repository"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataPage",
-                    template: "{ownerId}/{repoId}/page/{*path}",
+                    pattern: "{ownerId}/{repoId}/page/{*path}",
                     defaults: new {controller = "LinkedData", action = "Page"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataData",
-                    template: "{ownerId}/{repoId}/data/{*path}",
-                    defaults: new { controller = "LinkedData", action = "Data" });
+                    pattern: "{ownerId}/{repoId}/data/{*path}",
+                    defaults: new {controller = "LinkedData", action = "Data"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataId",
-                    template: "{ownerId}/{repoId}/id/{*path}",
-                    defaults: new { controller = "LinkedData", action = "Identifier" });
+                    pattern: "{ownerId}/{repoId}/id/{*path}",
+                    defaults: new {controller = "LinkedData", action = "Identifier"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataCsv",
-                    template: "{ownerId}/{repoId}/csv/{datasetId}/{filename}.csv",
+                    pattern: "{ownerId}/{repoId}/csv/{datasetId}/{filename}.csv",
                     defaults: new {controller = "LinkedData", action = "Csv"});
 
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "LinkedDataCsvMetadata",
-                    template: "{ownerId}/{repoId}/csv/{datasetId}/{filename}.json",
-                    defaults: new { controller = "LinkedData", action = "CsvMetadata" });
+                    pattern: "{ownerId}/{repoId}/csv/{datasetId}/{filename}.json",
+                    defaults: new {controller = "LinkedData", action = "CsvMetadata"});
+
+                // api
+                endpoints.MapControllerRoute(
+                    name: "Api",
+                    pattern: "api/{action}/{id?}",
+                    defaults: new {controller = "Api"});
 
                 // default
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
         }

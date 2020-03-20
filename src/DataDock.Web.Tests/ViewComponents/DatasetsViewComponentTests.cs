@@ -103,19 +103,71 @@ namespace DataDock.Web.Tests.ViewComponents
             Assert.Equal("Default", result.ViewName);
         }
 
+        [Fact]
         public void OwnerIdNoDatasetsFoundReturnsEmptyListView()
         {
+            var ownerId = "owner-1";
 
+            _mockDatasetsStore.Setup(m => m.GetDatasetsForOwnerAsync(ownerId, It.IsAny<int>(), It.IsAny<int>()))
+                .Throws(new DatasetNotFoundException($"No datasets found for owner '{ownerId}'"));
+
+            var vc = new DatasetsViewComponent(_mockDatasetsStore.Object, _uriService);
+            var asyncResult = vc.InvokeAsync(ownerId, string.Empty);
+            Assert.NotNull(asyncResult.Result);
+            var result = asyncResult.Result as ViewViewComponentResult;
+            Assert.NotNull(result);
+
+            _mockDatasetsStore.Verify(m => m.GetDatasetsForOwnerAsync(ownerId, 0, 20), Times.Once);
+
+            var model = result.ViewData?.Model as List<DatasetViewModel>;
+            Assert.NotNull(model);
+            Assert.Empty(model);
+
+            Assert.Equal("Default", result.ViewName);
         }
 
+        [Fact]
         public void OwnerIdAndRepoIdNoDatasetsFoundReturnsEmptyListView()
         {
+            var ownerId = "owner-1";
+            var repoId = "repo-1";
 
+            _mockDatasetsStore.Setup(m =>
+                    m.GetDatasetsForRepositoryAsync(ownerId, repoId, It.IsAny<int>(), It.IsAny<int>()))
+                .Throws(new DatasetNotFoundException($"No datasets found for owner '{ownerId}', repository: '{repoId}'"));
+
+            var vc = new DatasetsViewComponent(_mockDatasetsStore.Object, _uriService);
+            var asyncResult = vc.InvokeAsync(ownerId, repoId);
+            Assert.NotNull(asyncResult.Result);
+            var result = asyncResult.Result as ViewViewComponentResult;
+            Assert.NotNull(result);
+
+            _mockDatasetsStore.Verify(m => m.GetDatasetsForRepositoryAsync(ownerId, repoId, 0, 20), Times.Once);
+
+            var model = result.ViewData?.Model as List<DatasetViewModel>;
+            Assert.NotNull(model);
+            Assert.Empty(model);
+            Assert.Equal("Default", result.ViewName);
         }
 
+        [Fact]
         public void ExceptionsDisplaysErrorView()
         {
+            var ownerId = "owner-1";
+            var repoId = "repo-1";
 
+            _mockDatasetsStore.Setup(m =>
+                    m.GetDatasetsForRepositoryAsync(ownerId, repoId, It.IsAny<int>(), It.IsAny<int>()))
+                .Throws(new NullReferenceException("OOPS!"));
+
+            var vc = new DatasetsViewComponent(_mockDatasetsStore.Object, _uriService);
+            var asyncResult = vc.InvokeAsync(ownerId, repoId);
+            Assert.NotNull(asyncResult.Result);
+            var result = asyncResult.Result as ViewViewComponentResult;
+            Assert.NotNull(result);
+
+            _mockDatasetsStore.Verify(m => m.GetDatasetsForRepositoryAsync(ownerId, repoId, 0, 20), Times.Once);
+            Assert.Equal("Error", result.ViewName);
         }
     }
 }

@@ -10,7 +10,7 @@ function formatResults(results, searchInput) {
     $resultsHtml.append($hiddenDivider);
 
     if (results && Array.isArray(results) && results.length > 0) {
-        var $cards = $("<div/>", { 'class': "ui two cards" }).appendTo($resultsHtml);
+        var $cards = $("<div/>", { 'class': "ui two stackable cards" }).appendTo($resultsHtml);
 
         $.each(results,
             function(key, ds) {
@@ -177,7 +177,7 @@ function find() {
 }
 
 
-function buttonSearch(tags) {
+function tagSearch(tags) {
     $('#tags').val(''); // clear search input
     var buttonId = "#" + tags;
     $(buttonId).toggleClass("loading");
@@ -227,3 +227,27 @@ function formatQuery(tags, and) {
     console.log(query);
     return query;
 }
+
+function filterByTag(tag) {
+    $('.card[property="void:subset"]').hide();
+    $('.card[property="void:subset"]:has(span[property="dcat:keyword"]:contains("' + tag + '"))').show();
+}
+
+function clearFilter() {
+    $('.card[property="void:subset"]').show();
+}
+
+function buttonSearch(tag) {
+    var tagButton = $("#buttons button[data-tag=\"" + tag + "\"]");
+    if (!tagButton.hasClass("basic")) {
+        // remove filter
+        $("#buttons button").addClass("basic");
+        clearFilter();
+    } else {
+        // set filter
+        $("#buttons button").addClass("basic");
+        tagButton.removeClass("basic");
+        filterByTag(tag);
+    }
+}
+

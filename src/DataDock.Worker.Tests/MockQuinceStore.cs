@@ -12,8 +12,8 @@ namespace DataDock.Worker.Tests
         public List<Uri> DroppedGraphs { get; }
         public List<Tuple<INode, INode, INode, Uri>> Asserted { get; }
         public List<Tuple<INode, INode, INode, Uri>> Retracted { get; }
-        public List<List<Triple>> TripleCollections { get; }
-        public List<Tuple<INode, IList<Triple>, IList<Triple>>> ResourceStatements { get; }
+        private readonly Dictionary<INode, List<Triple>> _triplesBySubject = new Dictionary<INode, List<Triple>>();
+        private readonly Dictionary<INode, List<Triple>> _triplesByObject = new Dictionary<INode, List<Triple>>();
 
         public bool Flushed { get; private set; }
 
@@ -22,19 +22,48 @@ namespace DataDock.Worker.Tests
             Asserted = new List<Tuple<INode, INode, INode, Uri>>();
             Retracted = new List<Tuple<INode, INode, INode, Uri>>();
             DroppedGraphs = new List<Uri>();
-            TripleCollections = new List<List<Triple>>();
-            ResourceStatements = new List<Tuple<INode, IList<Triple>, IList<Triple>>>();
             Flushed = false;
         }
 
         public void Assert(INode subject, INode predicate, INode obj, Uri graph)
         {
             Asserted.Add(new Tuple<INode, INode, INode, Uri>(subject, predicate, obj, graph));
+            var t = new Triple(subject, predicate, obj, graph);
+            if (_triplesBySubject.TryGetValue(subject, out var triples))
+            {
+                triples.Add(t);
+            }
+            else
+            {
+                _triplesBySubject.Add(t.Subject, new List<Triple>{t});
+            }
+            if (_triplesByObject.TryGetValue(obj, out var triples2))
+            {
+                triples2.Add(t);
+            }
+            else
+            {
+                _triplesByObject.Add(t.Object, new List<Triple> { t });
+            }
+
+            Flushed = false;
         }
 
         public void Retract(INode subject, INode predicate, INode obj, Uri graph)
         {
             Retracted.Add(new Tuple<INode, INode, INode, Uri>(subject, predicate, obj, graph));
+            var t = new Triple(subject, predicate, obj, graph);
+            if (_triplesBySubject.TryGetValue(subject, out var triples))
+            {
+                triples.Remove(t);
+            }
+
+            if (_triplesByObject.TryGetValue(obj, out var triples2))
+            {
+                triples2.Remove(t);
+            }
+
+            Flushed = false;
         }
 
         public void Assert(IGraph graph)
@@ -67,7 +96,7 @@ namespace DataDock.Worker.Tests
 
         public IEnumerable<Triple> GetTriplesForObject(INode objectNode)
         {
-            throw new NotImplementedException();
+            return _triplesByObject.ContainsKey(objectNode) ? _triplesByObject[objectNode] : new List<Triple>(0);
         }
 
         public IEnumerable<Triple> GetTriplesForObject(Uri objectUri)
@@ -77,17 +106,37 @@ namespace DataDock.Worker.Tests
 
         public void EnumerateSubjects(ITripleCollectionHandler handler)
         {
-            foreach (var tc in TripleCollections)
+            foreach (var s in _triplesBySubject.Keys)
             {
-                handler.HandleTripleCollection(tc);
+                handler.HandleTripleCollection(_triplesBySubject[s]);
             }
         }
 
         public void EnumerateSubjects(IResourceStatementHandler handler)
         {
-            foreach (var resourceStatement in ResourceStatements)
+            foreach (var s in _triplesBySubject.Keys)
             {
-                handler.HandleResource(resourceStatement.Item1, resourceStatement.Item2, resourceStatement.Item3);
+                handler.HandleResource(s, _triplesBySubject[s],
+                    _triplesByObject.ContainsKey(s)
+                        ? _triplesByObject[s]
+                        : new List<Triple>(0));
+            }
+        }
+
+        public void EnumerateObjects(ITripleCollectionHandler handler)
+        {
+            foreach (var o in _triplesByObject.Keys)
+            {
+                handler.HandleTripleCollection(_triplesByObject[o]);
+            }
+        }
+
+        public void EnumerateObjects(IResourceStatementHandler handler)
+        {
+            foreach (var o in _triplesByObject.Keys)
+            {
+                handler.HandleResource(o, _triplesBySubject.ContainsKey(o) ? _triplesBySubject[o] : new List<Triple>(0),
+                    _triplesByObject[o]);
             }
         }
 

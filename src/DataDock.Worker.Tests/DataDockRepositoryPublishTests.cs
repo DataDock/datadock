@@ -11,24 +11,16 @@ namespace DataDock.Worker.Tests
 {
     public class DataDockRepositoryPublishTests : BaseDataDockRepositorySpec
     {
-        private Uri _datasetGraphIri;
-        private Uri _publishedSubject;
+        private readonly Uri _datasetGraphIri;
+        private readonly Uri _publishedSubject;
         public DataDockRepositoryPublishTests()
         {
             _datasetGraphIri = new Uri("http://datadock.io/test/repo/dataset");
             var initGraph = new Graph();
             _publishedSubject = new Uri("http://datadock.io/test/repo/id/subject");
             var s = initGraph.CreateUriNode(_publishedSubject);
-            QuinceStore.TripleCollections.Add(new List<Triple>
-            {
-                new Triple(s, initGraph.CreateUriNode(new Uri("http://example.org/p1")),
-                    initGraph.CreateUriNode(new Uri("http://example.org/o1")))
-            });
-            QuinceStore.ResourceStatements.Add(
-                new Tuple<INode, IList<Triple>, IList<Triple>>(
-                    s,
-                    QuinceStore.TripleCollections[0],
-                    new List<Triple>()));
+            QuinceStore.Assert(s, initGraph.CreateUriNode(new Uri("http://example.org/p1")),
+                initGraph.CreateUriNode(new Uri("http://example.org/o1")), _datasetGraphIri);
         }
 
         [Fact]

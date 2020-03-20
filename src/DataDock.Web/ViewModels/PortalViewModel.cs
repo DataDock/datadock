@@ -76,6 +76,7 @@ namespace DataDock.Web.ViewModels
             Log.Debug("Using GitHubClient to retrieve up to date github account info for display on the portal homepage");
 
             this.OwnerDisplayName = this.OwnerId;
+            this.LogoUrl = $"https://github.com/{ownerSettings.OwnerId}.png";
         }
 
         private List<SearchButton> GetSearchButtons(string searchButtonsString)

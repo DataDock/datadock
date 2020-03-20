@@ -11,10 +11,10 @@ var gulp = require("gulp"),
     rimraf = require("rimraf"),
     concat = require("gulp-concat"),
     merge = require('merge-stream'),
-    cssmin = require("gulp-cssmin"),
+    cleanCss = require("gulp-clean-css"),
     uglify = require("gulp-uglify-es").default,
     rename = require("gulp-rename"),
-    jasmineBrowser = require("gulp-jasmine-browser");
+    Server = require("karma").Server;
 
 
 var paths = {
@@ -52,7 +52,7 @@ gulp.task("min:js", function () {
 gulp.task("min:css", function () {
     return gulp.src([paths.css, "!" + paths.minCss])
         .pipe(concat(paths.concatCssDest))
-        .pipe(cssmin())
+        .pipe(cleanCss({compatibility: "ie8"}))
         .pipe(gulp.dest("."));
 });
 
@@ -85,6 +85,14 @@ gulp.task("nm_copy", function () {
     return merge(streams);
 
 });
+
+gulp.task("test",
+    function(done) {
+        new Server({
+            configFile: __dirname + "/karma.conf.js",
+            singleRun: true
+        }, done).start();
+    });
 
 gulp.task('default', function () {
     // place code for your default task here

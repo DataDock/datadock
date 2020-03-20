@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using DataDock.Common.Models;
 using DataDock.Common.Stores;
 using DataDock.Common;
+using DataDock.CsvWeb;
 using DataDock.CsvWeb.Metadata;
 using DataDock.CsvWeb.Parsing;
 using DataDock.CsvWeb.Rdf;
-using DataDock.Worker.Liquid;
 using Newtonsoft.Json.Linq;
-using Octokit;
 using Serilog;
 using VDS.RDF;
 using VDS.RDF.Parsing.Handlers;
@@ -92,16 +91,14 @@ namespace DataDock.Worker.Processors
             var csvDownloadLink =
                 new Uri(repositoryUri + $"csv/{job.DatasetId}/{job.CsvFileName}");
 
-            IGraph datasetGraph;
             using (var tmpReader = File.OpenText(csvPath))
             {
                 var header = tmpReader.ReadLine();
                 Log.Information("CSV header: {CsvHeader}",header);
             }
-            using (var csvReader = File.OpenText(csvPath))
-            {
-                datasetGraph = GenerateDatasetGraph(csvReader, metadataJson);
-            }
+
+            var metadataBaseUri = new Uri(datasetUri + "/csv/" + job.CsvFileName + "-metadata.json");
+            IGraph datasetGraph = await GenerateDatasetGraphAsync(csvPath, metadataJson, metadataBaseUri);
             IGraph metadataGraph = GenerateMetadataGraph(datasetUri, publisherIri, metadataJson,
                 new[] { ntriplesDownloadLink, csvDownloadLink }, datasetGraph);
 
@@ -164,7 +161,7 @@ namespace DataDock.Worker.Processors
                 if (!Directory.Exists(datasetCsvDirPath)) Directory.CreateDirectory(datasetCsvDirPath);
                 var csvFilePath = Path.Combine(datasetCsvDirPath, csvFileName);
                 var csvFileStream = await _jobFileStore.GetFileAsync(csvFileId);
-                using (var csvOutStream = File.Open(csvFilePath, FileMode.Create, FileAccess.Write))
+                await using (var csvOutStream = File.Open(csvFilePath, FileMode.Create, FileAccess.Write))
                 {
                     csvFileStream.CopyTo(csvOutStream);
                 }
@@ -172,10 +169,8 @@ namespace DataDock.Worker.Processors
                 {
                     var csvmFilePath = csvFilePath + "-metadata.json";
                     var csvmFileStream = await _jobFileStore.GetFileAsync(csvmFileId);
-                    using (var csvmOutStream = File.Open(csvmFilePath, FileMode.Create, FileAccess.Write))
-                    {
-                        csvmFileStream.CopyTo(csvmOutStream);
-                    }
+                    await using var csvmOutStream = File.Open(csvmFilePath, FileMode.Create, FileAccess.Write);
+                    csvmFileStream.CopyTo(csvmOutStream);
                 }
             }
             catch (Exception ex)
@@ -226,13 +221,13 @@ namespace DataDock.Worker.Processors
 
         }
 
-        private Graph GenerateDatasetGraph(TextReader csvReader, JObject metadataJson)
+        private async Task<Graph> GenerateDatasetGraphAsync(string csvPath, JObject metadataJson, Uri metadataUri)
         {
-            var parser = new JsonMetadataParser(null);
-            Table tableMeta;
+            var parser = new JsonMetadataParser(null, metadataUri);
+            var tableGroup = new TableGroup();
             try
             {
-                tableMeta = parser.Parse(metadataJson) as Table;
+                var tableMeta = parser.ParseTable(tableGroup, metadataJson);
                 if (tableMeta == null)
                 {
                     throw new WorkerException("CSV Conversion failed. Unable to read CSV table metadata.");
@@ -247,8 +242,9 @@ namespace DataDock.Worker.Processors
             var graph = new Graph();
             ProgressLog.Info("Running CSV to RDF conversion");
             var graphHandler = new GraphHandler(graph);
-            var converter = new Converter(tableMeta, graphHandler, (msg) => ProgressLog.Error(msg), this, reportInterval: CsvConversionReportInterval);
-            converter.Convert(csvReader);
+            var tableResolver = new LocalTableResolver(tableGroup.Tables[0].Url, csvPath);
+            var converter = new Converter(graphHandler, tableResolver, ConverterMode.Minimal, (msg) => ProgressLog.Error(msg), this, reportInterval: CsvConversionReportInterval);
+            await converter.ConvertAsync(tableGroup);
             if (converter.Errors.Any())
             {
                 foreach (var e in converter.Errors)
@@ -324,5 +320,30 @@ namespace DataDock.Worker.Processors
         }
     }
 
+    internal class LocalTableResolver:ITableResolver
+    {
+        private readonly Dictionary<Uri, string> _lookup = new Dictionary<Uri, string>();
+        public LocalTableResolver(Uri csvUri, string csvFilePath)
+        {
+            _lookup[csvUri] = csvFilePath;
+        }
 
+        public async Task<Stream> ResolveAsync(Uri tableUri)
+        {
+            return await Task.Run(() =>
+            {
+                if (_lookup.TryGetValue(tableUri, out var filePath))
+                {
+                    return File.OpenRead(filePath);
+                }
+
+                throw new FileNotFoundException("Could not resolve URI " + tableUri);
+            });
+        }
+
+        public Task<JObject> ResolveJsonAsync(Uri jsonUri)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -26,7 +26,7 @@
   <div class="ui grid container">
     <header>
       <div class="ui huge breadcrumb">
-        <div class="active section" title="@(Model.OwnerDisplayName) data portal homepage"><h1>@(Model.OwnerDisplayName)</h1></div>
+        <div class="active section" title="@(Model.OwnerDisplayName) data portal homepage"><h1><a href="https://datadock.io/@Model.OwnerId">@(Model.OwnerDisplayName)</a></h1></div>
       </div>
     </header>
   </div>
@@ -39,12 +39,12 @@
         if (Model.ShowAvatar && !string.IsNullOrEmpty(Model.LogoUrl))
         {
           <div class="two wide column">
-            <img class="ui tiny rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture" />
+            <img class="ui medium rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture" />
           </div>
         }
       }
 
-      <div class="seven wide column">
+      <div class="fourteen wide column">
         @if (Model.ShowDescription && !string.IsNullOrEmpty(Model.Description))
         {
           <span>@Model.Description</span>
@@ -91,14 +91,9 @@
             </div>
           }
 
-        </div><!-- list -->
-      </div>
-
-      <div class="seven wide column">
         @{
           if (Model.Publisher != null && Model.Publisher.IsDisplayable())
           {
-            <div class="ui list">
               <div class="item">
                 <i class="user icon"></i>
                 <div class="content">
@@ -135,12 +130,9 @@
                   </div>
                 </div><!-- content -->
               </div><!-- item -->
-            </div><!-- list -->
-
             }
           else
           {
-            <div class="ui list">
               <div class="item">
                 <i class="user icon"></i>
                 <div class="content">
@@ -148,9 +140,9 @@
                   <div>Not Specified</div>
                 </div>
               </div>
-            </div>
           }
         }
+          </div> <!-- list -->
 
       </div><!-- column -->
     </div> <!-- mobile row -->
@@ -160,10 +152,10 @@
 
         @if (Model.ShowAvatar && !string.IsNullOrEmpty(Model.LogoUrl))
         {
-          <div class="row">
-            <img class="ui medium rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture" />
-            <div class="ui hidden divider"></div>
-          </div>
+            <div class="row">
+                <img class="ui small rounded bordered image" src="@Model.LogoUrl" alt="@Model.OwnerDisplayName GitHub avatar picture"/>
+                <div class="ui hidden divider"></div>
+            </div>
         }
 
         @if (Model.ShowDescription && !string.IsNullOrEmpty(Model.Description))
@@ -175,7 +167,7 @@
         }
 
         <div class="row">
-          <div class="ui list">
+          <div class="ui stackable list">
 
             @if (Model.ShowDashboardLink)
             {
@@ -277,49 +269,59 @@
 
         @if (Model.OwnerSearchButtons != null && Model.OwnerSearchButtons.Count > 0)
         {
-          <div class="ui center aligned container search-buttons" id="buttons">
-
-            <div class="ui link four cards">
-              @foreach (var button in Model.OwnerSearchButtons)
-              {
-                if (!string.IsNullOrEmpty(button.Tag))
-                {
-                  <div class="primary card" onclick="buttonSearch('@button.Tag.Trim()')" id="@button.Tag.Trim()">
-                    <div class="content">
-                      <div class="header">
-                        @if (!string.IsNullOrEmpty(button.Icon))
+            <div class="ui center aligned container search-buttons" id="buttons">
+                <div class="ui grid" id="buttons">
+                    @foreach (var button in Model.OwnerSearchButtons)
+                    {
+                        if (!string.IsNullOrEmpty(button.Tag))
                         {
-                          <i class="fa fa-@button.Icon mr"></i>
+                            <div class="four wide computer column sixteen wide mobile column">
+                                @if (!string.IsNullOrEmpty(button.Icon))
+                                {
+                                    <button class="fluid ui big basic primary labeled icon button"
+                                            data-tag="@button.Tag" onclick="tagButtonSearch('@button.Tag')"
+                                            title="Show all datasets tagged with '@button.Tag'">
+                                        <i class="fa fa-@button.Icon"></i>
+                                        @if (!string.IsNullOrEmpty(button.Text))
+                                        {
+                                            @button.Text
+                                        }
+                                        else
+                                        {
+                                            @button.Tag
+                                        }
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="fluid ui big basic primary button"
+                                            data-tag="@button.Tag" onclick="tagButtonSearch('@button.Tag')"
+                                            title="Show all datasets tagged with '@button.Tag'">
+                                        @if (!string.IsNullOrEmpty(button.Text))
+                                        {
+                                            @button.Text
+                                        }
+                                        else
+                                        {
+                                            @button.Tag
+                                        }
+                                    </button>
+                                }
+                            </div>
                         }
-
-                        @if (!string.IsNullOrEmpty(button.Text))
-                        {
-                          <span>@button.Text</span>
-                        }
-                        else
-                        {
-                          <span>@button.Tag</span>
-                        }
-
-                      </div><!-- end header -->
-                    </div><!-- end content -->
-                  </div>
-                  <!-- end card -->
-                }
-              }
-            </div><!-- end cards -->
-          </div>
-          <!-- end #buttons -->
+                    }
+                </div>
+            </div> <!-- end #buttons -->
         }
         <div class="ui center aligned grid container">
-          <div class="two wide column"></div>
-          <div class="twelve wide column">
+          <div class="two wide computer column"></div>
+          <div class="twelve wide computer column sixteen wide mobile column">
             <div class="ui big action fluid input">
               <input type="text" placeholder="search @(Model.OwnerDisplayName) datasets" id="tags" />
               <button class="ui button" onclick="find();" id="search" tabindex="0">Search</button>
             </div>
           </div>
-          <div class="two wide column"></div>
+          <div class="two wide computer column"></div>
 
         </div>
         <div class="ui divider"></div>
@@ -341,7 +343,7 @@
               <h2>Data Repositories</h2>
               <div class="ui hidden divider"></div>
             </div>
-            <div class="ui two cards">
+            <div class="ui two stackable cards">
               @foreach (var r in Model.RepoIds)
               {
                 <div class="card">
@@ -381,20 +383,35 @@
 
   
 <!-- Jquery, Semantic-UI JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.js" integrity="sha256-Bhi6GMQ/72uYZcJXCJ2LToOIcN3+Cx47AZnq/Bw1f7A=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js" integrity="sha256-ABVkpwb9K9PxubvRrHMkk6wmWcIHUE9eBxNZLXYQ84k=" crossorigin="anonymous"></script>
+
 <script>
-  $(document).ready(function(){
-    $('#tags').keypress(function(e){
-      if(e.keyCode==13)
-        $('#search').click();
+    $(document).ready(function(){
+        $('#tags').keypress(function(e){
+            if(e.keyCode==13)
+                $('#search').click();
+        });
     });
-  });
-  var searchUri = '/api/search/@Model.OwnerId';
+    var searchUri = '/api/search/@Model.OwnerId';
+    function tagButtonSearch(tag) {
+        $('#tags').val(tag);
+        find();
+    }
 </script>
-<script src="js/site.min.js"></script>
-
-
+<environment names="Development">
+    <script src="~/js/datadock.portal.js"></script>
+    <script src="~/js/datadock.schemahelper.js"></script>
+    <script src="~/js/datadock.metadataeditor.js"></script>
+    <script src="~/js/datadock.datatypeSniffer.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/js/site.min.js" asp-append-version="true"></script>
+</environment>
 </body>
 </html>

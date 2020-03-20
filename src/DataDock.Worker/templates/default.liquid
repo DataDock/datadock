@@ -40,12 +40,6 @@
         <i class="right chevron icon divider"></i>
         <a class="section" href="{{datadock-publish-url}}/{{owner-id}}/{{repo-id}}" title="View {{repo-id}} datasets">{{repo-id}}</a>
         <i class="right chevron icon divider"></i>
-			{% if parentDataset -%}
-				<a class="section" href="{{parentDataset}}" title="View parent dataset">Dataset</a>
-			{% else -%}
-				Dataset
-			{% endif -%}
-        <i class="right chevron icon divider"></i>
         <div class="active section">
           <h1>
             {% if title -%}

@@ -4,14 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using DataDock.Common.Stores;
-using DataDock.Web.Models;
 using DataDock.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
-using Nest;
 using Serilog;
 
 namespace DataDock.Web.Controllers
@@ -60,7 +56,7 @@ namespace DataDock.Web.Controllers
 
                 return View("Index", portalViewModel);
             }
-            catch (OwnerSettingsNotFoundException osnf)
+            catch (OwnerSettingsNotFoundException)
             {
                 //redirect to a friendly warning page
                 return View("OwnerNotFound");
@@ -79,13 +75,11 @@ namespace DataDock.Web.Controllers
             var requestMediaType = Request.GetTypedHeaders().Accept.OrderByDescending(x => x.Quality ?? 0.0)
                 .FirstOrDefault(x => SupportedMediaTypes.Contains(x.MediaType.Value));
             if (requestMediaType == null) return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
-            switch (requestMediaType.MediaType.Value)
+            return requestMediaType.MediaType.Value switch
             {
-                case "application/n-quads":
-                    return SeeOther($"/{ownerId}/{repoId}/data/void.nq");
-                default:
-                    return SeeOther($"/{ownerId}/{repoId}/page/index.html");
-            }
+                "application/n-quads" => SeeOther($"/{ownerId}/{repoId}/data/void.nq"),
+                _ => SeeOther($"/{ownerId}/{repoId}/page/index.html")
+            };
         }
 
         /// <summary>
@@ -100,13 +94,11 @@ namespace DataDock.Web.Controllers
             var requestMediaType = Request.GetTypedHeaders().Accept.OrderByDescending(x => x.Quality ?? 0.0)
                 .FirstOrDefault(x => SupportedMediaTypes.Contains(x.MediaType.Value));
             if (requestMediaType == null) return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
-            switch (requestMediaType.MediaType.Value)
+            return requestMediaType.MediaType.Value switch
             {
-                case "application/n-quads":
-                    return SeeOther($"/{ownerId}/{repoId}/data/{path}.nq");
-                default:
-                    return SeeOther($"/{ownerId}/{repoId}/page/{path}.html");
-            }
+                "application/n-quads" => SeeOther($"/{ownerId}/{repoId}/data/{path}.nq"),
+                _ => SeeOther($"/{ownerId}/{repoId}/page/{path}.html")
+            };
         }
 
         /// <summary>
@@ -135,16 +127,14 @@ namespace DataDock.Web.Controllers
         {
             var requestMediaType = SelectMediaType(SupportedDataMediaTypes, SupportedDataMediaTypes[0]);
             if (requestMediaType == null) return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
-            switch (requestMediaType)
+            return requestMediaType switch
             {
-                case "application/n-quads":
-                case "*/*":
-                    return await ProxyRequest(
-                        new Uri($"https://{ownerId}.github.io/{repoId}/data/{path}"), 
-                        requestMediaType);
-                default:
-                    return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
-            }
+                "application/n-quads" => await ProxyRequest(
+                    new Uri($"https://{ownerId}.github.io/{repoId}/data/{path}"), requestMediaType),
+                "*/*" => await ProxyRequest(new Uri($"https://{ownerId}.github.io/{repoId}/data/{path}"),
+                    requestMediaType),
+                _ => new StatusCodeResult(StatusCodes.Status406NotAcceptable)
+            };
         }
 
         public async Task<IActionResult> Csv(string ownerId, string repoId, string datasetId, string filename)
@@ -181,38 +171,36 @@ namespace DataDock.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> ProxyRequest(Uri remoteUri, string overrideContentType=null)
         {
-            using (var http = new HttpClient())
+            using var http = new HttpClient();
+            var upstreamResponse =  await http.GetAsync(remoteUri);
+            var proxiedContentType = upstreamResponse.Content.Headers.ContentType.ToString();
+            Log.Information(
+                "Proxy: {upstreamUrl} responded with {upstreamResponseStatus}. Headers: {@upstreamHeaders}",
+                upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode, upstreamResponse.Headers);
+            Response.StatusCode = (int)upstreamResponse.StatusCode;
+            if (upstreamResponse.StatusCode == HttpStatusCode.OK)
             {
-                var upstreamResponse =  await http.GetAsync(remoteUri);
-                var proxiedContentType = upstreamResponse.Content.Headers.ContentType.ToString();
-                Log.Information(
-                    "Proxy: {upstreamUrl} responded with {upstreamResponseStatus}. Headers: {@upstreamHeaders}",
-                    upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode, upstreamResponse.Headers);
-                Response.StatusCode = (int)upstreamResponse.StatusCode;
-                if (upstreamResponse.StatusCode == HttpStatusCode.OK)
+                Response.ContentType =
+                    proxiedContentType.Equals("application/octet-stream") && overrideContentType != null
+                        ? overrideContentType
+                        : proxiedContentType;
+                // Copy other headers - e.g. cache-control?
+                foreach (var h in upstreamResponse.Headers)
                 {
-                    Response.ContentType =
-                        proxiedContentType.Equals("application/octet-stream") && overrideContentType != null
-                            ? overrideContentType
-                            : proxiedContentType;
-                    // Copy other headers - e.g. cache-control?
-                    foreach (var h in upstreamResponse.Headers)
+                    if (!Response.Headers.ContainsKey(h.Key))
                     {
-                        if (!Response.Headers.ContainsKey(h.Key))
-                        {
-                            Response.Headers.Add(h.Key, h.Value.ToArray());
-                        }
+                        Response.Headers.Add(h.Key, h.Value.ToArray());
                     }
-                    await upstreamResponse.Content.CopyToAsync(Response.Body);
                 }
-                else
-                {
-                    Log.Error("Proxy: {upstreamUrl} responded with {upstreamResponseStatus}",
-                        upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode);
-                }
-
-                return new EmptyResult();
+                await upstreamResponse.Content.CopyToAsync(Response.Body);
             }
+            else
+            {
+                Log.Error("Proxy: {upstreamUrl} responded with {upstreamResponseStatus}",
+                    upstreamResponse.RequestMessage.RequestUri, upstreamResponse.StatusCode);
+            }
+
+            return new EmptyResult();
         }
 
         /// <summary>

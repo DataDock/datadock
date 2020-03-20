@@ -37,24 +37,9 @@ namespace DataDock.Worker
 
         protected void WaitForElasticsearch(IElasticClient client)
         {
-            Log.Information("Waiting for ES to respond to pings");
-            var elasticsearchConnected = false;
-            while (!elasticsearchConnected)
-            {
-                var response = client.Ping();
-                if (response.IsValid)
-                {
-                    Log.Information("Elasticsearch is Running!");
-                    elasticsearchConnected = true;
-                }
-                else
-                {
-                    Log.Information("Elasticsearch is starting");
-                }
-
-                Thread.Sleep(1000);
-            }
-
+            Log.Information("Waiting for Elasticsearch cluster");
+            client.WaitForInitialization();
+            Log.Information("Elasticsearch cluster is now available");
         }
 
         protected void ConfigureServices(IServiceCollection serviceCollection, IElasticClient elasticClient,

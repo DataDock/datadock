@@ -49,7 +49,7 @@ namespace DataDock.Worker.Tests
             var htmlGenerator = new HtmlFileGenerator(_uriService, resourceMapperMock.Object, viewEngineMock.Object, new MockProgressLog(), 100, templateVariables);
 
             htmlGenerator.HandleResource(tripleCollection[0].Subject, tripleCollection, new List<Triple>());
-            resourceMapperMock.Verify(x=>x.GetPathFor(null), Times.Once);
+            resourceMapperMock.Verify(x=>x.GetPathFor(null), Times.Never);
             viewEngineMock.Verify(x => x.Render(It.IsAny<Uri>(), It.IsAny<IList<Triple>>(), It.IsAny<IList<Triple>>(), null), Times.Never);
         }
 

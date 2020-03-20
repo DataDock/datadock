@@ -7,7 +7,9 @@
 
 <div class="ui container">
   <h3>Set up new repository</h3>
-  <p>Choose your GitHub repository from the list below to initialise it for DataDock publishing. This is an optional step for publisher who wish to setup repository level settings such as Publisher details. You can skip this step and publish to any of your GitHub repositories in the <a href="/@Model.SelectedOwnerId/import">Add Data</a> section.</p>
+  <p>Choose your GitHub repository from the list below to initialise it for DataDock publishing. Want to create a new repository? <a href="https://github.com/new" title="Add new GitHub repository">Add a new repository to your GitHub account</a>.</p>
+
+    <p>This is an optional step for publisher who wish to setup repository level settings such as Publisher details. You can skip this step and publish to any of your existing GitHub repositories in the  <a href="@Url.RouteUrl("OwnerImport", new {ownerId=Model.SelectedOwnerId})"> Add Data</a> section.</p>
 
   <form class="ui form">
     <input type="hidden" name="ownerId" id="ownerId" value="@Model.SelectedOwnerId">
