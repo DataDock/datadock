@@ -157,13 +157,7 @@ export default class DefineAdvancedRow extends Vue {
       return true;
     }
   }
-/*
-  @Watch("value") onValueChanged() {
-    if (this.value.datatype === "uriTemplate") {
-      this.validateUriTemplate();
-    }
-  }
-*/
+
   @Watch("uriTemplate") onUriTemplateChanged() {
     this.validateUriTemplate();
     this.value.valueUrl = this.uriTemplate;
