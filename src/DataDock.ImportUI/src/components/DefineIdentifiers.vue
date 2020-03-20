@@ -44,7 +44,7 @@ export default class DefineIdentifiers extends Vue {
   private get identifierColumn(): string {
     if (this._identifierColumn) return this._identifierColumn;
     if ("aboutUrl" in this.value) {
-      if (this.value.aboutUrl.endsWith("row_{_row}")){
+      if (this.value.aboutUrl.endsWith("row_{_row}")) {
         return "row_{_row}";
       }
       if (this.value.aboutUrl.startsWith(this.identifierBase + "/resource/")) {
