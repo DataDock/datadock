@@ -17,7 +17,11 @@
       </router-link>
       <router-link
         to="/define"
-        :class="{ active: currentPage === 'define', step: true }"
+        :class="{
+          active: currentPage === 'define',
+          step: true,
+          disabled: !haveCsvFile
+        }"
       >
         <i class="write icon" />
         <div class="content">
@@ -29,7 +33,11 @@
       </router-link>
       <router-link
         to="/upload"
-        :class="{ active: currentPage === 'upload', step: true }"
+        :class="{
+          active: currentPage === 'upload',
+          step: true,
+          disabled: !haveCsvFile
+        }"
       >
         <i class="cloud upload icon" />
         <div class="content">
@@ -97,6 +105,10 @@ export default class App extends Vue {
 
   private get currentPage(): string | undefined {
     return this.$route.name;
+  }
+
+  private get haveCsvFile(): boolean {
+    return this.csvFile !== null;
   }
 
   private get identifierBase(): string {
