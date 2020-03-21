@@ -1,9 +1,9 @@
 <template>
   <div class="ui attached segment">
-    <div class="ui error message" v-if="!templateMetadata">
+    <div class="ui error message" v-if="csvFile == null">
       Please select a CSV file to upload to start
     </div>
-    <div class="ui two column stackable grid container" v-if="templateMetadata">
+    <div class="ui two column stackable grid container" v-if="csvFile != null">
       <div class="four wide column">
         <div class="ui vertical steps">
           <div
@@ -127,7 +127,7 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import DefineDetails from "@/components/DefineDetails.vue";
 import DefineIdentifiers from "@/components/DefineIdentifiers.vue";
 import DefineColumns from "@/components/DefineColumns.vue";
@@ -136,7 +136,7 @@ import DefinePreview from "@/components/DefinePreview.vue";
 import DefineTemplate from "@/components/DefineTemplate.vue";
 import { Helper, DatatypeSniffer, SnifferOptions } from "@/DataDock";
 
-export default Vue.extend({
+@Component({
   components: {
     DefineDetails,
     DefineIdentifiers,
@@ -144,46 +144,55 @@ export default Vue.extend({
     DefineAdvanced,
     DefinePreview,
     DefineTemplate
-  },
-  props: ["templateMetadata", "publishUrl", "ownerId", "repoId", "csvData"],
-  data: function() {
-    return {
-      activeItem: "details",
-      errorItems: [],
-      identifierBase:
-        this.publishUrl + "/" + this.ownerId + "/" + this.repoId + "/id",
-      datasetId: Helper.slugify(this.templateMetadata["dc:title"])
-    };
-  },
-  methods: {
-    isActive(menuItem: string) {
-      return this.$data.activeItem === menuItem;
-    },
-    setActive(menuItem: string) {
-      this.$data.activeItem = menuItem;
-    },
-    hasError(menuItem: string) {
-      return this.$data.errorItems.includes(menuItem);
-    },
-    onTitleChanged() {
-      this.$data.datasetId = Helper.slugify(this.templateMetadata["dc:title"]);
-    },
-    onError(panel: string, errorFlag: boolean) {
-      if (errorFlag) {
-        if (!this.$data.errorItems.includes(panel)) {
-          this.$data.errorItems.push(panel);
-        }
-      } else {
-        if (this.$data.errorItems.includes(panel)) {
-          this.$data.errorItems.splice(this.$data.errorItems.indexOf(panel));
-        }
+  }
+})
+export default class Define extends Vue {
+  @Prop() public templateMetadata: any;
+  @Prop() public publishUrl!: string;
+  @Prop() public ownerId!: string;
+  @Prop() public repoId!: string;
+  @Prop() public csvData!: string[][];
+  @Prop() public csvFile?: File;
+
+  // Data
+  public activeItem: string = "details";
+  public errorItems: string[] = [];
+  public identifierBase: string =
+    this.publishUrl + "/" + this.ownerId + "/" + this.repoId + "/id";
+  public datasetId: string = Helper.slugify(this.templateMetadata["dc:title"]);
+
+  // Computed
+  public resourceIdentifierBase(): string {
+    return this.$data.identifierBase + "/" + this.$data.datasetId;
+  }
+
+  // Methods
+  private isActive(menuItem: string) {
+    return this.$data.activeItem === menuItem;
+  }
+
+  private setActive(menuItem: string) {
+    this.$data.activeItem = menuItem;
+  }
+
+  private hasError(menuItem: string) {
+    return this.$data.errorItems.includes(menuItem);
+  }
+
+  private onTitleChanged() {
+    this.$data.datasetId = Helper.slugify(this.templateMetadata["dc:title"]);
+  }
+
+  private onError(panel: string, errorFlag: boolean) {
+    if (errorFlag) {
+      if (!this.$data.errorItems.includes(panel)) {
+        this.$data.errorItems.push(panel);
+      }
+    } else {
+      if (this.$data.errorItems.includes(panel)) {
+        this.$data.errorItems.splice(this.$data.errorItems.indexOf(panel));
       }
     }
-  },
-  computed: {
-    resourceIdentifierBase() {
-      return this.$data.identifierBase + "/" + this.$data.datasetId;
-    }
   }
-});
+}
 </script>

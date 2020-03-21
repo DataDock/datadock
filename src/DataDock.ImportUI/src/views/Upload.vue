@@ -1,12 +1,15 @@
 <template>
   <div class="ui attached segment">
-    <div class="ui error message" v-if="errors.length > 0">
+    <div class="ui error message" v-if="!csvFile">
+      Please select a CSV file to upload to start
+    </div>
+    <div class="ui error message" v-if="csvFile && errors.length > 0">
       <div class="header">Error</div>
       <ul class="list">
         <li v-for="(error, ix) of errors" :key="'error_' + ix">{{ error }}</li>
       </ul>
     </div>
-    <div class="ui form">
+    <div class="ui form" v-if="csvFile">
       <div class="inline field">
         <div class="ui checkbox">
           <input
