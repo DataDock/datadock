@@ -20,7 +20,7 @@
       </ul>
       <p>
         The column names in your import do not need to match these names, but
-        but the columns must be in the same order as specified in the template.
+        the columns must be in the same order as specified in the template.
       </p>
       <div class="ui button" v-on:click="discardTemplate">Discard Template</div>
     </div>
