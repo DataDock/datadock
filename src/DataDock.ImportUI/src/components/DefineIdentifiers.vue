@@ -39,10 +39,8 @@ export default class DefineIdentifiers extends Vue {
   @Prop() private value: any;
   @Prop() private identifierBase!: string;
   @Prop() private datasetId!: string;
-  private _identifierColumn: string = "";
 
   private get identifierColumn(): string {
-    if (this._identifierColumn) return this._identifierColumn;
     if ("aboutUrl" in this.value) {
       if (this.value.aboutUrl.endsWith("row_{_row}")) {
         return "row_{_row}";
@@ -55,29 +53,25 @@ export default class DefineIdentifiers extends Vue {
   }
 
   private set identifierColumn(newValue: string) {
-    this._identifierColumn = newValue;
-    this.recalculateAboutUrl();
+    console.log("set identifierColumn", newValue);
+    if (newValue === "row_{_row}") {
+      this.value["aboutUrl"] =
+        this.identifierBase + "/resource/" + this.datasetId + "/" + newValue;
+    } else {
+      this.value["aboutUrl"] = this.identifierBase + "/resource/" + newValue;
+    }
+    console.log("changed aboutUrl to", this.value.aboutUrl);
   }
 
-  private get aboutUrl(): string {
-    return this.identifierColumn === "row_{_row}"
-      ? this.identifierBase +
+  @Watch("datasetId") private onDatasetIdChanged() {
+    this.value.aboutUrl =
+      this.identifierColumn === "row_{_row}"
+        ? this.identifierBase +
           "/resource/" +
           this.datasetId +
           "/" +
           this.identifierColumn
-      : this.identifierBase + "/resource/" + this.identifierColumn;
-  }
-
-  private recalculateAboutUrl() {
-    this.value["aboutUrl"] = this.aboutUrl;
-  }
-
-  @Watch("identifierColumn") private onIdentifierColumnChanged() {
-    this.recalculateAboutUrl();
-  }
-  @Watch("datasetId") private onDatasetIdChanged() {
-    this.recalculateAboutUrl();
+        : this.identifierBase + "/resource/" + this.identifierColumn;
   }
 }
 </script>
