@@ -53,14 +53,12 @@ export default class DefineIdentifiers extends Vue {
   }
 
   private set identifierColumn(newValue: string) {
-    console.log("set identifierColumn", newValue);
     if (newValue === "row_{_row}") {
       this.value["aboutUrl"] =
         this.identifierBase + "/resource/" + this.datasetId + "/" + newValue;
     } else {
       this.value["aboutUrl"] = this.identifierBase + "/resource/" + newValue;
     }
-    console.log("changed aboutUrl to", this.value.aboutUrl);
   }
 
   @Watch("datasetId") private onDatasetIdChanged() {
