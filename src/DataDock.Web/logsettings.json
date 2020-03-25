@@ -1,0 +1,21 @@
+{
+  "Serilog": {
+    "Using": [ "Serilog.Sinks.Elasticsearch" ],
+    "MinimumLevel": "Debug",
+    "Enrich": [ "FromLogContext" ],
+    "WriteTo": [
+      {
+        "Name": "Elasticsearch",
+        "Args": {
+          "nodeUris": "http://elasticsearch:9200",
+          "indexFormat": "logstash-{0:yyyy.MM}",
+          "autoRegisterTemplate": true,
+          "autoRegisterTemplateVersion": "ESv6"
+        }
+      }
+    ],
+    "Properties": {
+      "ImageType": "Web"
+    }
+  }
+}

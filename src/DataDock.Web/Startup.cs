@@ -54,18 +54,7 @@ namespace DataDock.Web
             Configuration.Bind(config);
 
             // Set up logging
-            Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .Enrich.WithProperty("ImageType", "Web")
-                .WriteTo.Elasticsearch(
-                    new ElasticsearchSinkOptions(new Uri(config.ElasticsearchUrl))
-                    {
-                        MinimumLogEventLevel = LogEventLevel.Debug,
-                        AutoRegisterTemplate = true,
-                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6
-                    })
-                .CreateLogger();
-
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
 
             services.AddOptions();
 
