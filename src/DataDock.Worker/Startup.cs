@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using DataDock.Common.Elasticsearch;
 using DataDock.Common.Stores;
 using DataDock.Common;
@@ -9,8 +8,6 @@ using Nest;
 using Nest.JsonNetSerializer;
 using NetworkedPlanet.Quince.Git;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.Elasticsearch;
 
 namespace DataDock.Worker
 {
@@ -18,33 +15,7 @@ namespace DataDock.Worker
     {
         public virtual void ConfigureServices(IServiceCollection serviceCollection, WorkerConfiguration config)
         {
-            var client = RegisterElasticClient(serviceCollection, config);
-            ConfigureLogging(config.ElasticsearchUrl);
-            ConfigureServices(serviceCollection, client, config);
-        }
-
-        protected IElasticClient RegisterElasticClient(IServiceCollection serviceCollection, ApplicationConfiguration config)
-        {
-            Log.Information("Attempting to connect to Elasticsearch at {esUrl}", config.ElasticsearchUrl);
-            var client = new ElasticClient(
-                new ConnectionSettings(
-                    new SingleNodeConnectionPool(new Uri(config.ElasticsearchUrl)),
-                    JsonNetSerializer.Default));
-            WaitForElasticsearch(client);
-            serviceCollection.AddSingleton<IElasticClient>(client);
-            return client;
-        }
-
-        protected void WaitForElasticsearch(IElasticClient client)
-        {
-            Log.Information("Waiting for Elasticsearch cluster");
-            client.WaitForInitialization();
-            Log.Information("Elasticsearch cluster is now available");
-        }
-
-        protected void ConfigureServices(IServiceCollection serviceCollection, IElasticClient elasticClient,
-            WorkerConfiguration config)
-        {
+            RegisterElasticClient(serviceCollection, config);
             serviceCollection.AddSingleton(config);
             serviceCollection.AddSingleton<ApplicationConfiguration>(config);
             serviceCollection.AddScoped<IFileStore, DirectoryFileStore>();
@@ -66,20 +37,22 @@ namespace DataDock.Worker
             serviceCollection.AddSingleton<IGitCommandProcessorFactory, GitCommandProcessorFactory>();
         }
 
-        protected void ConfigureLogging(string elasticsearchUrl)
+        protected void RegisterElasticClient(IServiceCollection serviceCollection, ApplicationConfiguration config)
         {
-            Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .Enrich.WithProperty("ImageType", "Worker")
-                .MinimumLevel.Debug()
-                .WriteTo.Elasticsearch(
-                    new ElasticsearchSinkOptions(new Uri(elasticsearchUrl))
-                    {
-                        MinimumLogEventLevel = LogEventLevel.Debug,
-                        AutoRegisterTemplate = true,
-                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6
-                    })
-                .CreateLogger();
+            Log.Information("Attempting to connect to Elasticsearch at {esUrl}", config.ElasticsearchUrl);
+            var client = new ElasticClient(
+                new ConnectionSettings(
+                    new SingleNodeConnectionPool(new Uri(config.ElasticsearchUrl)),
+                    JsonNetSerializer.Default));
+            WaitForElasticsearch(client);
+            serviceCollection.AddSingleton<IElasticClient>(client);
+        }
+
+        protected void WaitForElasticsearch(IElasticClient client)
+        {
+            Log.Information("Waiting for Elasticsearch cluster");
+            client.WaitForInitialization();
+            Log.Information("Elasticsearch cluster is now available");
         }
     }
 }

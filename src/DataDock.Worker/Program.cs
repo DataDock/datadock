@@ -19,15 +19,20 @@ namespace DataDock.Worker
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true)
+                .AddJsonFile("logsettings.json", true)
                 .AddEnvironmentVariables("DD_");
             if (!string.IsNullOrEmpty(environment))
             {
-                builder.AddJsonFile("appsettings." + environment.ToLowerInvariant() + ".json");
+                builder.AddJsonFile($"appsettings.{environment.ToLowerInvariant()}.json", true);
+                builder.AddJsonFile($"logsettings.{environment.ToLowerInvariant()}.json", true);
             }
             var configuration = builder.Build();
             var workerConfig = new WorkerConfiguration();
             configuration.Bind(workerConfig);
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
             workerConfig.LogSettings();
+
+
             var serviceCollection = new ServiceCollection();
             var startup = new Startup();
             startup.ConfigureServices(serviceCollection, workerConfig);
