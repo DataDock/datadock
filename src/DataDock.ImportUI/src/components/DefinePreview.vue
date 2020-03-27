@@ -8,10 +8,10 @@
       <thead>
         <tr>
           <th
-            v-for="(col, colIx) in templateMetadata.tableSchema.columns"
+            v-for="colIx in nonVirtualColumnIndexes"
             v-bind:key="'col_' + colIx"
           >
-            {{ col.titles[0] }}
+            {{ templateMetadata.tableSchema.columns[colIx].titles[0] }}
           </th>
         </tr>
       </thead>
@@ -45,6 +45,16 @@ export default class DefinePreview extends Vue {
 
   get page() {
     return this.data.slice(1, this.pageSize);
+  }
+
+  get nonVirtualColumnIndexes(): number[] {
+    let indexes = [];
+    for (let i = 0; i < this.templateMetadata.tableSchema.columns.length; i++) {
+      if (!this.templateMetadata.tableSchema.columns[i].virtual) {
+        indexes.push(i);
+      }
+    }
+    return indexes;
   }
 }
 </script>

@@ -28,7 +28,9 @@ export class Helper {
           delete columnSchema.datatype;
           break;
         case "uri":
-          columnSchema.valueUrl = "{" + columnSchema.name + "}";
+          if (!columnSchema.virtual) {
+            columnSchema.valueUrl = "{" + columnSchema.name + "}";
+          }
           delete columnSchema.datatype;
           break;
       }

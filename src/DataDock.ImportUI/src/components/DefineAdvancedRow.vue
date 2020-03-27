@@ -12,7 +12,11 @@
           v-model="value.suppressOutput"
         />
       </div>
-      <div class="ui required field" :class="{ error: !titleValid }">
+      <div
+        v-if="!isVirtualColumn"
+        class="ui field required"
+        :class="{ error: !titleValid }"
+      >
         <label :for="value.name + '_title'">Title</label>
         <input
           :id="value.name + 'title'"
@@ -32,14 +36,22 @@
       ></prefixed-uri-input>
       <div class="field">
         <label :for="value.name + '_datatype'">Datatype</label>
-        <select :id="value.name + '_datatype'" v-model="value.datatype">
-          <option value="string">Text</option>
+        <select
+          :id="value.name + '_datatype'"
+          v-model="value.datatype"
+          @change="onDatatypeChanged"
+        >
+          <option value="string" v-if="!isVirtualColumn">Text</option>
           <option value="uri">URI</option>
-          <option value="integer">Whole Number</option>
-          <option value="decimal">Decimal Number</option>
-          <option value="date">Date</option>
-          <option value="dateTime">Date and Time</option>
-          <option value="boolean">True/False</option>
+          <option value="integer" v-if="!isVirtualColumn">Whole Number</option>
+          <option value="decimal" v-if="!isVirtualColumn"
+            >Decimal Number</option
+          >
+          <option value="date" v-if="!isVirtualColumn">Date</option>
+          <option value="dateTime" v-if="!isVirtualColumn"
+            >Date and Time</option
+          >
+          <option value="boolean" v-if="!isVirtualColumn">True/False</option>
           <option value="uriTemplate">URI Template</option>
         </select>
       </div>
@@ -68,6 +80,13 @@
           {{ errors.uriTemplate }}
         </div>
       </div>
+      <prefixed-uri-input
+        label="Value URI"
+        required="true"
+        v-model="valueUrl"
+        v-on:error="onValueUriInputError"
+        v-if="isVirtualColumn && value.datatype == 'uri'"
+      ></prefixed-uri-input>
       <div class="field" :class="{ error: !parentColumnValid }">
         <label :for="value.name + '_parent'">Parent Column</label>
         <select :id="value.name + '_parent'" v-model="parentColumn">
@@ -104,6 +123,8 @@ export default class DefineAdvancedRow extends Vue {
   @Prop() private resourceIdentifierBase!: string;
   @Prop() private templateMetadata: any;
   private uriTemplate: string =
+    "valueUrl" in this.value ? this.value["valueUrl"] : "";
+  private valueUrl: string =
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
   private errors: any = {};
   private hasErrors: boolean | undefined;
@@ -158,9 +179,25 @@ export default class DefineAdvancedRow extends Vue {
     }
   }
 
-  @Watch("uriTemplate") onUriTemplateChanged() {
+  private get isVirtualColumn(): boolean {
+    return "virtual" in this.value && this.value.virtual;
+  }
+
+  @Watch("uriTemplate")
+  onUriTemplateChanged() {
     this.validateUriTemplate();
     this.value.valueUrl = this.uriTemplate;
+    this.notifyChange();
+  }
+
+  @Watch("valueUrl")
+  onValueUrlChanged() {
+    this.value.valueUrl = this.valueUrl;
+    this.notifyChange();
+  }
+
+  private onDatatypeChanged() {
+    this.validateUriTemplate();
     this.notifyChange();
   }
 
@@ -184,8 +221,10 @@ export default class DefineAdvancedRow extends Vue {
 
   private get titleValid() {
     delete this.errors.title;
-    if (this.value.titles[0].length == 0) {
-      this.errors.title = "A non-empty title is required";
+    if (!this.isVirtualColumn) {
+      if (this.value.titles[0].length == 0) {
+        this.errors.title = "A non-empty title is required";
+      }
     }
     this.updateErrorFlag();
     return !this.errors.title;
@@ -195,8 +234,10 @@ export default class DefineAdvancedRow extends Vue {
     if (this.value.datatype === "uriTemplate") {
       this.validateUriTemplate();
       return this._uriTemplateValid;
+    } else {
+      delete this.errors.uriTemplate;
+      return true;
     }
-    return this._uriTemplateValid;
   }
 
   private onUriInputError(isValid: boolean, errors: any) {
@@ -206,6 +247,14 @@ export default class DefineAdvancedRow extends Vue {
       this.errors.propertyUrl = errors["value"];
     }
     this.updateErrorFlag();
+  }
+
+  private onValueUriInputError(isValid: boolean, errors: any) {
+    if (isValid) {
+      delete this.errors.valueUrl;
+    } else {
+      this.errors.valueUrl = errors["value"];
+    }
   }
 
   private readonly templateRegex: RegExp = /{([^}]+)}/g;
@@ -219,22 +268,24 @@ export default class DefineAdvancedRow extends Vue {
 
   private validateUriTemplate() {
     delete this.errors.uriTemplate;
-    if (this.uriTemplate.length == 0) {
-      this.errors.uriTemplate = "A non-empty URI template string is required";
-    }
-    this._uriTemplateValid = !("uriTemplate" in this.errors);
-    var results = this.uriTemplate.match(this.templateRegex);
-    if (!results) {
-      this.errors.uriTemplate =
-        "URI Template must reference one or more columns using {columnName} syntax";
-      this._uriTemplateValid = false;
-    } else {
-      for (let match of results) {
-        let columnRef = match.substring(1, match.length - 1);
-        if (!this.hasColumn(columnRef)) {
-          this.errors.uriTemplate =
-            "Template references a non-existant column with name " + match;
-          this._uriTemplateValid = false;
+    if (this.value.datatype == "uriTemplate") {
+      if (this.uriTemplate.length == 0) {
+        this.errors.uriTemplate = "A non-empty URI template string is required";
+      }
+      this._uriTemplateValid = !("uriTemplate" in this.errors);
+      var results = this.uriTemplate.match(this.templateRegex);
+      if (!results) {
+        this.errors.uriTemplate =
+          "URI Template must reference one or more columns using {columnName} syntax";
+        this._uriTemplateValid = false;
+      } else {
+        for (let match of results) {
+          let columnRef = match.substring(1, match.length - 1);
+          if (columnRef !== "_row" && !this.hasColumn(columnRef)) {
+            this.errors.uriTemplate =
+              "Template references a non-existant column with name " + match;
+            this._uriTemplateValid = false;
+          }
         }
       }
     }

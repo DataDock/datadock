@@ -9,7 +9,7 @@ import { Component, Prop } from "vue-property-decorator";
 import { Helper } from "@/DataDock";
 
 @Component
-export default class DefineTempalte extends Vue {
+export default class DefineTemplate extends Vue {
   @Prop() private value: any;
   public get templateJson(): string {
     let json = JSON.stringify(

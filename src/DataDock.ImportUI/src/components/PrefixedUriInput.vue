@@ -23,7 +23,7 @@ export default class PrefixedUriInput extends Vue {
   private namespace: string = "";
   private prefix!: string;
   private suffix!: string;
-  private curieOrUri: string = this.value;
+  private curieOrUri: string = this.value ?? "";
   private usePrefixcc: boolean = true;
   private onDebouncedUriInput!: () => void;
   private uriValid: boolean = true;
