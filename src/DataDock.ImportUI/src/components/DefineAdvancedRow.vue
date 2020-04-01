@@ -41,19 +41,34 @@
           v-model="value.datatype"
           @change="onDatatypeChanged"
         >
-          <option value="string" v-if="!isVirtualColumn">Text</option>
+          <option value="string">Text</option>
           <option value="uri">URI</option>
-          <option value="integer" v-if="!isVirtualColumn">Whole Number</option>
-          <option value="decimal" v-if="!isVirtualColumn"
-            >Decimal Number</option
-          >
-          <option value="date" v-if="!isVirtualColumn">Date</option>
-          <option value="dateTime" v-if="!isVirtualColumn"
-            >Date and Time</option
-          >
+          <option value="integer">Whole Number</option>
+          <option value="decimal">Decimal Number</option>
+          <option value="date">Date</option>
+          <option value="dateTime">Date and Time</option>
           <option value="boolean" v-if="!isVirtualColumn">True/False</option>
           <option value="uriTemplate">URI Template</option>
         </select>
+      </div>
+      <div
+        class="field"
+        :class="{ error: !defaultValid }"
+        v-if="
+          isVirtualColumn &&
+            value.datatype != 'uriTemplate' &&
+            value.datatype != 'uri'
+        "
+      >
+        <label :for="value.name + '_default'">Fixed Value</label>
+        <input
+          :id="value.name + '_default'"
+          type="text"
+          v-model="value.default"
+        />
+        <div class="ui error message" v-if="errors.default">
+          {{ errors.default }}
+        </div>
       </div>
       <div class="field" v-if="value.datatype == 'string'">
         <label :for="value.name + '_lang'">Language</label>
@@ -111,6 +126,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import DefineColumnsRow from "@/components/DefineColumnsRow.vue";
 import PrefixedUriInput from "@/components/PrefixedUriInput.vue";
 import * as _ from "lodash";
+import { Helper, SnifferOptions } from "@/DataDock";
 
 @Component({
   components: {
@@ -129,6 +145,7 @@ export default class DefineAdvancedRow extends Vue {
   private errors: any = {};
   private hasErrors: boolean | undefined;
   private _uriTemplateValid: boolean = true;
+  private _validator = new SnifferOptions();
 
   private notifyChange() {
     this.$emit("input", this.value);
@@ -238,6 +255,49 @@ export default class DefineAdvancedRow extends Vue {
       delete this.errors.uriTemplate;
       return true;
     }
+  }
+
+  private get defaultValid(): boolean {
+    let validator = new SnifferOptions();
+    delete this.errors.default;
+    switch (this.value.datatype) {
+      case "integer":
+        if (!validator.isInteger(this.value.default)) {
+          this.errors.default = "Invalid integer value";
+        }
+        break;
+      case "decimal":
+        if (!validator.isDecimal(this.value.default)) {
+          this.errors.default = "Invalid decimal value";
+        }
+        break;
+      case "float":
+        if (!validator.isFloat(this.value.default)) {
+          this.errors.default = "Invalid floating point value";
+        }
+        break;
+      case "date":
+        if (!validator.isDate(this.value.default)) {
+          this.errors.default = "Invalid date value";
+        }
+        break;
+      case "dateTime":
+        if (!validator.isDateTime(this.value.default)) {
+          this.errors.default = "Invalid date/time value";
+        }
+        break;
+      case "boolean":
+        if (!validator.isBoolean(this.value.default)) {
+          this.errors.default = "Invalid boolean value";
+        }
+        break;
+      case "uri":
+        if (!validator.isUri(this.value.default)) {
+          this.errors.default = "Invalid URL";
+        }
+    }
+    this.updateErrorFlag();
+    return !this.errors.default;
   }
 
   private onUriInputError(isValid: boolean, errors: any) {

@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataDock.Common\DataDock.Common.csproj" />
-    <PackageReference Include="DataDock.CsvWeb" Version="0.1.0-pre0005" />
+    <PackageReference Include="DataDock.CsvWeb" Version="0.1.0-pre0008" />
     <PackageReference Include="DotLiquid" Version="2.0.314" />
     <PackageReference Include="dotNetRDF" Version="2.4.0" />
     <PackageReference Include="Elasticsearch.Net" Version="6.8.3" />
