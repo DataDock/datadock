@@ -12,6 +12,7 @@
           v-for="(col, ix) of value.tableSchema.columns"
           v-model="value.tableSchema.columns[ix]"
           v-bind:colIx="ix"
+          :identifierBase="identifierBase"
           v-bind:resourceIdentifierBase="resourceIdentifierBase"
           v-bind:templateMetadata="value"
           v-bind:key="col.name"

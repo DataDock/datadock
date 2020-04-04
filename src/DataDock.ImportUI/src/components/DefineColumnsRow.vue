@@ -32,7 +32,7 @@
       </select>
     </td>
     <td v-if="!value.virtual">
-      <input type="checkbox" v-model="value.suppressOutput" />
+      <input type="checkbox" v-model="suppressed" />
     </td>
   </tr>
 </template>
@@ -46,6 +46,14 @@ export default class DefineColumnsRow extends Vue {
   @Prop() private value: any;
   @Prop() private resourceIdentifierBase!: string;
   private titleValid: boolean = true;
+
+  private get suppressed(): boolean {
+    return this.value.columnType == "suppressed";
+  }
+
+  private set suppressed(newValue: boolean) {
+    this.value.columnType = newValue ? "suppressed" : "standard";
+  }
 
   private validateTitle() {
     const wasValid = this.titleValid;

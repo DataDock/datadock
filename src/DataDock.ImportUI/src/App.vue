@@ -180,8 +180,7 @@ export default class App extends Vue {
         propertyUrl: this.identifierBase + "/definition/" + colId
       });
     }
-    this.ensureColumnDatatype(templateMetadata);
-    return templateMetadata;
+    return Helper.makeTemplateViewModel(templateMetadata);
   }
 
   makeSchemaFromTemplate(data: string[][], file: File, template: any) {
@@ -197,16 +196,7 @@ export default class App extends Vue {
       this.$root.$data.repoId +
       "/";
     this.makeAbsolute(templateMetadata, baseUri);
-    this.ensureColumnDatatype(templateMetadata);
-    return templateMetadata;
-  }
-
-  ensureColumnDatatype(templateMetadata: any) {
-    for (let i = 0; i < templateMetadata.tableSchema.columns.length; i++) {
-      templateMetadata.tableSchema.columns[i] = Helper.addSchemaDatatype(
-        templateMetadata.tableSchema.columns[i]
-      );
-    }
+    return Helper.makeTemplateViewModel(templateMetadata);
   }
 
   readonly colRefRegExp: RegExp = /^\{[^}]+\}$/;

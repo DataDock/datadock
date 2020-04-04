@@ -166,9 +166,9 @@ describe("DatatypeSniffer", () => {
 });
 
 describe("Helper", () => {
-  describe("makeCleanTemplate", () => {
+  describe("makeTemplate", () => {
     it("removes the datatype property from a uriTemplate column", () => {
-      var template = {
+      var templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -180,13 +180,17 @@ describe("Helper", () => {
           ]
         }
       };
-      var sanitizedTemplate = Helper.makeCleanTemplate(template);
-      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      var template = Helper.makeTemplate(templateViewModel);
+      var sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).not.toHaveProperty("datatype");
-      expect(sanitizedColA).toHaveProperty("valueUrl");
+      expect(sanitizedColA).toHaveProperty(
+        "valueUrl",
+        "http://example.org/id/{colA}"
+      );
     });
+
     it("replaces the datatype property for a uri column with a valueUrl property", () => {
-      var template = {
+      var templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -197,14 +201,14 @@ describe("Helper", () => {
           ]
         }
       };
-      var sanitizedTemplate = Helper.makeCleanTemplate(template);
-      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      var template = Helper.makeTemplate(templateViewModel);
+      var sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).not.toHaveProperty("datatype");
-      expect(sanitizedColA).toHaveProperty("valueUrl");
-      expect(sanitizedColA.valueUrl).toBe("{colA}");
+      expect(sanitizedColA).toHaveProperty("valueUrl", "{colA}");
     });
+
     it("does not modify a string column", () => {
-      var template = {
+      var templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -215,33 +219,236 @@ describe("Helper", () => {
           ]
         }
       };
-      var sanitizedTemplate = Helper.makeCleanTemplate(template);
-      var sanitizedColA = sanitizedTemplate.tableSchema.columns[0];
+      var template = Helper.makeTemplate(templateViewModel);
+      var sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).toHaveProperty("datatype");
       expect(sanitizedColA.datatype).toBe("string");
       expect(sanitizedColA).not.toHaveProperty("valueUrl");
     });
+  });
+
+  describe("makeTemplateViewModel", () => {
     it("Adds a uri datatype when the valueUrl is only a column reference", () => {
-      var col = {
-        name: "colA",
-        propertyUrl: "http://example.org/p",
-        valueUrl: "{colA}"
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              propertyUrl: "http://example.org/p",
+              valueUrl: "{colA}"
+            }
+          ]
+        }
       };
-      var annotatedTemplate = Helper.addSchemaDatatype(col);
-      expect(annotatedTemplate).toHaveProperty("datatype");
-      expect(annotatedTemplate.datatype).toBe("uri");
-      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      expect(templateViewModel).toHaveProperty("tableSchema");
+      expect(templateViewModel.tableSchema).toHaveProperty("columns");
+      expect(templateViewModel.tableSchema.columns).toHaveLength(1);
+      var col = templateViewModel.tableSchema.columns[0];
+      expect(col).toHaveProperty("datatype");
+      expect(col.datatype).toBe("uri");
+      expect(col.valueUrl).toBe("{colA}");
     });
+
     it("Adds a uriTemplate datatype when the valueUrl is not only a column reference", () => {
-      var col = {
-        name: "colA",
-        propertyUrl: "http://example.org/p",
-        valueUrl: "http://example.org/id/{colA}"
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              propertyUrl: "http://example.org/p",
+              valueUrl: "http://example.org/id/{colA}"
+            }
+          ]
+        }
       };
-      var annotatedTemplate = Helper.addSchemaDatatype(col);
-      expect(annotatedTemplate).toHaveProperty("datatype");
-      expect(annotatedTemplate.datatype).toBe("uriTemplate");
-      expect(annotatedTemplate.valueUrl).toBe(col.valueUrl);
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      var col = templateViewModel.tableSchema.columns[0];
+      expect(col).toHaveProperty("datatype");
+      expect(col.datatype).toBe("uriTemplate");
+      expect(col.valueUrl).toBe("http://example.org/id/{colA}");
+    });
+
+    it("Adds columnType=suppressed when suppressOutput is true on a column schema", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              suppressOutput: true
+            }
+          ]
+        }
+      };
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      var col = templateViewModel.tableSchema.columns[0];
+      expect(col).toHaveProperty("columnType", "suppressed");
+    });
+
+    it("Adds columnType=measure when dd:columnType=measure on a column schema", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              "http://schema.datadock.io/columnType": "measure"
+            }
+          ]
+        }
+      };
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      var col = templateViewModel.tableSchema.columns[0];
+      expect(col).toHaveProperty("columnType", "measure");
+    });
+
+    it("Marks measure facet and parent virutal columns as hidden", () => {
+      var template = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              datatype: "string",
+              "http://schema.datadock.io/columnType": "measure",
+              aboutUrl: "http://datadock.io/kal/test/id/resource/book/{colA}",
+              propertyUrl: "http://datadock.io/kal/id/definition/sales",
+              "http://schema.datadock.io/facetColumn": ["colC"]
+            },
+            {
+              name: "colB",
+              virtual: "true",
+              propertyUrl:
+                "http://datadock.io/kal/test/id/definition/someProperty",
+              valueUrl: "http://datadock.io/kal/test/id/resource/book/{colA}"
+            },
+            {
+              name: "colC",
+              virtual: "true",
+              propertyUrl: "http://datadock.io/kal/test/id/definition/year",
+              default: "2019",
+              aboutUrl: "http://datadock.io/kal/test/id/resource/book/{colA}"
+            },
+            {
+              name: "colD",
+              virtual: "true",
+              propertyUrl:
+                "http://datadock.io/kal/test/id/definition/customSubProperty",
+              default: "whoa!",
+              aboutUrl: "http://datadock.io/kal/test/id/resource/book/{colA}"
+            }
+          ]
+        }
+      };
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      expect(templateViewModel.tableSchema.columns).toHaveLength(2);
+      var colA = templateViewModel.tableSchema.columns[0];
+      expect(colA).toHaveProperty("measure");
+      expect(colA.measure).toHaveProperty("name", "colB");
+      expect(colA.measure).toHaveProperty("hidden", true);
+      expect(colA).toHaveProperty("facets");
+      expect(colA.facets).toHaveLength(1);
+      expect(colA.facets[0]).toHaveProperty("name", "colC");
+      expect(colA.facets[0]).toHaveProperty("hidden", true);
+      var colD = templateViewModel.tableSchema.columns[1];
+      expect(colD).toHaveProperty("name", "colD");
+      expect(colD).not.toHaveProperty("hidden");
+    });
+
+    it("Collects parent column information for measure columns", () => {
+      var template = {
+        tableSchema: {
+          aboutUrl: "http://datadock.io/kal/test/id/resource/isbn/{isbn}",
+          columns: [
+            {
+              name: "isbn",
+              datatype: "string",
+              propertyUrl: "http://datadock.io/kal/test/id/definition/isbn"
+            },
+            {
+              name: "sales_2020",
+              datatype: "integer",
+              titles: ["2020 Sales"],
+              "http://schema.datadock.io/columnType": "measure",
+              "http://schema.datadock.io/facetColumn": ["virtualCol2"],
+              aboutUrl:
+                "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}",
+              propertyUrl: "http://www.w3.org/1999/02/22-rdf-syntax-ns#value"
+            },
+            {
+              name: "virtualCol1",
+              virtual: true,
+              titles: ["Sales By Year"],
+              propertyUrl: "http://datadock.io/kal/test/id/definition/sales",
+              valueUrl:
+                "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}"
+            },
+            {
+              name: "virtualCol2",
+              virtual: true,
+              aboutUrl:
+                "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}",
+              propertyUrl: "http://datadock.io/kal/test/id/definition/year",
+              default: "2020",
+              datatype: "integer",
+              titles: ["Year"]
+            }
+          ]
+        }
+      };
+
+      var expected = {
+        tableSchema: {
+          aboutUrl: "http://datadock.io/kal/test/id/resource/isbn/{isbn}",
+          columns: [
+            {
+              name: "isbn",
+              datatype: "string",
+              columnType: "standard",
+              propertyUrl: "http://datadock.io/kal/test/id/definition/isbn"
+            },
+            {
+              name: "sales_2020",
+              columnType: "measure",
+              aboutUrl:
+                "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}",
+              propertyUrl: "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "http://schema.datadock.io/columnType": "measure",
+              "http://schema.datadock.io/facetColumn": ["virtualCol2"],
+              titles: ["2020 Sales"],
+              datatype: "integer",
+              measure: {
+                name: "virtualCol1",
+                titles: ["Sales By Year"],
+                virtual: true,
+                hidden: true,
+                datatype: "uriTemplate",
+                propertyUrl: "http://datadock.io/kal/test/id/definition/sales",
+                valueUrl:
+                  "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}"
+              },
+              facets: [
+                {
+                  name: "virtualCol2",
+                  columnType: "standard",
+                  virtual: true,
+                  hidden: true,
+                  titles: ["Year"],
+                  aboutUrl:
+                    "http://datadock.io/kal/test/id/resource/sales_2020/{isbn}",
+                  propertyUrl: "http://datadock.io/kal/test/id/definition/year",
+                  default: "2020",
+                  datatype: "integer"
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      var templateViewModel = Helper.makeTemplateViewModel(template);
+      expect(templateViewModel).toMatchObject(expected);
+
+      var roundTripModel = Helper.makeTemplate(templateViewModel);
+      expect(roundTripModel).toMatchObject(template);
     });
   });
 });
