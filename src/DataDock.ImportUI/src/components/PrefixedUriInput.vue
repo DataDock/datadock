@@ -1,15 +1,16 @@
 <template>
-  <div class="ui field" :class="{ error: !uriValid, required: required }">
+  <div class="ui field" :class="{ error: hasError, required: required }">
     <label :for="$vnode.key + '_input'">{{ label }}</label>
     <input
       :id="$vnode.key + '_input'"
       :key="$vnode.key + '_input'"
       type="text"
+      @blur="notifyValue"
       @input="onInputEdited"
       v-model="curieOrUri"
     />
-    <div class="ui bottom attached">{{ value }}</div>
-    <div class="ui error message" v-if="!uriValid">
+    <div class="ui bottom attached">{{ expandedUri }}</div>
+    <div class="ui error message" v-if="hasError">
       {{ this.errorMessage }}
     </div>
   </div>
@@ -32,7 +33,8 @@ export default class PrefixedUriInput extends Vue {
   private usePrefixcc: boolean = true;
   private onDebouncedUriInput!: () => void;
   private curieOrUri: string = this.value;
-  private uriValid: boolean = true;
+  private expandedUri: string = this.value;
+  private hasError: boolean = false;
   private uriEdited: boolean = false;
   private errorMessage: string = "";
 
@@ -81,19 +83,23 @@ export default class PrefixedUriInput extends Vue {
 
   setError(errorMessage: string) {
     this.errorMessage = errorMessage;
-    this.uriValid = false;
+    this.hasError = true;
+    this.$emit("error", this.$vnode.key, true, this.errorMessage);
   }
 
-  notifyValue(value: string) {
-    this.$emit("input", value);
-    if (!value.includes(":")) {
-      this.uriValid = false;
-      this.errorMessage = "Value must be a URI";
-      this.$emit("error", this.$vnode.key, true, this.errorMessage);
+  clearError() {
+    this.hasError = false;
+    this.$emit("error", this.$vnode.key, false, "");
+  }
+
+  notifyValue() {
+    this.$emit("input", this.expandedUri);
+    if (this.expandedUri == "" && this.required){
+      this.setError("A value is required");
+    } else if (!this.expandedUri.includes(":")) {
+      this.setError("Value must be a URI");
     } else {
-      this.uriValid = true;
-      this.errorMessage = "";
-      this.$emit("error", this.$vnode.key, false, "");
+      this.clearError();
     }
   }
 
@@ -108,7 +114,7 @@ export default class PrefixedUriInput extends Vue {
         Axios.get("https://prefix.cc/" + prefix + ".file.json")
           .then(function(response) {
             self.namespace = response.data[prefix];
-            self.notifyValue(self.namespace + self.suffix);
+            self.expandedUri = self.namespace + self.suffix;
           })
           .catch(function(error) {
             if (error.response.status == 404) {
@@ -118,11 +124,11 @@ export default class PrefixedUriInput extends Vue {
             }
           });
       } else {
-        this.notifyValue(this.namespace + this.suffix);
+        this.expandedUri = this.namespace + this.suffix;
       }
     } else {
-      this.namespace = this.prefix + ":";
-      this.notifyValue(this.curieOrUri ?? "");
+      this.namespace = "";
+      this.expandedUri = this.curieOrUri ?? "";
     }
   }
 }
