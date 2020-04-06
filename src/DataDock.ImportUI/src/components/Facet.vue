@@ -1,6 +1,15 @@
 <template>
-  <div>
+  <div class="ui segment">
+    <button
+      class="ui small compact icon basic red button"
+      style="float: right"
+      data-tooltip="Delete this facet"
+      @click="onDeleteFacet"
+    >
+      <i class="icon trash"></i>
+    </button>
     <prefixed-uri-input
+      class="clear-right"
       :key="$vnode.key + '_propertyUrl'"
       label="Facet Property URI"
       :required="true"
@@ -90,6 +99,10 @@ export default class Facet extends Vue {
     }
     this.updateErrorFlag();
     return !this.errors.default;
+  }
+
+  private onDeleteFacet() {
+    this.value.splice(this.facetIndex, 1);
   }
 
   private onInputError(
