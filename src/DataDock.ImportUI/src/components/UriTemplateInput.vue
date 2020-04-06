@@ -1,7 +1,7 @@
 <template>
   <div class="field" :class="{ error: hasErrors, required: required }">
-    <label :for="name">{{ label }}</label>
-    <input :id="name" type="text" v-model="uriTemplate" />
+    <label :for="$vnode.key + '_input'">{{ label }}</label>
+    <input :id="$vnode.key + '_input'" type="text" v-model="uriTemplate" />
     <div class="ui error message" v-if="hasErrors">
       {{ errorMessage }}
     </div>

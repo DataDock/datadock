@@ -1,7 +1,13 @@
 <template>
   <div class="ui field" :class="{ error: !uriValid, required: required }">
-    <label>{{ label }}</label>
-    <input type="text" v-model="curieOrUri" />
+    <label :for="$vnode.key + '_input'">{{ label }}</label>
+    <input
+      :id="$vnode.key + '_input'"
+      :key="$vnode.key + '_input'"
+      type="text"
+      @input="onInputEdited"
+      v-model="curieOrUri"
+    />
     <div class="ui bottom attached">{{ value }}</div>
     <div class="ui error message" v-if="!uriValid">
       {{ this.errorMessage }}
@@ -23,10 +29,11 @@ export default class PrefixedUriInput extends Vue {
   private namespace: string = "";
   private prefix!: string;
   private suffix!: string;
-  private curieOrUri: string = this.value ?? "";
   private usePrefixcc: boolean = true;
   private onDebouncedUriInput!: () => void;
+  private curieOrUri: string = this.value;
   private uriValid: boolean = true;
+  private uriEdited: boolean = false;
   private errorMessage: string = "";
 
   created() {
@@ -38,12 +45,26 @@ export default class PrefixedUriInput extends Vue {
     return curie.substring(prefixIx + 1);
   }
 
+  @Watch("value")
+  private onValueChanged(newValue: string) {
+    // If the model value has changed externally and the user has not edited it, update
+    if (!this.uriEdited) {
+      this.curieOrUri = newValue;
+    }
+  }
+
   @Watch("curieOrUri")
-  onUriInputChanged() {
+  private onCurieOrUriChanged() {
     this.onDebouncedUriInput();
   }
 
+  private onInputEdited() {
+    // When the user has made a change in the text input, set this flag so we don't reset to the model value
+    this.uriEdited = true;
+  }
+
   isCurie(): boolean {
+    if (!this.curieOrUri) return false;
     if (this.curieOrUri.includes(":")) {
       if (
         this.curieOrUri.startsWith("http://") ||
@@ -68,16 +89,16 @@ export default class PrefixedUriInput extends Vue {
     if (!value.includes(":")) {
       this.uriValid = false;
       this.errorMessage = "Value must be a URI";
-      this.$emit("error", false, { value: this.errorMessage });
+      this.$emit("error", this.$vnode.key, true, this.errorMessage);
     } else {
       this.uriValid = true;
       this.errorMessage = "";
-      this.$emit("error", true, {});
+      this.$emit("error", this.$vnode.key, false, "");
     }
   }
 
   expandCurie() {
-    if (this.isCurie()) {
+    if (this.curieOrUri && this.isCurie()) {
       const prefixIx = this.curieOrUri.indexOf(":");
       const prefix = this.curieOrUri.substring(0, prefixIx);
       this.suffix = this.curieOrUri.substring(prefixIx + 1);
@@ -101,7 +122,7 @@ export default class PrefixedUriInput extends Vue {
       }
     } else {
       this.namespace = this.prefix + ":";
-      this.notifyValue(this.curieOrUri);
+      this.notifyValue(this.curieOrUri ?? "");
     }
   }
 }

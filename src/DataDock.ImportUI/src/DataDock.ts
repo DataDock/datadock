@@ -55,6 +55,7 @@ export class Helper {
       if (c.columnType == "measure") {
         // Push down the measure column, recording its valueUrl as this columns aboutUrl
         c.aboutUrl = c.measure.valueUrl;
+        c.measure.virtual = true;
         columns.push(c.measure);
         delete c.measure;
         if (c.facets) {
