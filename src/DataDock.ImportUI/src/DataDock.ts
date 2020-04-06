@@ -58,13 +58,15 @@ export class Helper {
         c.measure.virtual = true;
         columns.push(c.measure);
         delete c.measure;
-        if (c.facets) {
-          // Push down each facet column, recording their names in the facetColumn property of this column
-          c[Schema.facetColumn] = [];
-          c.facets.forEach((facet: any) => {
-            c[Schema.facetColumn].push(facet.name);
-            columns.push(facet);
-          });
+        if ("facets" in c) {
+          if (c.facets && c.facets.length > 0) {
+            // Push down each facet column, recording their names in the facetColumn property of this column
+            c[Schema.facetColumn] = [];
+            c.facets.forEach((facet: any) => {
+              c[Schema.facetColumn].push(facet.name);
+              columns.push(facet);
+            });
+          }
           delete c.facets;
         }
       }
@@ -150,6 +152,11 @@ export class Helper {
 
       // Remove hidden property
       delete columnSchema.hidden;
+
+      // Remove any empty titles properties
+      if ("titles" in columnSchema && columnSchema.titles.length == 0) {
+        delete columnSchema.titles;
+      }
     });
     return templateMetadata;
   }

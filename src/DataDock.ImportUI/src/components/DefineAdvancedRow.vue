@@ -190,36 +190,13 @@
       <!-- Facets section (measure column only) -->
       <div v-if="value.columnType == 'measure'">
         <h4 class="ui dividing header">Facets</h4>
-        <div v-for="facet of value.facets" :key="facet.name">
-          <prefixed-uri-input
-            :name="facet.name + '_propertyUrl'"
-            label="Facet Property URI"
-            required="true"
-            v-model="facet.propertyUrl"
-            v-on:error="onInputError"
-          ></prefixed-uri-input>
-          <div class="field">
-            <label :for="facet.name + '_datatype'">Datatype</label>
-            <select :id="facet.name + '_datatype'" v-model="facet.datatype">
-              <option value="string">Text</option>
-              <option value="integer">Whole Number</option>
-              <option value="decimal">Decimal Number</option>
-              <option value="date">Date</option>
-              <option value="dateTime">Date and Time</option>
-              <option value="boolean">True/False</option>
-            </select>
-          </div>
-          <div class="field" :class="{ error: !defaultValid }">
-            <label :for="facet.name + '_default'">Facet Value</label>
-            <input
-              :id="facet.name + '_default'"
-              type="text"
-              v-model="facet.default"
-            />
-            <div class="ui error message" v-if="errors.default">
-              {{ errors.default }}
-            </div>
-          </div>
+        <div v-for="(facet, ix) of value.facets" :key="facet.name">
+          <facet
+            :key="facet.name"
+            @error="onInputError"
+            v-model="value.facets"
+            :facetIndex="ix"
+          ></facet>
         </div>
         <button class="ui button" @click="onAddFacet">Add Facet</button>
       </div>
@@ -233,13 +210,15 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import DefineColumnsRow from "@/components/DefineColumnsRow.vue";
 import PrefixedUriInput from "@/components/PrefixedUriInput.vue";
 import UriTemplateInput from "@/components/UriTemplateInput.vue";
+import Facet from "@/components/Facet.vue";
 import * as _ from "lodash";
 import { Helper, SnifferOptions, Schema } from "@/DataDock";
 
 @Component({
   components: {
     PrefixedUriInput,
-    UriTemplateInput
+    UriTemplateInput,
+    Facet
   }
 })
 export default class DefineAdvancedRow extends Vue {
@@ -338,15 +317,17 @@ export default class DefineAdvancedRow extends Vue {
     if (this.value.columnType == "measure") {
       if (!("measure" in this.value)) {
         // Create a new measure virtual column
-        this.value.measure = {
+        this.$set(this.value, "measure", {
           name: this.value.name + "_measure",
+          titles: [this.value.titles[0]],
           propertyUrl: this.value.propertyUrl,
           aboutUrl: this.value.aboutUrl,
           valueUrl: this.value.propertyUrl + "-{_row}"
-        };
+        });
+        this.value.titles.splice(0);
         this.value.propertyUrl =
           "http://www.w3.org/1999/02/22-rdf-syntax-ns#value";
-        this.value.facets = [];
+        this.$set(this.value, "facets", []);
       }
     }
   }
@@ -463,14 +444,14 @@ export default class DefineAdvancedRow extends Vue {
 
   private onAddFacet() {
     if (!("facets" in this.value)) {
-      this.value.facets = [];
     }
     this.value.facets.push({
       name: this.makeVirtualColumnName(),
+      propertyUrl: "",
       datatype: "string",
       default: ""
     });
-    this.$emit("input", this.value);
+    //this.$emit("input", this.value);
   }
 }
 </script>

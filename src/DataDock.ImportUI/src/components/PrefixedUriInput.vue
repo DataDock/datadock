@@ -33,13 +33,18 @@ export default class PrefixedUriInput extends Vue {
   private usePrefixcc: boolean = true;
   private onDebouncedUriInput!: () => void;
   private curieOrUri: string = this.value;
-  private expandedUri: string = this.value;
+  private expandedUri: string = this.value ?? "";
   private hasError: boolean = false;
   private uriEdited: boolean = false;
   private errorMessage: string = "";
 
   created() {
     this.onDebouncedUriInput = _.debounce(this.expandCurie, 500);
+  }
+
+  mounted() {
+    this.expandCurie();
+    this.validate();
   }
 
   getPrefixedPart(curie: string) {
@@ -93,7 +98,11 @@ export default class PrefixedUriInput extends Vue {
   }
 
   notifyValue() {
+    this.validate();
     this.$emit("input", this.expandedUri);
+  }
+
+  validate() {
     if (this.expandedUri == "" && this.required){
       this.setError("A value is required");
     } else if (!this.expandedUri.includes(":")) {
@@ -127,9 +136,11 @@ export default class PrefixedUriInput extends Vue {
         this.expandedUri = this.namespace + this.suffix;
       }
     } else {
+      this.prefix = "";
       this.namespace = "";
       this.expandedUri = this.curieOrUri ?? "";
     }
+    this.validate();
   }
 }
 </script>
