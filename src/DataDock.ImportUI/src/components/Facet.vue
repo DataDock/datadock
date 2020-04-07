@@ -103,6 +103,8 @@ export default class Facet extends Vue {
 
   private onDeleteFacet() {
     this.value.splice(this.facetIndex, 1);
+    // Clear any errors associated with this facet
+    this.$emit("error", this.$vnode.key, false, "");
   }
 
   private onInputError(

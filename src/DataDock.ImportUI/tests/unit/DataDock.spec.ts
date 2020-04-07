@@ -450,5 +450,48 @@ describe("Helper", () => {
       var roundTripModel = Helper.makeTemplate(templateViewModel);
       expect(roundTripModel).toMatchObject(template);
     });
+    it("annotates new measure columns correctly", () => {
+      var templateViewModel = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              columnType: "measure",
+              propertyUrl: "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              datatype: "integer",
+              measure: {
+                name: "colA_measure",
+                titles: ["Some Title"],
+                propertyUrl: "http://datadock.io/kal/test/id/definition/colA",
+                valueUrl: "http://datadock.io/kal/test/id/resource/colA-{_row}"
+              }
+            }
+          ]
+        }
+      };
+      var expectedTemplate = {
+        tableSchema: {
+          columns: [
+            {
+              name: "colA",
+              "http://schema.datadock.io/columnType": "measure",
+              aboutUrl: "http://datadock.io/kal/test/id/resource/colA-{_row}",
+              propertyUrl: "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              datatype: "integer"
+            },
+            {
+              name: "colA_measure",
+              titles: ["Some Title"],
+              propertyUrl: "http://datadock.io/kal/test/id/definition/colA",
+              valueUrl: "http://datadock.io/kal/test/id/resource/colA-{_row}",
+              virtual: true
+            }
+          ]
+        }
+      };
+
+      var template = Helper.makeTemplate(templateViewModel);
+      expect(template).toMatchObject(expectedTemplate);
+    });
   });
 });

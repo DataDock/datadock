@@ -53,8 +53,9 @@ export class Helper {
     let columns: any[] = templateViewModel.tableSchema.columns;
     columns.forEach((c: any, i: number) => {
       if (c.columnType == "measure") {
+        let measureUrl = c.measure.valueUrl;
         // Push down the measure column, recording its valueUrl as this columns aboutUrl
-        c.aboutUrl = c.measure.valueUrl;
+        c.aboutUrl = measureUrl;
         c.measure.virtual = true;
         columns.push(c.measure);
         delete c.measure;
@@ -63,12 +64,17 @@ export class Helper {
             // Push down each facet column, recording their names in the facetColumn property of this column
             c[Schema.facetColumn] = [];
             c.facets.forEach((facet: any) => {
+              facet.aboutUrl = measureUrl;
+              facet.virtual = true;
               c[Schema.facetColumn].push(facet.name);
               columns.push(facet);
             });
           }
           delete c.facets;
         }
+      } else {
+        delete c.measure;
+        delete c.facets;
       }
     });
   }
