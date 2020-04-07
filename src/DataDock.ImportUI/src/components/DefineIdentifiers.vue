@@ -21,7 +21,7 @@
             v-bind:key="col.name"
             v-bind:value="col.name + '/{' + col.name + '}'"
           >
-            {{ col.titles[0] }}
+            {{ "titles" in col ? col.titles[0] : col.name }}
           </option>
         </select>
       </div>

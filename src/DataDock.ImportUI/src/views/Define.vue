@@ -100,7 +100,7 @@
           <define-columns
             v-model="templateMetadata"
             :identifierBase="identifierBase"
-            :resourceIdentifierBase="resourceIdentifierBase"
+            :resourceIdentifierBase="resourceIdentifierBase()"
             @error="onError('definitions', $event)"
           ></define-columns>
         </div>
@@ -108,7 +108,7 @@
           <define-advanced
             v-model="templateMetadata"
             :identifierBase="identifierBase"
-            :resourceIdentifierBase="resourceIdentifierBase"
+            :resourceIdentifierBase="resourceIdentifierBase()"
             @error="onError('advanced', $event)"
           ></define-advanced>
         </div>

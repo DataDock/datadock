@@ -81,9 +81,13 @@ namespace DataDock.Web.ViewModels
 
         private List<SearchButton> GetSearchButtons(string searchButtonsString)
         {
+            var searchButtons = new List<SearchButton>();
+            if (string.IsNullOrEmpty(searchButtonsString))
+            {
+                return searchButtons;
+            }
             try
             {
-                var searchButtons = new List<SearchButton>();
 
                 var sbSplit = searchButtonsString.Split(',');
                 foreach (var b in sbSplit)
@@ -104,13 +108,14 @@ namespace DataDock.Web.ViewModels
                         searchButtons.Add(sb);
                     }
                 }
+
                 return searchButtons;
             }
             catch (Exception e)
             {
-               Log.Error(e, "Error building search buttons from string saved to owner settings");
+                Log.Error(e, "Error building search buttons from string saved to owner settings");
             }
-            return new List<SearchButton>();
+            return searchButtons;
         }
     }
 

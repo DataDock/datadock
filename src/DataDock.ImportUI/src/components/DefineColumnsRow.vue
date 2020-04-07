@@ -1,7 +1,12 @@
 <template>
   <tr>
     <td>{{ value.name }}</td>
-    <td>
+    <td colspan="3" v-if="value.virtual">
+      <div class="ui info message">
+        Virtual Column
+      </div>
+    </td>
+    <td v-if="!value.virtual">
       <div class="ui field" v-bind:class="{ error: !titleValid }">
         <input
           type="text"
@@ -14,7 +19,7 @@
         </div>
       </div>
     </td>
-    <td>
+    <td v-if="!value.virtual">
       <select v-model="value.datatype">
         <option value="string">Text</option>
         <option value="uri">URI</option>
@@ -26,8 +31,8 @@
         <option value="uriTemplate">URI Template</option>
       </select>
     </td>
-    <td>
-      <input type="checkbox" v-model="value.suppressOutput" />
+    <td v-if="!value.virtual">
+      <input type="checkbox" v-model="suppressed" />
     </td>
   </tr>
 </template>
@@ -41,6 +46,14 @@ export default class DefineColumnsRow extends Vue {
   @Prop() private value: any;
   @Prop() private resourceIdentifierBase!: string;
   private titleValid: boolean = true;
+
+  private get suppressed(): boolean {
+    return this.value.columnType == "suppressed";
+  }
+
+  private set suppressed(newValue: boolean) {
+    this.value.columnType = newValue ? "suppressed" : "standard";
+  }
 
   private validateTitle() {
     const wasValid = this.titleValid;

@@ -1,9 +1,16 @@
 <template>
-  <div class="ui field" :class="{ error: !uriValid, required: required }">
-    <label>{{ label }}</label>
-    <input type="text" v-model="curieOrUri" />
-    <div class="ui bottom attached">{{ value }}</div>
-    <div class="ui error message" v-if="!uriValid">
+  <div class="ui field" :class="{ error: hasError, required: required }">
+    <label :for="$vnode.key + '_input'">{{ label }}</label>
+    <input
+      :id="$vnode.key + '_input'"
+      :key="$vnode.key + '_input'"
+      type="text"
+      @blur="notifyValue"
+      @input="onInputEdited"
+      v-model="curieOrUri"
+    />
+    <div class="ui bottom attached">{{ expandedUri }}</div>
+    <div class="ui error message" v-if="hasError">
       {{ this.errorMessage }}
     </div>
   </div>
@@ -23,14 +30,21 @@ export default class PrefixedUriInput extends Vue {
   private namespace: string = "";
   private prefix!: string;
   private suffix!: string;
-  private curieOrUri: string = this.value;
   private usePrefixcc: boolean = true;
   private onDebouncedUriInput!: () => void;
-  private uriValid: boolean = true;
+  private curieOrUri: string = this.value;
+  private expandedUri: string = this.value ?? "";
+  private hasError: boolean = false;
+  private uriEdited: boolean = false;
   private errorMessage: string = "";
 
   created() {
     this.onDebouncedUriInput = _.debounce(this.expandCurie, 500);
+  }
+
+  mounted() {
+    this.expandCurie();
+    this.validate();
   }
 
   getPrefixedPart(curie: string) {
@@ -38,12 +52,26 @@ export default class PrefixedUriInput extends Vue {
     return curie.substring(prefixIx + 1);
   }
 
+  @Watch("value")
+  private onValueChanged(newValue: string) {
+    // If the model value has changed externally and the user has not edited it, update
+    if (!this.uriEdited) {
+      this.curieOrUri = newValue;
+    }
+  }
+
   @Watch("curieOrUri")
-  onUriInputChanged() {
+  private onCurieOrUriChanged() {
     this.onDebouncedUriInput();
   }
 
+  private onInputEdited() {
+    // When the user has made a change in the text input, set this flag so we don't reset to the model value
+    this.uriEdited = true;
+  }
+
   isCurie(): boolean {
+    if (!this.curieOrUri) return false;
     if (this.curieOrUri.includes(":")) {
       if (
         this.curieOrUri.startsWith("http://") ||
@@ -60,24 +88,32 @@ export default class PrefixedUriInput extends Vue {
 
   setError(errorMessage: string) {
     this.errorMessage = errorMessage;
-    this.uriValid = false;
+    this.hasError = true;
+    this.$emit("error", this.$vnode.key, true, this.errorMessage);
   }
 
-  notifyValue(value: string) {
-    this.$emit("input", value);
-    if (!value.includes(":")) {
-      this.uriValid = false;
-      this.errorMessage = "Value must be a URI";
-      this.$emit("error", false, { value: this.errorMessage });
+  clearError() {
+    this.hasError = false;
+    this.$emit("error", this.$vnode.key, false, "");
+  }
+
+  notifyValue() {
+    this.validate();
+    this.$emit("input", this.expandedUri);
+  }
+
+  validate() {
+    if (this.expandedUri == "" && this.required){
+      this.setError("A value is required");
+    } else if (!this.expandedUri.includes(":")) {
+      this.setError("Value must be a URI");
     } else {
-      this.uriValid = true;
-      this.errorMessage = "";
-      this.$emit("error", true, {});
+      this.clearError();
     }
   }
 
   expandCurie() {
-    if (this.isCurie()) {
+    if (this.curieOrUri && this.isCurie()) {
       const prefixIx = this.curieOrUri.indexOf(":");
       const prefix = this.curieOrUri.substring(0, prefixIx);
       this.suffix = this.curieOrUri.substring(prefixIx + 1);
@@ -87,7 +123,7 @@ export default class PrefixedUriInput extends Vue {
         Axios.get("https://prefix.cc/" + prefix + ".file.json")
           .then(function(response) {
             self.namespace = response.data[prefix];
-            self.notifyValue(self.namespace + self.suffix);
+            self.expandedUri = self.namespace + self.suffix;
           })
           .catch(function(error) {
             if (error.response.status == 404) {
@@ -97,12 +133,14 @@ export default class PrefixedUriInput extends Vue {
             }
           });
       } else {
-        this.notifyValue(this.namespace + this.suffix);
+        this.expandedUri = this.namespace + this.suffix;
       }
     } else {
-      this.namespace = this.prefix + ":";
-      this.notifyValue(this.curieOrUri);
+      this.prefix = "";
+      this.namespace = "";
+      this.expandedUri = this.curieOrUri ?? "";
     }
+    this.validate();
   }
 }
 </script>

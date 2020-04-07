@@ -78,9 +78,7 @@ export default class Upload extends Vue {
       return;
     }
     let formData = new FormData();
-    let sanitizedTemplate = Helper.makeCleanTemplate(
-      this.$props.templateMetadata
-    );
+    let sanitizedTemplate = Helper.makeTemplate(this.$props.templateMetadata);
     formData.append("ownerId", this.ownerId);
     formData.append("repoId", this.repoId);
     formData.append("file", this.csvFile, this.csvFileName);

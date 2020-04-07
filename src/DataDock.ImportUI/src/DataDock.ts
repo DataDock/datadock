@@ -6,44 +6,165 @@ export class Helper {
     return _.camelCase(_.deburr(_.trim(original)));
   }
 
-  public static addSchemaDatatype(columnSchema: any): any {
-    if ("valueUrl" in columnSchema) {
-      if (
-        columnSchema.valueUrl.startsWith("{") &&
-        columnSchema.valueUrl.endsWith("}")
-      ) {
-        return Object.assign({}, columnSchema, { datatype: "uri" });
+  public static getColumnWithValueUrl(
+    columnSchemas: any[],
+    valueUrl: string
+  ): any {
+    return _.findIndex(columnSchemas, (columnSchema: any) => {
+      return "valueUrl" in columnSchema && columnSchema.valueUrl === valueUrl;
+    });
+  }
+
+  public static getColumnWithName(
+    columnSchemas: any[],
+    columnName: string
+  ): any {
+    return _.findIndex(columnSchemas, (columnSchema: any) => {
+      return "name" in columnSchema && columnSchema.name === columnName;
+    });
+  }
+
+  public static pullUpMeasureColumns(templateMetadata: any) {
+    let columns: any[] = templateMetadata.tableSchema.columns;
+    for (let i = 0; i < columns.length; i++) {
+      let c = columns[i];
+      if (c.virtual) break; // Measure columns must be original source CSV columns
+      if (c.columnType === "measure") {
+        let resourceColIx = this.getColumnWithValueUrl(columns, c.aboutUrl);
+        if (resourceColIx > 0) {
+          c.measure = columns[resourceColIx];
+          columns.splice(resourceColIx, 1);
+        }
+        if (Schema.facetColumn in c) {
+          c.facets = [];
+          c[Schema.facetColumn].forEach((facetName: string) => {
+            let facetColumnIx = this.getColumnWithName(columns, facetName);
+            if (facetColumnIx > 0) {
+              c.facets.push(columns[facetColumnIx]);
+              columns.splice(facetColumnIx, 1);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  public static pushDownMeasureColumns(templateViewModel: any) {
+    let columns: any[] = templateViewModel.tableSchema.columns;
+    columns.forEach((c: any, i: number) => {
+      if (c.columnType == "measure") {
+        let measureUrl = c.measure.valueUrl;
+        // Push down the measure column, recording its valueUrl as this columns aboutUrl
+        c.aboutUrl = measureUrl;
+        c.measure.virtual = true;
+        columns.push(c.measure);
+        delete c.measure;
+        if ("facets" in c) {
+          if (c.facets && c.facets.length > 0) {
+            // Push down each facet column, recording their names in the facetColumn property of this column
+            c[Schema.facetColumn] = [];
+            c.facets.forEach((facet: any) => {
+              facet.aboutUrl = measureUrl;
+              facet.virtual = true;
+              c[Schema.facetColumn].push(facet.name);
+              columns.push(facet);
+            });
+          }
+          delete c.facets;
+        }
       } else {
-        var ret = Object.assign({}, columnSchema, { datatype: "uriTemplate" });
-        return ret;
+        delete c.measure;
+        delete c.facets;
       }
-    }
-    return columnSchema;
+    });
   }
 
-  public static removeSchemaDatatype(columnSchema: any): any {
-    if ("datatype" in columnSchema) {
-      switch (columnSchema.datatype) {
-        case "uriTemplate":
-          delete columnSchema.datatype;
-          break;
-        case "uri":
-          columnSchema.valueUrl = "{" + columnSchema.name + "}";
-          delete columnSchema.datatype;
-          break;
+  public static makeTemplateViewModel(templateMetata: any): any {
+    let templateViewModel = _.cloneDeep(templateMetata);
+    let facetColumns: string[] = [];
+    let measureResources: string[] = [];
+    templateViewModel.tableSchema.columns.forEach((columnSchema: any) => {
+      // Add uri/uriTemplate datatype when the valueUrl property is present
+      if ("valueUrl" in columnSchema) {
+        if (
+          columnSchema.valueUrl.startsWith("{") &&
+          columnSchema.valueUrl.endsWith("}")
+        ) {
+          columnSchema.datatype = "uri";
+        } else {
+          columnSchema.datatype = "uriTemplate";
+        }
       }
-    }
-    return columnSchema;
+      // Add a columnType property
+      if (columnSchema.suppressOutput) {
+        columnSchema.columnType = "suppressed";
+      } else if (columnSchema[Schema.columnType]) {
+        columnSchema.columnType = columnSchema[Schema.columnType];
+        if (columnSchema.columnType == "measure") {
+          measureResources.push(columnSchema.aboutUrl);
+          if (Schema.facetColumn in columnSchema) {
+            columnSchema[Schema.facetColumn].forEach((fc: any) =>
+              facetColumns.push(fc)
+            );
+          }
+        }
+      } else {
+        columnSchema.columnType = "standard";
+      }
+
+      if (columnSchema.virtual) {
+        if (
+          "valueUrl" in columnSchema &&
+          measureResources.indexOf(columnSchema.valueUrl) >= 0
+        ) {
+          // Hide the virutal column used as the parent for a measure column
+          columnSchema.hidden = true;
+        }
+        if (facetColumns.indexOf(columnSchema.name) >= 0) {
+          // Hide the virual columns used to define facets of a measure column
+          columnSchema.hidden = true;
+        }
+      }
+    });
+    this.pullUpMeasureColumns(templateViewModel);
+    return templateViewModel;
   }
 
-  public static makeCleanTemplate(template: any): any {
-    let copy = _.cloneDeep(template);
-    for (let i = 0; i < copy.tableSchema.columns.length; i++) {
-      copy.tableSchema.columns[i] = this.removeSchemaDatatype(
-        copy.tableSchema.columns[i]
-      );
-    }
-    return copy;
+  public static makeTemplate(templateViewModel: any): any {
+    let templateMetadata = _.cloneDeep(templateViewModel);
+    this.pushDownMeasureColumns(templateMetadata);
+    templateMetadata.tableSchema.columns.forEach((columnSchema: any) => {
+      // Convert columnType to suppressOutput or dd:columnType extension property
+      if (columnSchema.columnType == "suppressed") {
+        columnSchema.suppressOutput = true;
+      } else if (columnSchema.columnType == "standard") {
+        delete columnSchema.suppressOutput;
+        delete columnSchema[Schema.columnType];
+      } else {
+        delete columnSchema.suppressOutput;
+        columnSchema[Schema.columnType] = columnSchema.columnType;
+      }
+      delete columnSchema.columnType;
+
+      if (columnSchema.datatype == "uri" && !columnSchema.virtual) {
+        // Replace uri datatype with a valueUrl property
+        columnSchema.valueUrl = "{" + columnSchema.name + "}";
+        delete columnSchema.datatype;
+      }
+      if (columnSchema.datatype == "uriTemplate") {
+        // Remove the datatype property
+        delete columnSchema.datatype;
+      }
+
+      // Remove hidden property
+      delete columnSchema.hidden;
+
+      // Remove any empty titles properties
+      if ("titles" in columnSchema && columnSchema.titles.length == 0) {
+        delete columnSchema.titles;
+      }
+    });
+    return templateMetadata;
   }
 }
 
@@ -258,4 +379,11 @@ export class DatatypeSniffer {
     }
     return datatypeInfo;
   }
+}
+
+export class Schema {
+  public static SchemaBase: string = "http://schema.datadock.io/";
+  public static columnType: string = Schema.SchemaBase + "columnType";
+  public static hidden: string = Schema.SchemaBase + "hidden";
+  public static facetColumn: string = Schema.SchemaBase + "facetColumn";
 }

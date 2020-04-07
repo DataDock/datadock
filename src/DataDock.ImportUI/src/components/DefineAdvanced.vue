@@ -1,24 +1,28 @@
 <template>
-  <table class="ui celled form table" :class="{ error: hasErrors }">
-    <thead>
-      <tr>
-        <th>Column</th>
-        <th>Configuration</th>
-      </tr>
-    </thead>
-    <tbody>
-      <define-advanced-row
-        v-for="(col, ix) of value.tableSchema.columns"
-        v-model="value.tableSchema.columns[ix]"
-        v-bind:colIx="ix"
-        v-bind:resourceIdentifierBase="resourceIdentifierBase"
-        v-bind:templateMetadata="value"
-        v-bind:key="col.name"
-        @error="onError(col.name, ...arguments)"
-        @input="$emit('input', value)"
-      ></define-advanced-row>
-    </tbody>
-  </table>
+  <div>
+    <table class="ui celled form table" :class="{ error: hasErrors }">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Configuration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <define-advanced-row
+          v-for="(col, ix) of value.tableSchema.columns"
+          v-model="value.tableSchema.columns[ix]"
+          v-bind:colIx="ix"
+          :identifierBase="identifierBase"
+          v-bind:resourceIdentifierBase="resourceIdentifierBase"
+          v-bind:templateMetadata="value"
+          v-bind:key="col.name"
+          @error="onError(col.name, ...arguments)"
+          @input="$emit('input', value)"
+        ></define-advanced-row>
+      </tbody>
+    </table>
+    <button class="ui button" @click="addVirtualColumn()">Add Column</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -53,6 +57,29 @@ export default class DefineAdvanced extends Vue {
     if (this.hasErrors != hadErrors) {
       this.$emit("error", this.hasErrors);
     }
+  }
+
+  private hasColumn(colName: string): boolean {
+    return this.value.tableSchema.columns.some((c: any) => c.name === colName);
+  }
+
+  private getNextVirtualColumnName() {
+    let prefix = "virtualCol";
+    let index = 1;
+    while (this.hasColumn(prefix + index)) {
+      index += 1;
+    }
+    return prefix + index;
+  }
+  private addVirtualColumn() {
+    let colName = this.getNextVirtualColumnName();
+    this.value.tableSchema.columns.push({
+      name: colName,
+      virtual: true,
+      datatype: "uriTemplate",
+      propertyUrl: this.identifierBase + "/definition/" + colName
+    });
+    this.$emit("input", this.value);
   }
 }
 </script>
