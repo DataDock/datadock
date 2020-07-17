@@ -1,4 +1,5 @@
-﻿
+﻿@using System.Web
+@model DataDock.Web.ViewModels.QueryViewModel
 @{
     ViewData["Title"] = "SPARQL Query";
 }
@@ -44,6 +45,7 @@ result.bindingsStream.on('data',
 
     <script language="javascript">
 
+        var dataSources = @Html.Raw(Model.DataSourcesJson);
         function makeLink(uri) {
             let hashIx = uri.lastIndexOf('#');
             let href = uri;
@@ -122,10 +124,7 @@ result.bindingsStream.on('data',
 
         var yasqe = YASQE(document.getElementById("ui"));
         $('#queryButton').click(() => {
-            executeQuery(yasqe.getValue(),
-                [
-                    'http://localhost:5000/ldf/kal/data'
-                ]);
+            executeQuery(yasqe.getValue(), dataSources);
         });
         var resultsTable = $('#resultsTable').DataTable({ columns: [null] });
     </script>
