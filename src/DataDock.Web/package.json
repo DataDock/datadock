@@ -3,25 +3,25 @@
   "private": true,
   "version": "2.0.0",
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "@microsoft/signalr": "3.1.2",
-    "clean-css": ">=4.1.11",
+    "clean-css": "^4.2.3",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "2.6.1",
     "gulp-jasmine-browser": "4.1.0",
-    "gulp-rename": "1.4.0",
-    "gulp-uglify-es": "1.0.4",
-    "jasmine": "3.3.1",
-    "jasmine-core": "^3.3.0",
-    "jquery": "^3.5.0",
+    "gulp-rename": "2.0.0",
+    "gulp-uglify-es": "2.0.0",
+    "jasmine": "3.6.1",
+    "jasmine-core": "3.6.0",
+    "jquery": "3.5.1",
     "jquery-ui": "1.12.1",
-    "karma": "^4.4.1",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-jasmine": "^2.0.1",
-    "merge-stream": "1.0.1",
-    "puppeteer": "1.18.1",
-    "rimraf": "2.6.2"
+    "karma": "^5.1.1",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-jasmine": "^3.3.1",
+    "merge-stream": "2.0.0",
+    "rimraf": "3.0.2"
   }
 }
