@@ -108,7 +108,7 @@
           <define-advanced
             v-model="templateMetadata"
             :identifierBase="identifierBase"
-            :resourceIdentifierBase="resourceIdentifierBase()"
+            :datasetId="datasetId"
             @error="onError('advanced', $event)"
           ></define-advanced>
         </div>
@@ -163,7 +163,7 @@ export default class Define extends Vue {
 
   // Computed
   public resourceIdentifierBase(): string {
-    return this.$data.identifierBase + "/" + this.$data.datasetId;
+    return this.$data.identifierBase + "/resource/" + this.$data.datasetId;
   }
 
   // Methods

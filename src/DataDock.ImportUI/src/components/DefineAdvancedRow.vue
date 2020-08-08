@@ -225,7 +225,7 @@ export default class DefineAdvancedRow extends Vue {
   @Prop() private value: any;
   @Prop() private colIx!: number;
   @Prop() private identifierBase!: string;
-  @Prop() private resourceIdentifierBase!: string;
+  @Prop() private datasetId!: string;
   @Prop() private templateMetadata: any;
   private uriTemplate: string =
     "valueUrl" in this.value ? this.value["valueUrl"] : "";
@@ -322,7 +322,13 @@ export default class DefineAdvancedRow extends Vue {
           titles: [this.value.titles[0]],
           propertyUrl: this.value.propertyUrl,
           aboutUrl: this.value.aboutUrl,
-          valueUrl: this.value.propertyUrl + "-{_row}"
+          valueUrl:
+            this.identifierBase +
+            "/resource/" +
+            this.datasetId +
+            "-" +
+            this.value.name +
+            "-{_row}"
         });
         this.value.titles.splice(0);
         this.value.propertyUrl =

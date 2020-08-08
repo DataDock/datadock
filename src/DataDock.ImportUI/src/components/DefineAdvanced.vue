@@ -13,7 +13,7 @@
           v-model="value.tableSchema.columns[ix]"
           v-bind:colIx="ix"
           :identifierBase="identifierBase"
-          v-bind:resourceIdentifierBase="resourceIdentifierBase"
+          v-bind:datasetId="datasetId"
           v-bind:templateMetadata="value"
           v-bind:key="col.name"
           @error="onError(col.name, ...arguments)"
@@ -38,7 +38,7 @@ import DefineAdvancedRow from "@/components/DefineAdvancedRow.vue";
 export default class DefineAdvanced extends Vue {
   @Prop() private value: any;
   @Prop() private identifierBase!: string;
-  @Prop() private resourceIdentifierBase!: string;
+  @Prop() private datasetId!: string;
   private hasErrors: boolean = false;
   private errorColumns: string[] = [];
 
