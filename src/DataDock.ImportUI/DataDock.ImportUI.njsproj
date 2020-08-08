@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{e66dd2c4-7a79-4a18-95bc-0e08b37147be}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -30,7 +30,6 @@
     <None Include="src\shims-vue.d.ts" />
     <Content Include="src\assets\logo.png" />
     <None Include="src\router\index.ts" />
-    <None Include="tests\unit\example.spec.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataDock.ImportUI" />
