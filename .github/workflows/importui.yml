@@ -31,12 +31,8 @@ jobs:
         node-version: '12'
 
     - name: Install
-      run: |
-        pwd
-        echo $GITHUB_WORKSPACE
-        ls $GITHUB_WORKSPACE/src/DataDock.ImportUI
-        npm ci
+      run: npm ci
 
     # Runs a set of commands using the runners shell
     - name: Run Unit Tests 
-      run: npm test:unit
+      run: npm run test:unit
