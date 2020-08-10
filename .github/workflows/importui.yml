@@ -33,6 +33,8 @@ jobs:
     - name: Install
       run: npm ci
 
-    # Runs a set of commands using the runners shell
-    - name: Run Unit Tests 
+    - name: Lint
+      run: npm run lint -- --no-fix
+ 
+    - name: Unit Tests
       run: npm run test:unit
