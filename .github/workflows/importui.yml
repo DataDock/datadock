@@ -7,7 +7,7 @@ name: ImportUI Build and Test
 on:
   push:
     branches:
-    - feature/**
+    - 'feature/**'
   pull_request:
     branches: [ develop ]
 
