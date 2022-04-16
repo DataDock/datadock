@@ -36,13 +36,15 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2-beta
+    - uses: actions/setup-node@v3
       with:
         node-version: '16'
     - name: Restore Packages
       run: dotnet restore src/DataDock.sln
     - name: Build
-      run: dotnet build -c Release src/DataDock.sln
+      run: |
+        dotnet build -c Release src/DataDock.Worker/DataDock.Worker.csproj
+        dotnet build -c Release src/DataDock.Web/DataDock.Web.csproj
     - name: Common tests
       run: dotnet test -c Release src/DataDock.Common.Tests
     - name: Web tests
