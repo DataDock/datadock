@@ -40,8 +40,8 @@ jobs:
       with:
         node-version: '16'
  
-    - name: Install Karma
-      run: npm install --global karma
+    #- name: Install Karma
+    #  run: npm install --global karma
       
     - name: Restore Packages
       run: dotnet restore src/DataDock.sln
@@ -61,5 +61,7 @@ jobs:
       run: dotnet test -c Release src/DataDock.Worker.Tests
       
     - name: Web JS tests
-      run: karma start karma.conf.js --single-run
+      run: |
+        npm ci
+        karma start karma.conf.js --single-run
       working-directory: src/DataDock.Web
