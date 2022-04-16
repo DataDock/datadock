@@ -7,7 +7,9 @@
 
 ## Dev 
 
- - Fill out local config in `/src/DataDock.Web/appsettings.development.json` (create if none exists, this file is excluded from git)
+- run `npm install` in `src/DataDock.ImportUI`
+
+- Fill out local config in `/src/DataDock.Web/appsettings.development.json` (create if none exists, this file is excluded from git)
 
 If developing using Visual Studio Code, add these tasks to your `tasks.json`:
 
@@ -39,7 +41,7 @@ If developing using Visual Studio Code, add these tasks to your `tasks.json`:
 ```
 
  - run a build in `src` dir
- - run `docker-compose -f docker-compose.yml -f docker-compose.override.yml up` from `/src`
+ - run `docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build --force-recreate` from `/src`
 
 # Docker on Windows
 
