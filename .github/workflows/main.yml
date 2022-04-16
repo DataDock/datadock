@@ -33,17 +33,17 @@ jobs:
   core:
     runs-on: ubuntu-latest
   steps:
-  - uses: actions/checkout@v2
-  - uses: actions/setup-node@v2-beta
-    with:
-      node-version: '16'
-  - name: Restore Packages
-    run: dotnet restore src/DataDock.sln
-  - name: Build
-    run: dotnet build -c Release src/DataDock.sln
-  - name: Common tests
-    run: dotnet test -c Release src/DataDock.Common.Tests
-  - name: Web tests
-    run: dotnet test -c Release src/DataDock.Web.Tests
-  - name: Worker tests
-    run: dotnet test -c Release src/DataDock.Worker.Tests
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '16'
+    - name: Restore Packages
+      run: dotnet restore src/DataDock.sln
+    - name: Build
+      run: dotnet build -c Release src/DataDock.sln
+    - name: Common tests
+      run: dotnet test -c Release src/DataDock.Common.Tests
+    - name: Web tests
+      run: dotnet test -c Release src/DataDock.Web.Tests
+    - name: Worker tests
+      run: dotnet test -c Release src/DataDock.Worker.Tests
