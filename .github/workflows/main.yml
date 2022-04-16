@@ -41,7 +41,7 @@ jobs:
         node-version: '16'
  
     - name: Install Karma
-      run: npm install --global karma-cli
+      run: npm install --global karma
       
     - name: Restore Packages
       run: dotnet restore src/DataDock.sln
