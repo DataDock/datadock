@@ -6,29 +6,8 @@ on:
     branches: [ develop ]
 
 jobs:
-  import-ui:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./src/DataDock.ImportUI
-    
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2-beta
-      with:
-        node-version: '16'
-
-    - name: Install
-      run: npm ci
-
-    - name: Lint
-      run: npm run lint -- --no-fix
- 
-    - name: Unit Tests
-      run: npm run test:unit
       
-  core:
+  build-and-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -43,6 +22,17 @@ jobs:
     - name: Restore Packages
       run: dotnet restore src/DataDock.sln
       
+    - name: Build ImportUI
+      run: |
+        npm ci
+        npm run build
+        npm run lint -- --no-fix
+      working-directory: ./src/DataDock.ImportUI
+
+    - name: Test ImportUI
+      run: npm run test:unit
+      working-directory: ./src/DataDock.ImportUI
+        
     - name: Build
       run: dotnet build -c Release src/DataDock.sln
         
