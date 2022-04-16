@@ -40,25 +40,25 @@ jobs:
       with:
         node-version: '16'
  
-    #- name: Install Karma
-    #  run: npm install --global karma
+    - name: Install Karma
+      run: npm install --global karma-cli
       
-    - name: Restore Packages
-      run: dotnet restore src/DataDock.sln
+    #- name: Restore Packages
+    #  run: dotnet restore src/DataDock.sln
       
-    - name: Build
-      run: |
-        dotnet build -c Release src/DataDock.Worker/DataDock.Worker.csproj
-        dotnet build -c Release src/DataDock.Web/DataDock.Web.csproj
+    #- name: Build
+    #  run: |
+    #    dotnet build -c Release src/DataDock.Worker/DataDock.Worker.csproj
+    #    dotnet build -c Release src/DataDock.Web/DataDock.Web.csproj
         
-    - name: Common tests
-      run: dotnet test -c Release src/DataDock.Common.Tests
+    #- name: Common tests
+    #  run: dotnet test -c Release src/DataDock.Common.Tests
       
-    - name: Web tests
-      run: dotnet test -c Release src/DataDock.Web.Tests
+    #- name: Web tests
+    #  run: dotnet test -c Release src/DataDock.Web.Tests
       
-    - name: Worker tests
-      run: dotnet test -c Release src/DataDock.Worker.Tests
+    #- name: Worker tests
+    #  run: dotnet test -c Release src/DataDock.Worker.Tests
       
     - name: Web JS tests
       run: |
