@@ -65,8 +65,8 @@ namespace DataDock.Worker.Tests
                 'url': 'http://datadock.io/datadock/test/id/dataset/mydataset',
                 'dc:title': 'http://datadock.io/datadock/test/foo',
                 'dc:license': 'https://creativecommons.org/publicdomain/zero/1.0/',
-                'aboutUrl': 'http://datadock.io/datadock/test/id/resource/mydataset/monument_record_no/{monument_record_no}', 
                 'tableSchema': {
+                    'aboutUrl': 'http://datadock.io/datadock/test/id/resource/mydataset/monument_record_no/{monument_record_no}', 
                     'columns': [
                         {
                             'name' : 'foo',
@@ -84,10 +84,10 @@ namespace DataDock.Worker.Tests
                 SchemaFileId = "schemaFileId"
             };
             await proc.ProcessJob(job, new UserAccount(), _mockProgressLog.Object);
-            _mockSchemeStore.Verify(s=>s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p=>
-                (p.Schema["aboutUrl"] as JValue).Value<string>().Equals("id/resource/mydataset/monument_record_no/{monument_record_no}"))));
             _mockSchemeStore.Verify(s => s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p =>
                 (p.Schema["dc:title"] as JValue).Value<string>().Equals("http://datadock.io/datadock/test/foo"))));
+            _mockSchemeStore.Verify(s=>s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p=>
+                (p.Schema["tableSchema"]["aboutUrl"] as JValue).Value<string>().Equals("id/resource/mydataset/monument_record_no/{monument_record_no}"))));
             _mockSchemeStore.Verify(s => s.CreateOrUpdateSchemaRecordAsync(It.Is<SchemaInfo>(p =>
                 (p.Schema["tableSchema"]["columns"][0]["propertyUrl"] as JValue).Value<string>()
                 .Equals("id/definition/foo"))));
