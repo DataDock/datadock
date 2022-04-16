@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web.Tests", "DataD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Import", "DataDock.Import\DataDock.Import.csproj", "{F7387540-90AA-42A2-89C5-171EC8E3AA0B}"
 EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "DataDock.ImportUI", "DataDock.ImportUI\DataDock.ImportUI.njsproj", "{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -47,9 +47,7 @@ jobs:
       run: dotnet restore src/DataDock.sln
       
     - name: Build
-      run: |
-        dotnet build -c Release src/DataDock.Worker/DataDock.Worker.csproj
-        dotnet build -c Release src/DataDock.Web/DataDock.Web.csproj
+      run: dotnet build -c Release src/DataDock.sln
         
     - name: Common tests
       run: dotnet test -c Release src/DataDock.Common.Tests
