@@ -82,6 +82,7 @@ namespace DataDock.Worker.Processors
                     var ownerSettings = await OwnerSettingsStore.GetOwnerSettingsAsync(ownerId);
                     if (ownerSettings != null)
                     {
+                        ProgressLog.Info($"No contact information found in repository owner's settings. Attempting to retrieve contact information from GitHub.");
                         portalInfo.IsOrg = ownerSettings.IsOrg;
                         portalInfo.ShowDashboardLink = ownerSettings.DisplayDataDockLink;
                         if (!string.IsNullOrEmpty(ownerSettings.TwitterHandle)) portalInfo.Twitter = ownerSettings.TwitterHandle;
@@ -89,6 +90,7 @@ namespace DataDock.Worker.Processors
                         var client = GitHubClientFactory.CreateClient(authenticationToken);
                         if (ownerSettings.IsOrg)
                         {
+                            ProgressLog.Info("Attempting to retrieve contact information for GitHub organization {ownerId}.");
                             var org = await client.Organization.Get(ownerId);
                             if (org == null) return portalInfo;
 
@@ -102,6 +104,7 @@ namespace DataDock.Worker.Processors
                         }
                         else
                         {
+                            ProgressLog.Info("Attempting to retrieve contact information for GitHub user {ownerId}.");
                             var user = await client.User.Get(ownerId);
                             if (user == null) return portalInfo;
 
@@ -130,8 +133,9 @@ namespace DataDock.Worker.Processors
                 ProgressLog.Info("No owner settings found");
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Error(ex, "Error when attempting to retrieve portal information from owner settings.");
                 ProgressLog.Error("Error when attempting to retrieve portal information from owner settings");
                 return null;
             }
