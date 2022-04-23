@@ -4,6 +4,14 @@
 
  - Docker
  - Dotnet Core 3.1 
+ 
+ ## Solution Files
+ 
+ The `src` directory contains two solution files for working with the code-base. 
+ 
+ The `DataDock.Windows.sln` includes a reference to `DataDock.ImportUI\DataDock.ImportUI.njsproj` which is a project file format that is only supported on Visual Studio for Windows with the Node.js development workload installed. 
+ The `DataDock.sln` excludes this project file, meaning that to build the Import Vue app, you must use the `npm` command line (see Visual Studio Code instructions below).
+    
 
 ## Dev 
 
