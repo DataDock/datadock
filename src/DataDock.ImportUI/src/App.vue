@@ -163,8 +163,9 @@ export default class App extends Vue {
       "dc:description": "",
       "dc:license": "",
       "dcat:keyword": [],
-      aboutUrl: this.identifierBase + "/resource/" + datasetId + "/row_{_row}",
-      tableSchema: {}
+      tableSchema: {
+        aboutUrl: this.identifierBase + "/resource/" + datasetId + "/row_{_row}"
+      }
     };
     templateMetadata.tableSchema.columns = [];
     let sniffer = new DatatypeSniffer(new SnifferOptions());

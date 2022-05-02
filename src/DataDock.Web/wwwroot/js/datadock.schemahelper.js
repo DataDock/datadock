@@ -61,7 +61,8 @@
     }
 
     this.getAboutUrl = function(metadata) {
-        return getPropertyValue(metadata, "aboutUrl", null);
+        var tableSchema = getPropertyValue(metadata, "tableSchema", null);
+        return getPropertyValue(tableSchema, "aboutUrl", null);
     };
 
     this.getColumnTitle = function(colTemplate, defaultValue) {
