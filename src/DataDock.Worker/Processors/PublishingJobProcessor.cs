@@ -77,53 +77,62 @@ namespace DataDock.Worker.Processors
                         OwnerId = ownerId,
                         RepositoryName = repoId
                     };
-
-                    ProgressLog.Info("Attempting to retrieve publisher contact information from repository owner's settings");
+                    
+                    ProgressLog.Info("Attempting to retrieve owner settings");
                     var ownerSettings = await OwnerSettingsStore.GetOwnerSettingsAsync(ownerId);
                     if (ownerSettings != null)
                     {
-                        ProgressLog.Info($"No contact information found in repository owner's settings. Attempting to retrieve contact information from GitHub.");
-                        portalInfo.IsOrg = ownerSettings.IsOrg;
+                        ProgressLog.Info("Owner settings retrieved, creating portal info");
+
+                        // grab basic (non-github) info from owner settings
                         portalInfo.ShowDashboardLink = ownerSettings.DisplayDataDockLink;
                         if (!string.IsNullOrEmpty(ownerSettings.TwitterHandle)) portalInfo.Twitter = ownerSettings.TwitterHandle;
+                        portalInfo.IsOrg = ownerSettings.IsOrg;
+                        
+                        if(ownerSettings.DisplayGitHubAvatar || ownerSettings.DisplayGitHubBlogUrl || ownerSettings.DisplayGitHubDescription || ownerSettings.DisplayGitHubIssuesLink || ownerSettings.DisplayGitHubLocation) {
+                            ProgressLog.Info("Settings indicate GitHub profile details required, looking up info from GitHub...");
+                            try {
+                                var client = GitHubClientFactory.CreateClient(authenticationToken);
+                                if (ownerSettings.IsOrg)
+                                {
+                                    ProgressLog.Info("Attempting to retrieve contact information for GitHub organization.");
+                                    var org = await client.Organization.Get(ownerId);
+                                    if (org == null) return portalInfo;
 
-                        var client = GitHubClientFactory.CreateClient(authenticationToken);
-                        if (ownerSettings.IsOrg)
-                        {
-                            ProgressLog.Info("Attempting to retrieve contact information for GitHub organization {ownerId}.");
-                            var org = await client.Organization.Get(ownerId);
-                            if (org == null) return portalInfo;
+                                    portalInfo.OwnerDisplayName = org.Name ?? ownerId;
+                                    if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
+                                    if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = org.AvatarUrl;
+                                    if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = org.Bio;
+                                    if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
+                                    if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = org.Location;
+                                    if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = org.HtmlUrl;
+                                }
+                                else
+                                {
+                                    ProgressLog.Info("Attempting to retrieve contact information for GitHub user.");
+                                    var user = await client.User.Get(ownerId);
+                                    if (user == null) return portalInfo;
 
-                            portalInfo.OwnerDisplayName = org.Name ?? ownerId;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
-                            if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = org.AvatarUrl;
-                            if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = org.Bio;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = org.Blog;
-                            if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = org.Location;
-                            if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = org.HtmlUrl;
-                        }
-                        else
-                        {
-                            ProgressLog.Info("Attempting to retrieve contact information for GitHub user {ownerId}.");
-                            var user = await client.User.Get(ownerId);
-                            if (user == null) return portalInfo;
-
-                            portalInfo.OwnerDisplayName = user.Name ?? ownerId;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
-                            if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = user.AvatarUrl;
-                            if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = user.Bio;
-                            if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
-                            if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = user.Location;
-                            if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = user.HtmlUrl;
+                                    portalInfo.OwnerDisplayName = user.Name ?? ownerId;
+                                    if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
+                                    if (ownerSettings.DisplayGitHubAvatar) portalInfo.LogoUrl = user.AvatarUrl;
+                                    if (ownerSettings.DisplayGitHubDescription) portalInfo.Description = user.Bio;
+                                    if (ownerSettings.DisplayGitHubBlogUrl) portalInfo.Website = user.Blog;
+                                    if (ownerSettings.DisplayGitHubLocation) portalInfo.Location = user.Location;
+                                    if (ownerSettings.DisplayGitHubIssuesLink) portalInfo.GitHubHtmlUrl = user.HtmlUrl;
+                                }
+                            } catch (Exception ex) {
+                                Log.Error(ex, "Error when attempting to retrieve profile information from GitHub.");
+                                ProgressLog.Error("Error when attempting to retrieve profile information from GitHub");
+                                ProgressLog.Info("Skipping GitHub details in portal info");
+                            }
                         }
                     }
                     ProgressLog.Info("Looking up repository portal search buttons from settings for {0} repository.", repoId);
-
                     var repoSettings = await RepoSettingsStore.GetRepoSettingsAsync(ownerId, repoId);
                     var repoSearchButtons = repoSettings?.SearchButtons;
                     if (!string.IsNullOrEmpty(repoSearchButtons))
                     {
-
                         portalInfo.RepoSearchButtons = GetSearchButtons(repoSearchButtons);
 
                     }
@@ -136,7 +145,8 @@ namespace DataDock.Worker.Processors
             catch (Exception ex)
             {
                 Log.Error(ex, "Error when attempting to retrieve portal information from owner settings.");
-                ProgressLog.Error("Error when attempting to retrieve portal information from owner settings");
+                ProgressLog.Error("Error when attempting to retrieve portal information from owner settings {ex.Message}");
+                ProgressLog.Error("{ex}");
                 return null;
             }
 

@@ -47,6 +47,7 @@ namespace DataDock.Common
         public GitHubClient CreateClient(string accessToken)
         {
             if (accessToken == null) throw new ArgumentNullException(nameof(accessToken));
+            Log.Information($"Creating github client for {_productHeaderValue}");
             var client = new GitHubClient(new ProductHeaderValue(_productHeaderValue))
             {
                 Credentials = new Credentials(accessToken)

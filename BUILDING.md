@@ -19,6 +19,8 @@
 
 - Fill out local config in `/src/DataDock.Web/appsettings.development.json` (create if none exists, this file is excluded from git)
 
+- Fill out local config in `/src/DataDock.Worker/appsettings.development.json` (create if none exists, this file is excluded from git)
+
 If developing using Visual Studio Code, add these tasks to your `tasks.json`:
 
 ```json
