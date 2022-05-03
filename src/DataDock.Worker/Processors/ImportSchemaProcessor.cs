@@ -41,41 +41,30 @@ namespace DataDock.Worker.Processors
 
                     using (var sr = new StreamReader(schemaFileStream))
                     {
-                        using (var jr = new JsonTextReader(sr))
-                        {
-                            schemaJson = JObject.Load(jr);
-                        }
+                        using var jr = new JsonTextReader(sr);
+                        schemaJson = await JObject.LoadAsync(jr);
                     }
-                    if (schemaJson != null)
+
+                    _progressLog.UpdateStatus(JobStatus.Running, "Retrieved DataDock schema file.");
+
+                    MakeRelative(schemaJson,
+                        $"{_configuration.PublishUrl}{(_configuration.PublishUrl.EndsWith("/") ? string.Empty : "/")}{job.OwnerId}/{job.RepositoryId}/");
+
+                    Log.Debug("Create schema: OwnerId: {ownerId} RepositoryId: {repoId} SchemaFileId: {schemaFileId}",
+                        job.OwnerId, job.RepositoryId, job.SchemaFileId);
+
+                    var schemaInfo = new SchemaInfo
                     {
-                        _progressLog.UpdateStatus(JobStatus.Running, "Retrieved DataDock schema file.");
+                        OwnerId = job.OwnerId,
+                        RepositoryId = job.RepositoryId,
+                        LastModified = DateTime.UtcNow,
+                        SchemaId = Guid.NewGuid().ToString(),
+                        Schema = schemaJson,
+                    };
+                    _progressLog.UpdateStatus(JobStatus.Running, "Creating schema record.");
 
-                        MakeRelative(schemaJson,
-                            $"{_configuration.PublishUrl}{(_configuration.PublishUrl.EndsWith("/") ? string.Empty : "/")}{job.OwnerId}/{job.RepositoryId}/");
-
-                        Log.Debug("Create schema: OwnerId: {ownerId} RepositoryId: {repoId} SchemaFileId: {schemaFileId}",
-                            job.OwnerId, job.RepositoryId, job.SchemaFileId);
-
-                        var schemaInfo = new SchemaInfo
-                        {
-                            OwnerId = job.OwnerId,
-                            RepositoryId = job.RepositoryId,
-                            LastModified = DateTime.UtcNow,
-                            SchemaId = Guid.NewGuid().ToString(),
-                            Schema = schemaJson,
-                        };
-                        _progressLog.UpdateStatus(JobStatus.Running, "Creating schema record.");
-
-                        await _schemaStore.CreateOrUpdateSchemaRecordAsync(schemaInfo);
-                        _progressLog.UpdateStatus(JobStatus.Running, "Schema record created successfully.");
-                    }
-                    else
-                    {
-                        _progressLog.UpdateStatus(JobStatus.Failed,
-                            "Unable to create schema - unable to retrieve schema JSON from temporary file storage");
-                        throw new WorkerException(
-                            "Unable to create schema - unable to retrieve schema JSON from temporary file storage");
-                    }
+                    await _schemaStore.CreateOrUpdateSchemaRecordAsync(schemaInfo);
+                    _progressLog.UpdateStatus(JobStatus.Running, "Schema record created successfully.");
                 }
                 else
                 {

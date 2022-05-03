@@ -25,6 +25,11 @@ namespace DataDock.Common
             return $"{PublishSite}{ownerId}/{repositoryId}/";
         }
 
+        public IRepositoryUriService GetRepositoryUriService(string ownerId, string repositoryId)
+        {
+            return new DataDockRepositoryUriService(GetRepositoryUri(ownerId, repositoryId));
+        }
+
         public string GetIdentifierPrefix(string ownerId, string repositoryId)
         {
             if (string.IsNullOrEmpty(ownerId)) throw new ArgumentException("Identifier must be a non-null non-empty string", nameof(ownerId));

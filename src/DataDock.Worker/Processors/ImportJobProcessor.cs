@@ -259,20 +259,13 @@ namespace DataDock.Worker.Processors
         private Graph GenerateMetadataGraph(Uri datasetUri, Uri publisherIri, JObject metadataJson, IEnumerable<Uri> downloadUris, IGraph dataGraph)
         {
             var metadataGraph = new Graph();
-            var metadataExtractor = new MetdataExtractor();
             ProgressLog.Info("Extracting dataset metadata");
-            metadataExtractor.Run(metadataJson, metadataGraph, publisherIri, dataGraph.Triples.Count, DateTime.UtcNow);
-            var dsNode = metadataGraph.CreateUriNode(datasetUri);
-            var ddNode = metadataGraph.CreateUriNode(new Uri("http://rdfs.org/ns/void#dataDump"));
-            var exampleResource = metadataGraph.CreateUriNode(new Uri("http://rdfs.org/ns/void#exampleResource"));
-            foreach (var downloadUri in downloadUris)
-            {
-                metadataGraph.Assert(dsNode, ddNode, metadataGraph.CreateUriNode(downloadUri));
-            }
-            foreach (var distinctSubject in dataGraph.Triples.Select(t => t.Subject).OfType<IUriNode>().Distinct().Take(10))
-            {
-                metadataGraph.Assert(dsNode, exampleResource, distinctSubject);
-            }
+            var metadataExtractor = new MetadataExtractor(metadataJson);
+            metadataExtractor.AssertPublisher(publisherIri);
+            metadataExtractor.AssertTripleCount(dataGraph.Triples.Count);
+            metadataExtractor.AssertModified(DateTime.UtcNow);
+            metadataExtractor.AssertDataDumps(downloadUris);
+            metadataExtractor.AssertExampleResources(dataGraph.Triples.Select(t=>t.Subject).OfType<IUriNode>().Distinct().Take(10));
             return metadataGraph;
         }
 
@@ -304,13 +297,10 @@ namespace DataDock.Worker.Processors
             return metadata;
         }
 
-        private Graph GenerateDefinitionsGraph(JObject metadataJson)
+        private IGraph GenerateDefinitionsGraph(JObject metadataJson)
         {
-            var definitionsGraph = new Graph();
-            var metadataExtractor = new MetdataExtractor();
             ProgressLog.Info("Extracting column property definitions");
-            metadataExtractor.GenerateColumnDefinitions(metadataJson, definitionsGraph);
-            return definitionsGraph;
+            return new DefinitionsGraph(metadataJson).Graph;
         }
 
 

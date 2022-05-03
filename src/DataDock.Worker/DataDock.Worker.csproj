@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataDock.Common\DataDock.Common.csproj" />
+    <ProjectReference Include="..\DataDock.WorkerLib\DataDock.WorkerLib.csproj" />
     <PackageReference Include="DataDock.CsvWeb" Version="0.1.0-pre0008" />
     <PackageReference Include="DotLiquid" Version="2.0.314" />
     <PackageReference Include="dotNetRDF" Version="2.4.0" />

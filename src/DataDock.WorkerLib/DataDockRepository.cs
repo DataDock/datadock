@@ -5,6 +5,7 @@ using System.Reflection;
 using DataDock.Common;
 using DataDock.Common.Models;
 using DataDock.Worker.Templating;
+using DotLiquid;
 using NetworkedPlanet.Quince;
 using Serilog;
 using VDS.RDF;

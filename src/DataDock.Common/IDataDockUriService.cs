@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DataDock.Common
+﻿namespace DataDock.Common
 {
     /// <summary>
     /// Defines the service interface for a helper class that knows the URI patterns used in the DataDock service
@@ -22,6 +18,14 @@ namespace DataDock.Common
         /// <param name="repositoryId">The GitHub repository ID</param>
         /// <returns>The DataDock service URL for the data repository</returns>
         string GetRepositoryUri(string ownerId, string repositoryId);
+
+        /// <summary>
+        /// Returns the service which handles the generation of IRIs for items in a specific data repository.
+        /// </summary>
+        /// <param name="ownerId">The GitHub owner ID</param>
+        /// <param name="repositoryId">The GitHub repository ID</param>
+        /// <returns></returns>
+        IRepositoryUriService GetRepositoryUriService(string ownerId, string repositoryId);
 
         /// <summary>
         /// Returns the default URI prefix used for resources in the specified DataDock data repository

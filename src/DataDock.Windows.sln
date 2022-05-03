@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Web", "DataDock.Web\DataDock.Web.csproj", "{79D93F37-7DDF-4D98-BA25-1C50859483B5}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -27,6 +27,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDock.Import", "DataDock.Import\DataDock.Import.csproj", "{F7387540-90AA-42A2-89C5-171EC8E3AA0B}"
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "DataDock.ImportUI", "DataDock.ImportUI\DataDock.ImportUI.njsproj", "{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDock.WorkerLib", "DataDock.WorkerLib\DataDock.WorkerLib.csproj", "{DEAD1CAF-DFE0-4830-A277-672F146EE103}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDock.Command", "DataDock.Command\DataDock.Command.csproj", "{AB2AB82D-E34B-4FA0-81E7-B5EA2E6BD0E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +78,14 @@ Global
 		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E66DD2C4-7A79-4A18-95BC-0E08B37147BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEAD1CAF-DFE0-4830-A277-672F146EE103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEAD1CAF-DFE0-4830-A277-672F146EE103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEAD1CAF-DFE0-4830-A277-672F146EE103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEAD1CAF-DFE0-4830-A277-672F146EE103}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB2AB82D-E34B-4FA0-81E7-B5EA2E6BD0E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB2AB82D-E34B-4FA0-81E7-B5EA2E6BD0E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB2AB82D-E34B-4FA0-81E7-B5EA2E6BD0E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB2AB82D-E34B-4FA0-81E7-B5EA2E6BD0E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
