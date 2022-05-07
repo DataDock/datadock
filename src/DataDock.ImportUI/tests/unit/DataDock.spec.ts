@@ -114,29 +114,79 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Float);
     });
-    it("sniffs date values", function() {
-      var data = [
+    it("sniffs UK Format Date Values", function() {
+      let data = [
         ["dates"],
         ["23/12/2020"],
         ["23/12/20"],
-        ["12/23/2020"],
-        ["23/12/2020"],
-        ["2020-12-23"],
-        ["-0163-05-13"]
+        ["1/2/3"],
+        ["23/02/-1000"]
       ];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
     });
-    it("sniffs date/time values", function() {
-      var data = [
+    it("sniffs US Format date values", function() {
+      let data = [
+        ["dates"],
+        ["12/23/2020"],
+        ["12/23/20"],
+        ["1/2/3"],
+        ["02/23/-1000"]
+      ];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+    });
+    it("sniffs ISO format date values", function() {
+      let data = [["dates"], ["2020-12-23"], ["1-2-3"], ["-1000-02-23"]];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+    });
+    it("sniffs ISO date/time values with no timezone or fractional seconds", function() {
+      const data = [
+        ["datetimes"],
+        ["2020-12-23T02:01:00"],
+        ["-2020-12-23T02:01:00"]
+      ];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+    });
+    it("sniffs ISO date/time values with timezone and no fractional seconds", function() {
+      const data = [
         ["datetimes"],
         ["2020-12-23T02:01:00Z"],
         ["2020-12-23T02:01:00-11:00"],
-        ["2020-12-23T02:01:00+09:00"],
+        ["2020-12-23T02:01:00+09:00"]
+      ];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+    });
+    it("sniffs ISO date/time values with no timezone and fractional seconds", function() {
+      const data = [
+        ["datetimes"],
         ["2020-12-23T02:01:00.1"],
         ["2020-12-23T02:01:00.01"]
+      ];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+    });
+    it("sniffs ISO date/time values with timezones and fractional seconds", function() {
+      const data = [
+        ["datetimes"],
+        ["2020-12-23T02:01:00.1Z"],
+        ["2020-12-23T02:01:00.12-11:00"],
+        ["2020-12-23T02:01:00.123+09:00"]
       ];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);

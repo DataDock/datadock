@@ -168,46 +168,47 @@ export class Helper {
   }
 }
 
+class DateTimeFormatInfo {
+  readonly momentFormat: string;
+  readonly csvwFormat: string;
+
+  constructor(momentFormat: string, csvwFormat: string) {
+    this.momentFormat = momentFormat;
+    this.csvwFormat = csvwFormat;
+  }
+}
+
 const DATE_FORMATS = [
-  "MM/DD/YYYY",
-  "MM/DD/YY",
-  "M/D/YYYY",
-  "M/D/YY",
-  "DD/MM/YYYY",
-  "DD/MM/YY",
-  "D/M/YYYY",
-  "D/M/YY",
-  "Do MMMM YYYY",
-  "Do MMMM YY",
-  "Do MMM YYYY",
-  "Do MMM YY",
-  "YYYY-MM-DD",
-  "YYYY-MM-DDZ",
-  "YYYY-MM-DDZZ",
-  "-YYYY-MM-DD",
-  "-YYYY-MM-DDZ",
-  "-YYYY-MM-DDZZ"
+  // US format, two-digit years
+  new DateTimeFormatInfo("M/D/YY", "M/d/yy"),
+  // US format, 1+ digits for years
+  new DateTimeFormatInfo("M/D/Y", "M/d/u"),
+  // UK format, two-digit years
+  new DateTimeFormatInfo("D/M/YY", "d/M/yy"),
+  // UK format, 1+ digits for years
+  new DateTimeFormatInfo("D/M/Y", "d/M/u"),
+  // CSVW does not have a way to match ordinal day-of-month (i.e. 1st, 2nd etc.)
+  //new DateTimeFormatInfo("Do MMMM YYYY", null),
+  //new DateTimeFormatInfo("Do MMMM YY", null),
+  //new DateTimeFormatInfo("Do MMM YYYY", null),
+  //new DateTimeFormatInfo("Do MMM YY", null),
+  // Extended ISO format (allowing 1+ digits for year, 1/2 for month and day)
+  new DateTimeFormatInfo("Y-M-D", "u-M-d"),
+  // Extended ISO format with timezone
+  new DateTimeFormatInfo("Y-M-DZ", "u-M-dZ")
 ];
 
 const DATETIME_FORMATS = [
-  "YYYY-MM-DDTHH:mm:ss",
-  "YYYY-MM-DDTHH:mm:ss.S",
-  "YYYY-MM-DDTHH:mm:ss.SS",
-  "YYYY-MM-DDTHH:mm:ss.SSS",
-  "YYYY-MM-DDTHH:mm:ss.SSSS",
-  "YYYY-MM-DDTHH:mm:ssZ",
-  "YYYY-MM-DDTHH:mm:ss.SZ",
-  "YYYY-MM-DDTHH:mm:ss.SSZ",
-  "YYYY-MM-DDTHH:mm:ss.SSSZ",
-  "-YYYY-MM-DDTHH:mm:ss",
-  "-YYYY-MM-DDTHH:mm:ss.S",
-  "-YYYY-MM-DDTHH:mm:ss.SS",
-  "-YYYY-MM-DDTHH:mm:ss.SSS",
-  "-YYYY-MM-DDTHH:mm:ss.SSSS",
-  "-YYYY-MM-DDTHH:mm:ssZ",
-  "-YYYY-MM-DDTHH:mm:ss.SZ",
-  "-YYYY-MM-DDTHH:mm:ss.SSZ",
-  "-YYYY-MM-DDTHH:mm:ss.SSSZ"
+  new DateTimeFormatInfo("Y-M-DTH:m:s", "u-M-dTh:m:s"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.S", "u-M-dTh:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SS", "u-M-dTh:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSS", "u-M-dTh:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSS", "u-M-dTh:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:sZ", "u-M-dTh:m:sZ"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SZ", "u-M-dTh:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSZ", "u-M-dTh:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSZ", "u-M-dTh:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSSZ", "u-M-dTh:m:s.S+Z")
 ];
 
 export class SnifferOptions {
@@ -216,19 +217,27 @@ export class SnifferOptions {
     return /^(((https?)|ftp):\/\/.+)$/.test(x);
   };
   public isInteger = (x: string) => {
-    return /^((\+|-)?\d+)$/.test(x);
+    return /^(([+\-])?\d+)$/.test(x);
   };
   public isDecimal = (x: string) => {
-    return /^((\+|-)?\d+(\.\d+)?)$/.test(x);
+    return /^(([+\-])?\d+(\.\d+)?)$/.test(x);
   };
   public isFloat = (x: string) => {
-    return /^(((\+|-)?\d+(\.\d+)?((E)-?\d+)?)|INF|-INF|NAN)$/i.test(x);
+    return /^((([+\-])?\d+(\.\d+)?((E)-?\d+)?)|INF|-INF|NAN)$/i.test(x);
   };
-  public isDate = (x: string) => {
-    return moment(x, DATE_FORMATS, true).isValid();
+  public dateFormats = (x: string) => {
+    return new Set(
+      DATE_FORMATS.filter(fmt =>
+        moment(x, fmt.momentFormat, true).isValid()
+      ).map(fmt => fmt.csvwFormat)
+    );
   };
-  public isDateTime = (x: string) => {
-    return moment(x, DATETIME_FORMATS, true).isValid();
+  public dateTimeFormats = (x: string) => {
+    return new Set(
+      DATETIME_FORMATS.filter(fmt =>
+        moment(x, fmt.momentFormat, true).isValid()
+      ).map(fmt => fmt.csvwFormat)
+    );
   };
   public isBoolean = (x: string) => {
     return /^(0|1|true|false|yes|no)$/i.test(x);
@@ -306,13 +315,25 @@ export class DatatypeSniffer {
     this.options = options;
   }
 
+  private static intersect<T>(x: Set<T>, y: Set<T>) {
+    const ret = new Set<T>();
+    for (let el of x) {
+      if (y.has(el)) {
+        ret.add(el);
+      }
+    }
+    return ret;
+  }
+
   public sniffColumn(colIx: number, rows: string[][]): ColumnInfo {
     let datatype: DatatypeEnum = DatatypeEnum.All;
+    let dateFormats: Set<string> | null = null;
+    let dateTimeFormats: Set<string> | null = null;
     let hasEmptyValues = false;
     let allEmptyValues = true;
     let skipRows = 0;
     if (typeof this.options.skipHeader === "number") {
-      skipRows = this.options.skipHeader;
+      skipRows = this.options.skipHeader as number;
     } else {
       skipRows = this.options.skipHeader ? 1 : 0;
     }
@@ -342,11 +363,30 @@ export class DatatypeSniffer {
       if (datatype & DatatypeEnum.Float && !this.options.isFloat(val)) {
         datatype = datatype & ~DatatypeEnum.Float;
       }
-      if (datatype & DatatypeEnum.Date && !this.options.isDate(val)) {
-        datatype = datatype & ~DatatypeEnum.Date;
+      if (datatype & DatatypeEnum.Date) {
+        let sniffedFormats = this.options.dateFormats(val);
+        if (dateFormats == null) {
+          dateFormats = sniffedFormats;
+        } else {
+          dateFormats = DatatypeSniffer.intersect(dateFormats, sniffedFormats);
+        }
+        if (dateFormats.size === 0) {
+          datatype = datatype & ~DatatypeEnum.Date;
+        }
       }
-      if (datatype & DatatypeEnum.DateTime && !this.options.isDateTime(val)) {
-        datatype = datatype & ~DatatypeEnum.DateTime;
+      if (datatype & DatatypeEnum.DateTime) {
+        let sniffedFormats = this.options.dateTimeFormats(val);
+        if (dateTimeFormats == null) {
+          dateTimeFormats = sniffedFormats;
+        } else {
+          dateTimeFormats = DatatypeSniffer.intersect(
+            dateTimeFormats,
+            sniffedFormats
+          );
+        }
+        if (dateTimeFormats.size === 0) {
+          datatype = datatype & ~DatatypeEnum.DateTime;
+        }
       }
       if (datatype & DatatypeEnum.Boolean && !this.options.isBoolean(val)) {
         datatype = datatype & ~DatatypeEnum.Boolean;
