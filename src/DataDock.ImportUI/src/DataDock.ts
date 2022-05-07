@@ -204,6 +204,13 @@ const DATE_FORMATS = [
 
 const DATETIME_FORMATS = [
   new DateTimeFormatInfo("YYYY-M-DTH:m:s", "yyyy-M-dTH:m:s"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.S", "yyyy-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.SS", "yyyy-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.SSS", "yyyy-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:sZ", "yyyy-M-dTH:m:sZ"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.SZ", "yyyy-M-dTH:m:s.S+Z"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.SSZ", "yyyy-M-dTH:m:s.S+Z"),
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s.SSSZ", "yyyy-M-dTH:m:s.S+Z"),
   new DateTimeFormatInfo("Y-M-DTH:m:s", "u-M-dTH:m:s"),
   new DateTimeFormatInfo("Y-M-DTH:m:s.S", "u-M-dTH:m:s.S+"),
   new DateTimeFormatInfo("Y-M-DTH:m:s.SS", "u-M-dTH:m:s.S+"),
@@ -229,6 +236,12 @@ export class SnifferOptions {
   };
   public isFloat = (x: string) => {
     return /^((([+\-])?\d+(\.\d+)?((E)-?\d+)?)|INF|-INF|NAN)$/i.test(x);
+  };
+  public isDate = (x: string) => {
+    return this.dateFormats(x).size > 0;
+  };
+  public isDateTime = (x: string) => {
+    return this.dateTimeFormats(x).size > 0;
   };
   public dateFormats = (x: string) => {
     return new Set(
