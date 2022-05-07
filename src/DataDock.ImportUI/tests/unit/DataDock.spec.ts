@@ -16,14 +16,14 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.datatype).toBe(DatatypeEnum.Boolean);
     });
     it("sniffs boolean 0/1", function() {
-      var data = [["colA"], ["0"], ["1"], ["0"]];
+      const data = [["colA"], ["0"], ["1"], ["0"]];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Boolean);
     });
     it("sniffs mixed boolean", function() {
-      var data = [["colA"], ["true"], ["false"], ["0"], ["1"]];
+      const data = [["colA"], ["true"], ["false"], ["0"], ["1"]];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
@@ -31,7 +31,7 @@ describe("DatatypeSniffer", () => {
     });
 
     it("sniffs http, https and ftp uris", function() {
-      var data = [
+      const data = [
         ["uri"],
         ["http://example.org"],
         ["https://datadock.io/foo/bar?baz=bletch#eep"],
@@ -43,28 +43,28 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.datatype).toBe(DatatypeEnum.Uri);
     });
     it("does not sniff generic urns as uris", function() {
-      var data = [["urn"], ["urn:foo:bar"], ["isbn:0987654321"]];
+      const data = [["urn"], ["urn:foo:bar"], ["isbn:0987654321"]];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.None);
     });
     it("sniffs integers", function() {
-      var data = [["ints"], ["123"], ["+123"], ["-123"]];
+      const data = [["ints"], ["123"], ["+123"], ["-123"]];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Integer);
     });
     it("sniffs decimals", function() {
-      var data = [["1.23"], ["-0.54"], ["+123.345"]];
+      const data = [["1.23"], ["-0.54"], ["+123.345"]];
       let colInfo = datatypeSniffer.sniffColumn(0, data);
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Decimal);
     });
     it("sniffs decimals and integers as decimal", function() {
-      var data = [
+      const data = [
         ["mix"],
         ["1.23"],
         ["-0.54"],
@@ -79,7 +79,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.datatype).toBe(DatatypeEnum.Decimal);
     });
     it("sniffs floats", function() {
-      var data = [
+      const data = [
         ["floats"],
         ["1.0E1"],
         ["-4E10"],
@@ -94,7 +94,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.datatype).toBe(DatatypeEnum.Float);
     });
     it("sniffs floats, decimals and integers as float", function() {
-      var data = [
+      const data = [
         ["mix"],
         ["1.0E1"],
         ["-4E10"],
@@ -126,6 +126,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+      expect(colInfo.sniffedFormat).toBe("d/M/u");
     });
     it("sniffs US Format date values", function() {
       let data = [
@@ -139,6 +140,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+      expect(colInfo.sniffedFormat).toBe("M/d/u");
     });
     it("sniffs ISO format date values", function() {
       let data = [["dates"], ["2020-12-23"], ["1-2-3"], ["-1000-02-23"]];
@@ -146,6 +148,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+      expect(colInfo.sniffedFormat).toBe("u-M-d");
     });
     it("sniffs ISO date/time values with no timezone or fractional seconds", function() {
       const data = [
@@ -157,6 +160,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+      expect(colInfo.sniffedFormat).toBe("u-M-dTH:m:s");
     });
     it("sniffs ISO date/time values with timezone and no fractional seconds", function() {
       const data = [
@@ -169,6 +173,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+      expect(colInfo.sniffedFormat).toBe("u-M-dTH:m:sZ");
     });
     it("sniffs ISO date/time values with no timezone and fractional seconds", function() {
       const data = [
@@ -180,6 +185,7 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+      expect(colInfo.sniffedFormat).toBe("u-M-dTH:m:s.S+");
     });
     it("sniffs ISO date/time values with timezones and fractional seconds", function() {
       const data = [
@@ -192,9 +198,10 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.hasEmptyValues).toBe(false);
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.DateTime);
+      expect(colInfo.sniffedFormat).toBe("u-M-dTH:m:s.S+Z");
     });
     it("sniffs mixed date and datetime as string", function() {
-      var data = [
+      const data = [
         ["mix"],
         ["23/12/2020"],
         ["23/12/20"],
@@ -218,7 +225,7 @@ describe("DatatypeSniffer", () => {
 describe("Helper", () => {
   describe("makeTemplate", () => {
     it("removes the datatype property from a uriTemplate column", () => {
-      var templateViewModel = {
+      const templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -230,8 +237,8 @@ describe("Helper", () => {
           ]
         }
       };
-      var template = Helper.makeTemplate(templateViewModel);
-      var sanitizedColA = template.tableSchema.columns[0];
+      const template = Helper.makeTemplate(templateViewModel);
+      const sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).not.toHaveProperty("datatype");
       expect(sanitizedColA).toHaveProperty(
         "valueUrl",
@@ -240,7 +247,7 @@ describe("Helper", () => {
     });
 
     it("replaces the datatype property for a uri column with a valueUrl property", () => {
-      var templateViewModel = {
+      const templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -251,14 +258,14 @@ describe("Helper", () => {
           ]
         }
       };
-      var template = Helper.makeTemplate(templateViewModel);
-      var sanitizedColA = template.tableSchema.columns[0];
+      const template = Helper.makeTemplate(templateViewModel);
+      const sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).not.toHaveProperty("datatype");
       expect(sanitizedColA).toHaveProperty("valueUrl", "{colA}");
     });
 
     it("does not modify a string column", () => {
-      var templateViewModel = {
+      const templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -269,8 +276,8 @@ describe("Helper", () => {
           ]
         }
       };
-      var template = Helper.makeTemplate(templateViewModel);
-      var sanitizedColA = template.tableSchema.columns[0];
+      const template = Helper.makeTemplate(templateViewModel);
+      const sanitizedColA = template.tableSchema.columns[0];
       expect(sanitizedColA).toHaveProperty("datatype");
       expect(sanitizedColA.datatype).toBe("string");
       expect(sanitizedColA).not.toHaveProperty("valueUrl");
@@ -279,7 +286,7 @@ describe("Helper", () => {
 
   describe("makeTemplateViewModel", () => {
     it("Adds a uri datatype when the valueUrl is only a column reference", () => {
-      var template = {
+      const template = {
         tableSchema: {
           columns: [
             {
@@ -290,18 +297,18 @@ describe("Helper", () => {
           ]
         }
       };
-      var templateViewModel = Helper.makeTemplateViewModel(template);
+      const templateViewModel = Helper.makeTemplateViewModel(template);
       expect(templateViewModel).toHaveProperty("tableSchema");
       expect(templateViewModel.tableSchema).toHaveProperty("columns");
       expect(templateViewModel.tableSchema.columns).toHaveLength(1);
-      var col = templateViewModel.tableSchema.columns[0];
+      const col = templateViewModel.tableSchema.columns[0];
       expect(col).toHaveProperty("datatype");
       expect(col.datatype).toBe("uri");
       expect(col.valueUrl).toBe("{colA}");
     });
 
     it("Adds a uriTemplate datatype when the valueUrl is not only a column reference", () => {
-      var template = {
+      const template = {
         tableSchema: {
           columns: [
             {
@@ -312,15 +319,15 @@ describe("Helper", () => {
           ]
         }
       };
-      var templateViewModel = Helper.makeTemplateViewModel(template);
-      var col = templateViewModel.tableSchema.columns[0];
+      const templateViewModel = Helper.makeTemplateViewModel(template);
+      const col = templateViewModel.tableSchema.columns[0];
       expect(col).toHaveProperty("datatype");
       expect(col.datatype).toBe("uriTemplate");
       expect(col.valueUrl).toBe("http://example.org/id/{colA}");
     });
 
     it("Adds columnType=suppressed when suppressOutput is true on a column schema", () => {
-      var template = {
+      const template = {
         tableSchema: {
           columns: [
             {
@@ -330,13 +337,13 @@ describe("Helper", () => {
           ]
         }
       };
-      var templateViewModel = Helper.makeTemplateViewModel(template);
-      var col = templateViewModel.tableSchema.columns[0];
+      const templateViewModel = Helper.makeTemplateViewModel(template);
+      const col = templateViewModel.tableSchema.columns[0];
       expect(col).toHaveProperty("columnType", "suppressed");
     });
 
     it("Adds columnType=measure when dd:columnType=measure on a column schema", () => {
-      var template = {
+      const template = {
         tableSchema: {
           columns: [
             {
@@ -346,13 +353,13 @@ describe("Helper", () => {
           ]
         }
       };
-      var templateViewModel = Helper.makeTemplateViewModel(template);
-      var col = templateViewModel.tableSchema.columns[0];
+      const templateViewModel = Helper.makeTemplateViewModel(template);
+      const col = templateViewModel.tableSchema.columns[0];
       expect(col).toHaveProperty("columnType", "measure");
     });
 
     it("Marks measure facet and parent virutal columns as hidden", () => {
-      var template = {
+      const template = {
         tableSchema: {
           columns: [
             {
@@ -388,9 +395,9 @@ describe("Helper", () => {
           ]
         }
       };
-      var templateViewModel = Helper.makeTemplateViewModel(template);
+      const templateViewModel = Helper.makeTemplateViewModel(template);
       expect(templateViewModel.tableSchema.columns).toHaveLength(2);
-      var colA = templateViewModel.tableSchema.columns[0];
+      const colA = templateViewModel.tableSchema.columns[0];
       expect(colA).toHaveProperty("measure");
       expect(colA.measure).toHaveProperty("name", "colB");
       expect(colA.measure).toHaveProperty("hidden", true);
@@ -398,13 +405,13 @@ describe("Helper", () => {
       expect(colA.facets).toHaveLength(1);
       expect(colA.facets[0]).toHaveProperty("name", "colC");
       expect(colA.facets[0]).toHaveProperty("hidden", true);
-      var colD = templateViewModel.tableSchema.columns[1];
+      const colD = templateViewModel.tableSchema.columns[1];
       expect(colD).toHaveProperty("name", "colD");
       expect(colD).not.toHaveProperty("hidden");
     });
 
     it("Collects parent column information for measure columns", () => {
-      var template = {
+      const template = {
         tableSchema: {
           aboutUrl: "http://datadock.io/kal/test/id/resource/isbn/{isbn}",
           columns: [
@@ -445,7 +452,7 @@ describe("Helper", () => {
         }
       };
 
-      var expected = {
+      const expected = {
         tableSchema: {
           aboutUrl: "http://datadock.io/kal/test/id/resource/isbn/{isbn}",
           columns: [
@@ -494,14 +501,14 @@ describe("Helper", () => {
         }
       };
 
-      var templateViewModel = Helper.makeTemplateViewModel(template);
+      const templateViewModel = Helper.makeTemplateViewModel(template);
       expect(templateViewModel).toMatchObject(expected);
 
-      var roundTripModel = Helper.makeTemplate(templateViewModel);
+      const roundTripModel = Helper.makeTemplate(templateViewModel);
       expect(roundTripModel).toMatchObject(template);
     });
     it("annotates new measure columns correctly", () => {
-      var templateViewModel = {
+      const templateViewModel = {
         tableSchema: {
           columns: [
             {
@@ -519,7 +526,7 @@ describe("Helper", () => {
           ]
         }
       };
-      var expectedTemplate = {
+      const expectedTemplate = {
         tableSchema: {
           columns: [
             {
@@ -540,7 +547,7 @@ describe("Helper", () => {
         }
       };
 
-      var template = Helper.makeTemplate(templateViewModel);
+      const template = Helper.makeTemplate(templateViewModel);
       expect(template).toMatchObject(expectedTemplate);
     });
   });

@@ -199,16 +199,16 @@ const DATE_FORMATS = [
 ];
 
 const DATETIME_FORMATS = [
-  new DateTimeFormatInfo("Y-M-DTH:m:s", "u-M-dTh:m:s"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.S", "u-M-dTh:m:s.S+"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SS", "u-M-dTh:m:s.S+"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SSS", "u-M-dTh:m:s.S+"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSS", "u-M-dTh:m:s.S+"),
-  new DateTimeFormatInfo("Y-M-DTH:m:sZ", "u-M-dTh:m:sZ"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SZ", "u-M-dTh:m:s.S+Z"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SSZ", "u-M-dTh:m:s.S+Z"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSZ", "u-M-dTh:m:s.S+Z"),
-  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSSZ", "u-M-dTh:m:s.S+Z")
+  new DateTimeFormatInfo("Y-M-DTH:m:s", "u-M-dTH:m:s"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.S", "u-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SS", "u-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSS", "u-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSS", "u-M-dTH:m:s.S+"),
+  new DateTimeFormatInfo("Y-M-DTH:m:sZ", "u-M-dTH:m:sZ"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SZ", "u-M-dTH:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSZ", "u-M-dTH:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSZ", "u-M-dTH:m:s.S+Z"),
+  new DateTimeFormatInfo("Y-M-DTH:m:s.SSSSZ", "u-M-dTH:m:s.S+Z")
 ];
 
 export class SnifferOptions {
@@ -261,16 +261,19 @@ export class ColumnInfo {
   public allEmptyValues: boolean;
   public datatype: DatatypeEnum;
   public sniffedType: string;
-
+  public sniffedFormat: string | null;
+  
   public constructor(
     hasEmptyValues: boolean,
     allEmptyValues: boolean,
-    datatype: DatatypeEnum
+    datatype: DatatypeEnum,
+    format: string | null
   ) {
     this.hasEmptyValues = hasEmptyValues;
     this.allEmptyValues = allEmptyValues;
     this.datatype = datatype;
     this.sniffedType = this.getSniffedType(datatype);
+    this.sniffedFormat = format;
   }
 
   public isUri(): boolean {
@@ -408,7 +411,18 @@ export class DatatypeSniffer {
       datatype = datatype & ~DatatypeEnum.Integer;
     }
 
-    return new ColumnInfo(hasEmptyValues, allEmptyValues, datatype);
+    let sniffedFormat: string | null = null;
+    if (dateFormats != null && dateFormats.size > 0) {
+      sniffedFormat = dateFormats.values().next().value;
+    } else if (dateTimeFormats != null && dateTimeFormats.size > 0) {
+      sniffedFormat = dateTimeFormats.values().next().value;
+    }
+    return new ColumnInfo(
+      hasEmptyValues,
+      allEmptyValues,
+      datatype,
+      sniffedFormat
+    );
   }
 
   public getDatatypes(rows: string[][]): ColumnInfo[] {
