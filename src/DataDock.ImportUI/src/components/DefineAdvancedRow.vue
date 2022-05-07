@@ -51,9 +51,9 @@
         </span>
       </div>
 
-      <div v-if="value.columnType != 'suppressed'">
+      <div v-if="value.columnType !== 'suppressed'">
         <!-- Measure section (Measure columns only) -->
-        <div v-if="value.columnType == 'measure'">
+        <div v-if="value.columnType === 'measure'">
           <h4 class="ui dividing header">Measure</h4>
           <prefixed-uri-input
             :key="value.name + '_measure_propertyUrl'"
@@ -73,11 +73,11 @@
         </div>
 
         <!-- Value section (measure and standard columns) -->
-        <h4 v-if="value.columnType == 'measure'" class="ui dividing header">
+        <h4 v-if="value.columnType === 'measure'" class="ui dividing header">
           Value
         </h4>
         <div
-          v-if="!isVirtualColumn && value.columnType != 'measure'"
+          v-if="!isVirtualColumn && value.columnType !== 'measure'"
           class="ui field required"
           :class="{ error: !titleValid }"
         >
@@ -112,7 +112,7 @@
             <option value="integer">Whole Number</option>
             <option value="decimal">Decimal Number</option>
             <option value="date">Date</option>
-            <option value="dateTime">Date and Time</option>
+            <option value="datetime">Date and Time</option>
             <option value="boolean" v-if="!isVirtualColumn">True/False</option>
             <option value="uriTemplate">URI Template</option>
           </select>
@@ -122,8 +122,8 @@
           :class="{ error: !defaultValid }"
           v-if="
             isVirtualColumn &&
-              value.datatype != 'uriTemplate' &&
-              value.datatype != 'uri'
+              value.datatype !== 'uriTemplate' &&
+              value.datatype !== 'uri'
           "
         >
           <label :for="value.name + '_default'">Fixed Value</label>
@@ -136,7 +136,7 @@
             {{ errors.default }}
           </div>
         </div>
-        <div class="field" v-if="value.datatype == 'string'">
+        <div class="field" v-if="value.datatype === 'string'">
           <label :for="value.name + '_lang'">Language</label>
           <input
             :id="value.name + '_lang'"
@@ -146,8 +146,21 @@
             @change="notifyChange"
           />
         </div>
+        <div
+          class="field"
+          v-if="value.datatype === 'date' || value.datatype === 'datetime'"
+        >
+          <label :for="value.name + '_format'">Format</label>
+          <input
+            :id="value.name + '_format'"
+            type="text"
+            placeholder="e.g. MM/DD/YYYY"
+            v-model="value['format']"
+            @change="notifyChange"
+          />
+        </div>
         <uri-template-input
-          v-if="value.datatype == 'uriTemplate'"
+          v-if="value.datatype === 'uriTemplate'"
           v-model="this.value.valueUrl"
           :name="value.name + '_uriTemplate'"
           label="URI Template String"
@@ -162,10 +175,10 @@
           required="true"
           v-model="valueUrl"
           v-on:error="onInputError"
-          v-if="isVirtualColumn && value.datatype == 'uri'"
+          v-if="isVirtualColumn && value.datatype === 'uri'"
         ></prefixed-uri-input>
         <div
-          v-if="value.columnType != 'measure'"
+          v-if="value.columnType !== 'measure'"
           class="field"
           :class="{ error: !parentColumnValid }"
         >
@@ -176,7 +189,9 @@
               v-for="col in templateMetadata.tableSchema.columns"
               :key="'parent_' + col.name"
               :value="col.name"
-              :disabled="col.datatype != 'uri' && col.datatype != 'uriTemplate'"
+              :disabled="
+                col.datatype !== 'uri' && col.datatype !== 'uriTemplate'
+              "
             >
               {{ col.name }}
             </option>
@@ -184,7 +199,7 @@
         </div>
 
         <!-- Facets section (measure column only) -->
-        <div v-if="value.columnType == 'measure'">
+        <div v-if="value.columnType === 'measure'">
           <h4 class="ui dividing header">Facets</h4>
           <div v-for="(facet, ix) of value.facets" :key="facet.name">
             <facet
@@ -428,7 +443,7 @@ export default class DefineAdvancedRow extends Vue {
     this.updateErrorFlag();
   }
 
-  private readonly templateRegex: RegExp = /{([^}]+)}/g;
+  // private readonly templateRegex: RegExp = /{([^}]+)}/g;
 
   private hasColumn(colName: string) {
     for (let col of this.templateMetadata.tableSchema.columns) {

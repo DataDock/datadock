@@ -26,7 +26,7 @@
         <option value="integer">Whole Number</option>
         <option value="decimal">Decimal Number</option>
         <option value="date">Date</option>
-        <option value="dateTime">Date and Time</option>
+        <option value="datetime">Date and Time</option>
         <option value="boolean">True/False</option>
         <option value="uriTemplate">URI Template</option>
       </select>
@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 
 @Component
 export default class DefineColumnsRow extends Vue {
@@ -57,11 +57,7 @@ export default class DefineColumnsRow extends Vue {
 
   private validateTitle() {
     const wasValid = this.titleValid;
-    if (this.value.titles[0].length > 0) {
-      this.titleValid = true;
-    } else {
-      this.titleValid = false;
-    }
+    this.titleValid = this.value.titles[0].length > 0;
     if (this.titleValid != wasValid) {
       this.$emit("error", !this.titleValid);
     }

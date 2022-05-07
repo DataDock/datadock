@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 import Axios from "axios";
 import { Helper } from "@/DataDock";
 
@@ -109,7 +109,7 @@ export default class Upload extends Vue {
             this.ownerId +
             "/" +
             this.repoId;
-          var jobIds = response.data["jobIds"];
+          const jobIds = response.data["jobIds"];
           if (jobIds) {
             jobsUrl = jobsUrl + "/" + jobIds;
           } else {
@@ -122,18 +122,23 @@ export default class Upload extends Vue {
       })
       .catch(error => {
         if (error.response && error.response.data) {
-          if (typeof error.response.data === 'string') {
+          if (typeof error.response.data === "string") {
             this.errors.push(
-              "Publish API has reported an error: " + error.response.data)
+              "Publish API has reported an error: " + error.response.data
+            );
           } else if (Array.isArray(error.response.data)) {
-            this.errors.push("Publish API has reported errors")
-            error.response.data.forEach((x: any) => this.errors.push(x))
-          } else if ('responseText' in error.response.data) {
+            this.errors.push("Publish API has reported errors");
+            error.response.data.forEach((x: any) => this.errors.push(x));
+          } else if ("responseText" in error.response.data) {
             this.errors.push(
-              "Publish API has reported an error: " + error.response.data.responseText
+              "Publish API has reported an error: " +
+                error.response.data.responseText
             );
           } else {
-            this.errors.push("Publis API has reported an error: " + JSON.stringify(error.response.data))
+            this.errors.push(
+              "Publish API has reported an error: " +
+                JSON.stringify(error.response.data)
+            );
           }
         } else {
           this.errors.push("Publish API has returned an unspecified error.");

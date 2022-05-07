@@ -174,12 +174,16 @@ export default class App extends Vue {
     for (let ix = 0; ix < data[0].length; ix++) {
       let col = data[0][ix];
       const colId = Helper.slugify(col);
-      templateMetadata.tableSchema.columns.push({
+      let colDef: any = {
         name: colId,
         titles: [col],
         datatype: datatypes[ix].sniffedType,
         propertyUrl: this.identifierBase + "/definition/" + colId
-      });
+      };
+      if (datatypes[ix].sniffedFormat != null) {
+        colDef["format"] = datatypes[ix].sniffedFormat;
+      }
+      templateMetadata.tableSchema.columns.push(colDef);
     }
     return Helper.makeTemplateViewModel(templateMetadata);
   }
