@@ -128,6 +128,14 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
       expect(colInfo.sniffedFormat).toBe("d/M/u");
     });
+    it("sniffs four-digit years in UK format date values", () => {
+      const data = [["dates"], ["23/12/2020"], ["01/02/2021"]];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+      expect(colInfo.sniffedFormat).toBe("d/M/yyyy");
+    });
     it("sniffs US Format date values", function() {
       let data = [
         ["dates"],
@@ -141,6 +149,14 @@ describe("DatatypeSniffer", () => {
       expect(colInfo.allEmptyValues).toBe(false);
       expect(colInfo.datatype).toBe(DatatypeEnum.Date);
       expect(colInfo.sniffedFormat).toBe("M/d/u");
+    });
+    it("sniffs four-digit years in US format date values", () => {
+      let data = [["dates"], ["12/23/2020"], ["1/2/2021"]];
+      let colInfo = datatypeSniffer.sniffColumn(0, data);
+      expect(colInfo.hasEmptyValues).toBe(false);
+      expect(colInfo.allEmptyValues).toBe(false);
+      expect(colInfo.datatype).toBe(DatatypeEnum.Date);
+      expect(colInfo.sniffedFormat).toBe("M/d/yyyy");
     });
     it("sniffs ISO format date values", function() {
       let data = [["dates"], ["2020-12-23"], ["1-2-3"], ["-1000-02-23"]];

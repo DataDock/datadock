@@ -181,10 +181,14 @@ class DateTimeFormatInfo {
 const DATE_FORMATS = [
   // US format, two-digit years
   new DateTimeFormatInfo("M/D/YY", "M/d/yy"),
+  // US format, four-digit years
+  new DateTimeFormatInfo("M/D/YYYY", "M/d/yyyy"),
   // US format, 1+ digits for years
   new DateTimeFormatInfo("M/D/Y", "M/d/u"),
   // UK format, two-digit years
   new DateTimeFormatInfo("D/M/YY", "d/M/yy"),
+  // UK Format, four-digit years
+  new DateTimeFormatInfo("D/M/YYYY", "d/M/yyyy"),
   // UK format, 1+ digits for years
   new DateTimeFormatInfo("D/M/Y", "d/M/u"),
   // CSVW does not have a way to match ordinal day-of-month (i.e. 1st, 2nd etc.)
@@ -199,6 +203,7 @@ const DATE_FORMATS = [
 ];
 
 const DATETIME_FORMATS = [
+  new DateTimeFormatInfo("YYYY-M-DTH:m:s", "yyyy-M-dTH:m:s"),
   new DateTimeFormatInfo("Y-M-DTH:m:s", "u-M-dTH:m:s"),
   new DateTimeFormatInfo("Y-M-DTH:m:s.S", "u-M-dTH:m:s.S+"),
   new DateTimeFormatInfo("Y-M-DTH:m:s.SS", "u-M-dTH:m:s.S+"),
