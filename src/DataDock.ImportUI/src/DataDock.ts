@@ -155,6 +155,14 @@ export class Helper {
         // Remove the datatype property
         delete columnSchema.datatype;
       }
+      // If there is derived datatype information, turn datatype into an object
+      if ("datatype" in columnSchema && "format" in columnSchema) {
+        columnSchema.datatype = {
+          base: columnSchema.datatype,
+          format: columnSchema.format
+        };
+        delete columnSchema.format;
+      }
 
       // Remove hidden property
       delete columnSchema.hidden;
@@ -280,7 +288,7 @@ export class ColumnInfo {
   public datatype: DatatypeEnum;
   public sniffedType: string;
   public sniffedFormat: string | null;
-  
+
   public constructor(
     hasEmptyValues: boolean,
     allEmptyValues: boolean,
