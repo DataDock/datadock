@@ -1,3 +1,11 @@
+# Shuttering DataDock.io
+
+We have taken the decision to shutter the datadock.io service at this time.
+
+This repository will remain available as an archive of the service code.
+
+Please reach out to the repository maintainers if you are interested in restarting this project.
+
 # DataDock.io
 
 This is the repository for the open-source code base that runs https://datadock.io
